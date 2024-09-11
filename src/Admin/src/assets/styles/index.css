@@ -1,0 +1,38 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+/* Đảm bảo rằng phần giữa có thể cuộn khi cần */
+.admin-container {
+    display: flex;
+    height: 100vh; /* Chiều cao toàn bộ viewport */
+    overflow: hidden; /* Ngăn không cho phần chính cuộn */
+  }
+  
+  .sidebar {
+    width: 250px; /* Hoặc kích thước của sidebar */
+    background: #f3f4f6; /* Màu nền cho sidebar */
+    /* Các kiểu khác cho sidebar */
+  }
+  
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Ngăn không cho nội dung chính cuộn ở đây */
+  }
+  
+  .header {
+    background: #1e40af; /* Màu nền cho header */
+    color: white;
+    /* Các kiểu khác cho header */
+  }
+  
+  .content {
+    flex: 1;
+    overflow-y: auto; /* Hiển thị thanh cuộn dọc khi cần thiết */
+    background: #ffffff; /* Màu nền cho nội dung chính */
+  }
+  

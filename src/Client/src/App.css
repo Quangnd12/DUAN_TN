@@ -1,0 +1,70 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --black-color: #191414;
+  --green-color: #1db954;
+  --dark-gray: #121212;
+  --gray: #404040;
+  --dark-color: #242424;
+  --light-gray: #b3b3b3;
+}
+
+body::-webkit-scrollbar {
+  display: none; /* Đối với trình duyệt Webkit (Chrome, Safari) */
+}
+
+body {
+  overflow: hidden;
+  -ms-overflow-style: none; /* Đối với Internet Explorer và Edge */
+  scrollbar-width: none; /* Đối với Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* For IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.App {
+  background: var(--black-color);
+  display: grid;
+  grid-column: 3;
+  /* grid-template-columns: 20% 30% 50%;; */
+  padding: 8px;
+}
+
+.rowItemTitle {
+  color: white;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.rowItemSubTitle {
+  color: white;
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 10px;
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: 12px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 10px;
+  border: 3px solid #f1f1f1;
+}
