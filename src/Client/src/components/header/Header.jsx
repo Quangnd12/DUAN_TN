@@ -4,41 +4,48 @@ import Button from "@mui/material/Button";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import SearchInput from "../searchInput/index";
-import BellIcon from "../Icons/BellIcon";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import CircleIcon from "@mui/icons-material/Circle";
 import { Link } from "react-router-dom";
 
 const Header = () => {
   return (
-    <div className="w-100 bg-[var(--black-color)]">
+    <div className="w-100 bg-zinc-900 mb-4 rounded-md">
       <div className=" p-4 flex justify-between items-center">
         <div className="flex gap-2">
-          <div className="rounded-full p-2 bg-gray-800 text-gray-500 hover:text-white cursor-pointer">
+          <div className="rounded-full p-2 bg-gray-500 text-white hover:text-gray-700 cursor-pointer">
             <ArrowBackIosIcon />
           </div>
-          <div className="rounded-full p-2 bg-gray-800 text-gray-500 hover:text-white cursor-pointer">
+          <div className="rounded-full p-2 bg-gray-500 text-white hover:text-gray-700 cursor-pointer">
             <ArrowForwardIosIcon />
           </div>
+          <div className="relative left-8">
           <SearchInput></SearchInput>
+          </div>
         </div>
 
         <div className="flex gap-2">
-        <Link to={"/content"}>
-          <div className="mt-3 hover:bg-gray-600 rounded-full">
-            <BellIcon></BellIcon>
-          </div>
-          </Link>
-          <Link to={"/register"}>
-            <div
-              style={{
-                background: "linear-gradient(to bottom, #888888, #000000)",
-              }}
-              className="p-4 rounded-full text-white"
-            >
-              Register
+          <Link to={"/content"}>
+            <div className="relative px-4 py-2 hover:bg-gray-600 rounded-md">
+              <NotificationsIcon
+                fontSize="large"
+                className="text-white"
+              ></NotificationsIcon>
+              <div className="absolute top-0 right-3">
+                <CircleIcon
+                  fontSize="small"
+                  className="text-red-500"
+                ></CircleIcon>
+              </div>
             </div>
           </Link>
+          <Link to={"/register"}>
+            <div className="px-4 py-2 rounded-md text-white">Register</div>
+          </Link>
           <Link to={"/login"}>
-            <div className="p-4 rounded-full font-bold bg-white">Login</div>
+            <div className="px-4 py-2 rounded-md font-bold bg-white">
+              Log in
+            </div>
           </Link>
         </div>
       </div>

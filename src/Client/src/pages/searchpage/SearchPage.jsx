@@ -12,7 +12,11 @@ const SearchPage = () => {
 
   const genres = [
     { name: "Music", color: "bg-red-500", coverArt: "CoverArt.jpg" },
-    { name: "Vietnamese Music", color: "bg-amber-200", coverArt: "CoverArt2.jpg" },
+    {
+      name: "Vietnamese Music",
+      color: "bg-amber-200",
+      coverArt: "CoverArt2.jpg",
+    },
     { name: "US-UK", color: "bg-cyan-500", coverArt: "CoverArt3.jpg" },
     { name: "Made For You", color: "bg-sky-700", coverArt: "CoverArt4.jpg" },
     {

@@ -1,5 +1,8 @@
 import React from "react";
+import { Helmet } from "react-helmet";
 import RowItems from "../../components/row_items/RowItems";
+import GridItems from "../../components/grid_items/GridItems";
+import GridGenreItems from "../../components/grid_items/GridGenreItems";
 import Footer from "../../components/footer/Footer";
 
 
@@ -123,8 +126,14 @@ const data = {
 };
 
 const HomePage = () => {
+  
   return (
     <div>
+      <Helmet>
+        <title>Home Page</title>
+        <meta name="description" content="This is the home page of our music app." />
+      </Helmet>
+      <GridItems/>
       <RowItems
         title={"Popular artist"}
         data={data.artist}
@@ -137,6 +146,8 @@ const HomePage = () => {
         title={"Popular Radio"}
         data={data.radio}
       />
+      <GridGenreItems/>
+
       {/* <RowItems
         title={"Featured charts"}
         data={data.artist}
