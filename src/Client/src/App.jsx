@@ -11,6 +11,8 @@ import ForgotPass from './pages/auth/forgotPass';
 import Track from "./pages/track/Track";
 import Content from './pages/content/Content';
 import InfoClient from './pages/info-client/Info-client';
+import TopRank from "./pages/toprank/TopRank";
+import Library from "./pages/library/library";
 
 
 function Client() {
@@ -22,7 +24,7 @@ function Client() {
         </div>
         <div className='flex-1'>
           <Header />
-          <div className='overflow-y-auto scrollbar-custom ' style={{  height: "620px" }}>
+          <div className='overflow-y-auto scrollbar-custom ' style={{ height: "620px" }}>
             <Routes>
               <Route path='/' element={<HomePage />} />
               <Route path='/search' element={<SearchPage />} />
@@ -33,6 +35,8 @@ function Client() {
               <Route path='/content' element={<Content />} />
               <Route path='/info' element={<InfoClient />} />
               <Route path='/track' element={<Track />} />
+              <Route path='/toprank' element={<TopRank />} />
+              <Route path='/library' element={<Library />} />
             </Routes>
           </div>
         </div>

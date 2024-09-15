@@ -22,10 +22,10 @@ const Header = () => {
         </div>
 
         <div className="flex gap-2">
-        <Link to={"/content"}>
-          <div className="mt-3 hover:bg-gray-600 rounded-full">
-            <BellIcon></BellIcon>
-          </div>
+          <Link to={"/content"}>
+            <div className="mt-3 hover:bg-gray-600 rounded-full">
+              <BellIcon></BellIcon>
+            </div>
           </Link>
           <Link to={"/register"}>
             <div

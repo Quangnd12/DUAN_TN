@@ -48,7 +48,7 @@ const SideBar = () => {
             <div className="text-white font-bold">Playlist</div>
           </div>
         </Link>
-        <Link to={"/top-rank"}>
+        <Link to={"/toprank"}>
           <div className="flex items-center gap-2 p-2 hover:bg-gray-600 rounded py-2">
             <StarRateIcon fontSize="large" sx={{ color: "white" }} />
             <div className="text-white font-bold">Top rank</div>
