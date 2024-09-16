@@ -1,12 +1,10 @@
 import React from "react";
-import ArtistCover from "../../components/artist/ArtistCover";
-import ArtistInfo from "../../components/artist/ArtistInfo";
-import Playlist from "./playlist/Playlist";
+import ArtistInfo from "./component/ArtistInfo";
+import Playlist from "./sections/Artist";
 
 const Artist = () => {
   return (
     <div className="relative w-full h-screen">
-      <ArtistCover />
       <ArtistInfo />
       <div className="relative text-left">
         <Playlist />

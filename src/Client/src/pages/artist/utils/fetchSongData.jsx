@@ -1,9 +1,49 @@
-import React from "react";
-import RowItems from "../../components/row_items/RowItems";
-import Footer from "../../components/footer/Footer";
-import { Link } from "react-router-dom";
-
 const data = {
+  songs: [
+    {
+      image: "https://i.scdn.co/image/ab67616d00001e027c17174be9cdaa69349f47d6",
+      name: "Ai Mà Biết Được (feat. tlinh)",
+      artist: "Adele",
+      details: "1,947,983",
+      duration: "4:00",
+    },
+    {
+      image: "https://i.scdn.co/image/ab67616d00001e027c17174be9cdaa69349f47d6",
+      name: "giá như",
+      artist: "Adele",
+      details: "4,065,807",
+      duration: "3:43",
+    },
+    {
+      image: "https://i.scdn.co/image/ab67616d00001e022922307c16bb852a0849bea0",
+      name: "Anh Đã Quen Với Cô Đơn",
+      artist: "Adele",
+      details: "10,119,884",
+      duration: "4:28",
+    },
+    {
+      image: "https://i.scdn.co/image/ab67616d00001e027c17174be9cdaa69349f47d6",
+      name: "Ai Mà Biết Được (feat. tlinh)",
+      artist: "Adele",
+      details: "1,947,983",
+      duration: "4:00",
+    },
+    {
+      image: "https://i.scdn.co/image/ab67616d00001e027c17174be9cdaa69349f47d6",
+      name: "giá như",
+      artist: "Adele",
+      details: "4,065,807",
+      duration: "3:43",
+    },
+    {
+      image: "https://i.scdn.co/image/ab67616d00001e022922307c16bb852a0849bea0",
+      name: "Anh Đã Quen Với Cô Đơn",
+      artist: "Adele",
+      details: "10,119,884",
+      duration: "4:28",
+    },
+  ],
+
   artists: [
     {
       id: 1,
@@ -43,12 +83,14 @@ const data = {
       title: "Artist",
     },
   ],
-  album: [
+
+  albums: [
     {
       id: 1,
       name: "Golden",
       image: "https://th.bing.com/th/id/OIP.WvBa5FEOB-eU1WcSRdmppQAAAA?w=474&h=474&rs=1&pid=ImgDetMain",
       title: "Jungkook",
+      date:'11/12/2024'
     },
     {
       id: 2,
@@ -56,102 +98,37 @@ const data = {
       image:
         "https://bloganchoi.com/wp-content/uploads/2024/06/loi-bai-hat-dung-lam-trai-tim-anh-dau-lyrics-son-tung-mtp-5-1-696x870.jpg",
       title: "Sơn Tùng MTP",
+      date:'11/12/2024'
     },
     {
       id: 3,
       name: "Ai Cũng Phải Bắt Đầu Từ Đâu Đó",
       image: "https://th.bing.com/th/id/OIP.a9y4ZYtf2szQO2xpWSZW4wAAAA?rs=1&pid=ImgDetMain",
       title: "Hiếu Thứ Hai",
+      date:'11/12/2024'
     },
     {
       id: 4,
       name: "m-tp M-TP",
       image: "https://th.bing.com/th/id/R.507942273181bc5c5ee7d4383edbd47f?rik=bnaU0HuAKoX8cA&pid=ImgRaw&r=0",
       title: "Sơn Tùng MTP",
+      date:'11/12/2024'
     },
     {
       id: 5,
       name: "99%",
       image: "https://th.bing.com/th/id/OIP.C43hoOrXpwjHKWbLg4bMBAHaHa?w=600&h=600&rs=1&pid=ImgDetMain",
       title: "MCK",
+      date:'11/12/2024'
     },
     {
       id: 6,
       name: "Take Care",
       image: "https://th.bing.com/th/id/OIP.ZOO_GYv50IJq13htfEv_dwHaHf?rs=1&pid=ImgDetMain",
       title: "Drake",
+      date:'11/12/2024'
     },
-  ],
-  radio: [
-    {
-      id: 1,
-      name: "GolTV On The Radioden",
-      image: "https://seeded-session-images.scdn.co/v2/img/122/secondary/artist/3HJIB8sYPyxrFGuwvKXSLR/en",
-      title: "podcast",
-    },
-    {
-      id: 2,
-      name: "MT Joy",
-      image: "https://seeded-session-images.scdn.co/v2/img/122/secondary/artist/69tiO1fG8VWduDl3ji2qhI/en",
-      title: "podcast",
-    },
-    {
-      id: 3,
-      name: "Im Bo Yo",
-      image: "https://seeded-session-images.scdn.co/v2/img/122/secondary/track/2PrGlRpPayQ4JFztXWTEx2/en",
-      title: "podcast",
-    },
-    {
-      id: 4,
-      name: "Peekapoo",
-      image: "https://seeded-session-images.scdn.co/v2/img/122/secondary/artist/4Ok1Cm5YX5StCQZgH0r2xF/en",
-      title: "podcast",
-    },
-    {
-      id: 5,
-      name: "Feel like we alway go backwares",
-      image: "https://seeded-session-images.scdn.co/v2/img/122/secondary/track/0LtOwyZoSNZKJWHqjzADpW/en",
-      title: "podcast",
-    },
-    {
-      id: 6,
-      name: "If it not you",
-      image: "https://seeded-session-images.scdn.co/v1/img/track/7ykaUgkdQWJLsMuOymTV2A/en",
-      title: "podcast",
-    },
-  ],
+  ]
 };
 
-const HomePage = () => {
-  return (
-    <div>
-      <RowItems
-        title={"Popular artist"}
-        data={data.artists}
-      />
-      <RowItems
-        title={"Popular albums"}
-        data={data.album}
-      />
-      <RowItems
-        title={"Popular Radio"}
-        data={data.radio}
-      />
-      {/* <RowItems
-        title={"Featured charts"}
-        data={data.artist}
-      />
-      <RowItems
-        title={"Sportify playlists"}
-        data={data.artist}
-      />
-      <RowItems
-        title={"Trending episodes"}
-        data={data.artist}
-      /> */}
-      <Footer />
-    </div>
-  );
-};
-
-export default HomePage;
+export default data;

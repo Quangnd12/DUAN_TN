@@ -1,0 +1,90 @@
+/* PlayerControls.css */
+.container {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    background-color: #181818;
+    padding: 0.5rem 0;
+    z-index: 1000;
+  }
+  
+  .controls {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 1rem;
+  }
+  
+  .control-buttons {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    left: 670px;
+    top: 18px;
+    gap: 1rem;
+  }
+  
+  .control-buttons .icon {
+    color: #b3b3b3;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+  }
+  .icon-custom{
+    color: #b3b3b3;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+  }
+  .control-buttons .icon:hover {
+    color: white;
+  }
+  
+  .control-buttons .state .icon {
+    color: white;
+    font-size: 2rem;
+  }
+  
+  .progress-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 30%;
+    padding: 0 1rem;
+    justify-content: center;
+  }
+  
+  .progress-container input[type="range"] {
+    flex: 1;
+    cursor: pointer;
+    appearance: none;
+    background: #535353;
+    height: 4px;
+    border-radius: 2px;
+  }
+  
+  .progress-container input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    background: #3b82f6;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+  }
+  
+  .progress-container input[type="range"]::-moz-range-thumb {
+    background: #3b82f6;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+  }
+  
+  .progress-container span {
+    color: white;
+    font-size: 0.875rem;
+  }
+  

@@ -5,32 +5,32 @@ import { Link } from "react-router-dom";
 
 const RowItems = ({ title, data }) => {
   return (
-    <div className="flex flex-col p-4  bg-zinc-900">
-      <div className="flex justify-between">
+    <div className="flex flex-col p-4 bg-zinc-900">
+      <div className="flex justify-between mb-4">
         <h2 className="rowItemTitle">{title}</h2>
-        <span className="rowItemSubTitle">Show all</span>
+        <Link to={"/artist"} className="rowItemSubTitle">Show all</Link>
       </div>
-      <Link to={"/artist"}>
       <div className="flex justify-between">
         {data.map(item =>
           item.title === "Artist" ? (
-            <CircleCard
-              key={item.id}
-              image={item.image}
-              name={item.name}
-              title={item.title}
-            />
+            <Link key={item.id} to={`/artist/${item.id}`}>
+              <CircleCard
+                image={item.image}
+                name={item.name}
+                title={item.title}
+              />
+            </Link>
           ) : (
-            <RoundCard
-              key={item.id}
-              image={item.image}
-              name={item.name}
-              title={item.title}
-            />
+            <Link key={item.id} to={`/listalbum/${item.id}`}>
+              <RoundCard
+                image={item.image}
+                name={item.name}
+                title={item.title}
+              />
+            </Link>
           ),
         )}
       </div>
-      </Link>
     </div>
   );
 };

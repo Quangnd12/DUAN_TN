@@ -1,7 +1,7 @@
 import React from "react";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 
-const CircleCard = ({ image, name, title }) => {
+const CircleCard = ({id, image, name, title }) => {
   const greenColor = getComputedStyle(document.documentElement).getPropertyValue("--green-color").trim();
 
   return (
