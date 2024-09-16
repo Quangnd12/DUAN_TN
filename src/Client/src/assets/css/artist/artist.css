@@ -1,0 +1,95 @@
+.artist-bg{
+    background: linear-gradient(180deg, #2A2A35 0%, #292A41 50%, #1F214A 100%);
+
+}
+.bg-icon{
+background-color: #09A6EF;
+}
+.dropdown {
+  position: absolute;
+  right: 4px;
+  top: 100%;
+  background-color: #333;
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  bottom: 100%; 
+  z-index:100; 
+  width: 200px; 
+}
+
+
+.dropdown.right-aligned {
+  right: 0;
+  transform: none;
+}
+
+/* Dropdown căn trái */
+.dropdown.left-aligned {
+  bottom: 200px;
+  left: 200px;
+  transform: none;
+}
+.dropdown-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.3s ease;
+  width: 100%; /* Chiều rộng đồng nhất cho các button */
+  text-align: left; /* Căn trái nội dung */
+}
+
+.dropdown-button:hover {
+  background-color: #4a4a4a;
+   /* Màu nền khi hover */
+}
+
+.share-options {
+  position: absolute;
+  left: -200px; /* Đặt bảng chia sẻ sang bên trái */
+  top: 0;
+  background-color: #333;
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 30;
+  width: 200px; /* Chiều rộng đồng nhất cho share-options */
+  display: none; /* Ẩn mặc định */
+}
+
+.dropdown-button:hover .share-options {
+  display: block; /* Hiển thị share-options khi hover */
+}
+
+.share-options a,
+.share-options button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.3s ease;
+  text-align: left; /* Căn trái nội dung */
+}
+
+.share-options a:hover,
+.share-options button:hover {
+  background-color: #5a5a5a; /* Màu nền khi hover */
+}
+.song-name {
+  white-space: nowrap; 
+  overflow: hidden;    
+  text-overflow: ellipsis; 
+}
+
+.custom-width {
+  width: 80%; 
+}
+
+
+
+

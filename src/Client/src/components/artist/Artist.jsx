@@ -33,9 +33,9 @@ function Artist() {
             Nghệ sĩ được xác minh
           </span>
           <div className="absolute top-28 left-3 text-white">
-            <h1 className="text-8xl font-bold">SOOBIN</h1>
+            <h1 className="text-8xl font-bold">Adele</h1>
             <p className="text-left text-lg mt-2">
-              1,017,761 người nghe hàng tháng
+              1,017,761 người theo dõi
             </p>
           </div>
         </div>
