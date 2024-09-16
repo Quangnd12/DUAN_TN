@@ -88,7 +88,7 @@ const SideBar = () => {
         isOpen={isOpen}
       />
       <NavItem
-        to="/top-rank"
+        to="/toprank"
         icon={<StarRateIcon />}
         text="Top rank"
         isOpen={isOpen}

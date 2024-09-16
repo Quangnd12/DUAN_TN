@@ -12,6 +12,8 @@ import ForgotPass from "./pages/auth/forgotPass";
 import Track from "./pages/track/Track";
 import Content from "./pages/content/Content";
 import InfoClient from "./pages/info-client/Info-client";
+import TopRank from "./pages/toprank/TopRank";
+import Library from "./pages/library/library";
 
 function Client() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -53,6 +55,8 @@ function Client() {
               <Route path="/content" element={<Content />} />
               <Route path="/info" element={<InfoClient />} />
               <Route path="/track" element={<Track />} />
+              <Route path='/toprank' element={<TopRank />} />
+              <Route path='/library' element={<Library />} />
             </Routes>
           </div>
         </div>
