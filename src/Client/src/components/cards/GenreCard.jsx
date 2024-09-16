@@ -4,7 +4,7 @@ const GenreCard = ({ genre }) => {
   return (
     <div
       key={genre.name}
-      className={`${genre.color} text-white w-full h-48 cursor-pointer rounded-lg text-left relative p-4 overflow-hidden`}
+      className={`${genre.color} text-white w-full h-48 hover:opacity-50 cursor-pointer transition-all  rounded-lg text-left relative p-4 overflow-hidden`}
     >
       <img
         src={`../assets/img/${genre.coverArt}`}

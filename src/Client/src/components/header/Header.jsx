@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 import Button from "@mui/material/Button";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
@@ -10,6 +11,16 @@ import CircleIcon from "@mui/icons-material/Circle";
 import { Link } from "react-router-dom";
 
 const Header = () => {
+  const navigate = useNavigate();
+
+  const handleSearch = (query) => {
+    if (query) {
+      navigate("/search", { state: { query } });
+    } else {
+      navigate("/search");
+    }
+  };
+
   return (
     <div className="w-100 bg-zinc-900 mb-4 rounded-md">
       <div className=" p-4 flex justify-between items-center">
@@ -25,7 +36,7 @@ const Header = () => {
             </div>
           </Tooltip>
           <div className="relative left-8">
-            <SearchInput></SearchInput>
+            <SearchInput onSearch={handleSearch}></SearchInput>
           </div>
         </div>
 
