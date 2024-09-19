@@ -9,7 +9,6 @@ import Artist from "./pages/artist/";
 import Login from "./pages/auth/login";
 import Register from "./pages/auth/register";
 import ForgotPass from "./pages/auth/forgotPass";
-import Track from "./pages/track/Track";
 import Content from "./pages/content/Content";
 import InfoClient from "./pages/info-client/Info-client";
 import TopRank from "./pages/toprank/TopRank";
@@ -17,6 +16,8 @@ import Library from "./pages/library/library";
 import AllSong from './pages/artist/components/SongList';
 import AllAlbums from './pages/artist/components/AlbumList';
 import Albums from './pages/album';
+import Playlist from "./pages/playlist";
+
 
 
 function Client() {
@@ -61,9 +62,7 @@ function Client() {
               <Route path="/forgot" element={<ForgotPass />} />
               <Route path="/content" element={<Content />} />
               <Route path="/info" element={<InfoClient />} />
-              <Route path="/track" element={<Track />} />
-              <Route path='/toprank' element={<TopRank />} />
-              <Route path='/library' element={<Library />} />
+              <Route path="/playlist/:id" element={<Playlist />} />
             </Routes>
           </div>
         </div>

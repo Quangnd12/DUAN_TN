@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import artistChoice from "../../../data/artistChoice";
-import popularSongs from "../../../data/popularSongs";
+import artistChoice from "../../../pages/artist/utils/artistChoice";
+import popularSongs from "../../../pages/artist/utils/popularSongs";
 
 function Playlist() {
   const [isPlaying, setIsPlaying] = useState(false);
