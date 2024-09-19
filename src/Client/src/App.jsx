@@ -63,6 +63,8 @@ function Client() {
               <Route path="/content" element={<Content />} />
               <Route path="/info" element={<InfoClient />} />
               <Route path="/playlist/:id" element={<Playlist />} />
+              <Route path="/toprank" element={<TopRank />} />
+              <Route path="/library" element={<Library />} />
             </Routes>
           </div>
         </div>
