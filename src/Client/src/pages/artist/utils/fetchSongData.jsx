@@ -119,14 +119,59 @@ const data = {
       name: "99%",
       image: "https://th.bing.com/th/id/OIP.C43hoOrXpwjHKWbLg4bMBAHaHa?w=600&h=600&rs=1&pid=ImgDetMain",
       title: "MCK",
-      date:'11/12/2024'
+      song:"7 songs"
     },
     {
       id: 6,
       name: "Take Care",
       image: "https://th.bing.com/th/id/OIP.ZOO_GYv50IJq13htfEv_dwHaHf?rs=1&pid=ImgDetMain",
       title: "Drake",
-      date:'11/12/2024'
+      song:"7 songs"
+    },
+  ],
+  playlists: [
+    {
+      id: 1,
+      name: "Golden",
+      image: "https://th.bing.com/th/id/OIP.WvBa5FEOB-eU1WcSRdmppQAAAA?w=474&h=474&rs=1&pid=ImgDetMain",
+      title: "Jungkook",
+      song:"7 songs"
+    },
+    {
+      id: 2,
+      name: "Album này rất suy",
+      image:
+        "https://bloganchoi.com/wp-content/uploads/2024/06/loi-bai-hat-dung-lam-trai-tim-anh-dau-lyrics-son-tung-mtp-5-1-696x870.jpg",
+      title: "Sơn Tùng MTP",
+      song:"7 songs"
+    },
+    {
+      id: 3,
+      name: "Ai Cũng Phải Bắt Đầu Từ Đâu Đó",
+      image: "https://th.bing.com/th/id/OIP.a9y4ZYtf2szQO2xpWSZW4wAAAA?rs=1&pid=ImgDetMain",
+      title: "Hiếu Thứ Hai",
+      song:"7 songs"
+    },
+    {
+      id: 4,
+      name: "m-tp M-TP",
+      image: "https://th.bing.com/th/id/R.507942273181bc5c5ee7d4383edbd47f?rik=bnaU0HuAKoX8cA&pid=ImgRaw&r=0",
+      title: "Sơn Tùng MTP",
+      song:"7 songs"
+    },
+    {
+      id: 5,
+      name: "99%",
+      image: "https://th.bing.com/th/id/OIP.C43hoOrXpwjHKWbLg4bMBAHaHa?w=600&h=600&rs=1&pid=ImgDetMain",
+      title: "MCK",
+      song:"7 songs"
+    },
+    {
+      id: 6,
+      name: "Take Care",
+      image: "https://th.bing.com/th/id/OIP.ZOO_GYv50IJq13htfEv_dwHaHf?rs=1&pid=ImgDetMain",
+      title: "Drake",
+      song:"7 songs"
     },
   ]
 };

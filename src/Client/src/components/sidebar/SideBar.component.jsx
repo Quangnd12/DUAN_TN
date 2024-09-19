@@ -26,12 +26,12 @@ const SideBar = () => {
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
+  const id = 1;
 
   return (
     <div
-      className={`flex flex-col h-screen transition-all mr-1 duration-300 ease-in-out ${
-        isOpen ? "w-72" : "w-16"
-      } bg-zinc-900 p-2 rounded-md`}
+      className={`flex flex-col h-screen transition-all mr-1 duration-300 ease-in-out ${isOpen ? "w-72" : "w-16"
+        } bg-zinc-900 p-2 rounded-md`}
     >
       <div className="flex items-center justify-start mb-4">
         <Link to={"/"}>
@@ -82,7 +82,7 @@ const SideBar = () => {
         isOpen={isOpen}
       />
       <NavItem
-        to="/track"
+        to={`/playlist/${id}`}
         icon={<QueueMusicIcon />}
         text="Playlist"
         isOpen={isOpen}
@@ -101,9 +101,8 @@ const SideBar = () => {
           </div>
         )}
         <div
-          className={`flex items-center gap-3 rounded-full w-max p-2 mb-5 font-bold transition-all cursor-pointer ${
-            isClicked ? "bg-white text-black" : "bg-black text-white"
-          } hover:scale-105 ${isOpen ? "" : "justify-center"}`}
+          className={`flex items-center gap-3 rounded-full w-max p-2 mb-5 font-bold transition-all cursor-pointer ${isClicked ? "bg-white text-black" : "bg-black text-white"
+            } hover:scale-105 ${isOpen ? "" : "justify-center"}`}
           onClick={() => setIsClicked(!isClicked)}
         >
           {" "}

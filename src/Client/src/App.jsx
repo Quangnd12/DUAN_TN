@@ -9,12 +9,12 @@ import Artist from "./pages/artist";
 import Login from "./pages/auth/login";
 import Register from "./pages/auth/register";
 import ForgotPass from "./pages/auth/forgotPass";
-import Track from "./pages/track/Track";
 import Content from "./pages/content/Content";
 import InfoClient from "./pages/info-client/Info-client";
 import AllSong from './pages/artist/component/SongList';
 import AllAlbums from './pages/artist/component/AlbumList';
 import Albums from './pages/album';
+import Playlist from "./pages/playlist";
 
 
 function Client() {
@@ -59,7 +59,7 @@ function Client() {
               <Route path="/forgot" element={<ForgotPass />} />
               <Route path="/content" element={<Content />} />
               <Route path="/info" element={<InfoClient />} />
-              <Route path="/track" element={<Track />} />
+              <Route path="/playlist/:id" element={<Playlist />} />
             </Routes>
           </div>
         </div>

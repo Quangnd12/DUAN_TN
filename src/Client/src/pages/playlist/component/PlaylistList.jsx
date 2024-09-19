@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import data from "../../artist/utils/fetchSongData";
-import { MdPlayArrow, MdShuffle, MdMoreHoriz, MdCheckBoxOutlineBlank, MdPlaylistAdd, MdCheck } from "react-icons/md";
+import { MdPlayArrow, MdShuffle, MdCheckBoxOutlineBlank, MdPlaylistAdd, MdCheck } from "react-icons/md";
 import PlayerControls from "../../../components/audio/PlayerControls";
 import SongItem from "../../../components/dropdown/dropdownMenu";
 import "../../../assets/css/artist/artist.css";
 import LikeButton from "../../../components/button/favorite";
 import MoreButton from "../../../components/button/more";
+import { handleAddPlaylist } from "../../../components/notification";
 
-const ListSongOfAlbums = (albums) => {
+const ListSongOfPlaylist = () => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
     const [dropdownIndex, setDropdownIndex] = useState(null);
     const [showShareOptions, setShowShareOptions] = useState(false);
@@ -126,10 +127,10 @@ const ListSongOfAlbums = (albums) => {
 
                     {isAnyCheckboxSelected() && (
                         <div
-                            className="ml-6 relative flex items-center p-1 w-400 rounded-3xl  border border-gray-600  cursor-pointer bg-black mb-2"
+                            className="ml-8 relative flex items-center p-1 w-400 rounded-3xl  border border-gray-600  cursor-pointer bg-black mb-2"
                         >
                             <MdPlaylistAdd size={23} className="text-gray-400 mr-2 ml-2" />
-                            <p className="text-gray-400 text-sm mr-2">Add to playlist</p>
+                            <p className="text-gray-400 text-sm mr-2" onClick={handleAddPlaylist} >Add to playlist</p>
                         </div>
                     )}
                 </div>
@@ -217,4 +218,4 @@ const ListSongOfAlbums = (albums) => {
     );
 };
 
-export default ListSongOfAlbums;
+export default ListSongOfPlaylist;

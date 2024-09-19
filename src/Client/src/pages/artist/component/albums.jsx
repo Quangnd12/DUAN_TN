@@ -15,9 +15,8 @@ const ArtistAlbum = () => {
       </div>
       <div className="grid grid-cols-5 gap-4">
         {data.albums.slice(0, 5).map((album, index) => (
-          <Link to={`/listalbum/${album.id}`}>
+          <Link to={`/listalbum/${album.id}`} key={album.id}>
             <div
-              key={index}
               className="flex flex-col items-start"
             >
               <img

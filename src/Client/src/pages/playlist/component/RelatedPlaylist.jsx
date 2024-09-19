@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import data from "../../artist/utils/fetchSongData";
 
-const AlbumRandom = () => {
+const PlaylistRandom = () => {
 
   return (
     <div className="p-4">
@@ -11,19 +11,18 @@ const AlbumRandom = () => {
         <h2 className="text-2xl text-white font-bold mb-4">You may also like</h2>
       </div>
       <div className="grid grid-cols-5 gap-4">
-        {data.albums.slice(0, 5).map((album, index) => (
-          <Link to={`/listalbum/${album.id}`} key={album.id}>
+        {data.playlists.slice(0, 5).map((playlist, index) => (
+          <Link to={`/playlist/${playlist.id}`} key={playlist.id}>
             <div
               className="flex flex-col items-start"
             >
               <img
-                src={album.image}
-                alt={album.name}
+                src={playlist.image}
+                alt={playlist.name}
                 className="w-52 h-52 object-cover rounded-lg"
               />
               <div className="mt-2 text-left">
-                <p className="text-white font-semibold">{album.name}</p>
-                <p className="text-gray-400">{album.date}</p>
+                <p className="text-white font-semibold">{playlist.name}</p>
               </div>
             </div>
           </Link>
@@ -33,4 +32,4 @@ const AlbumRandom = () => {
   );
 };
 
-export default AlbumRandom;
+export default PlaylistRandom;
