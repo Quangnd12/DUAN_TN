@@ -1,6 +1,6 @@
 import React from "react";
 import Footer from "../../components/footer/Footer";
-
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 const data = [
   {
     id: 1,
@@ -51,7 +51,15 @@ const data = [
 
 const TopRank = () => {
   return (
+    <HelmetProvider>
     <div className="relative text-white bg-gray-900">
+      <Helmet>
+        <title>Top-Rank</title>
+        <meta
+          name="description"
+          content="This is the home page of our music app."
+        />
+      </Helmet>
       <div className="relative w-full h-64">
         <img
           src="https://i.scdn.co/image/ab6761610000e5eb17e2d498df7cbd7c43bd5e6a"
@@ -108,6 +116,7 @@ const TopRank = () => {
       </div>
       <Footer />
     </div>
+    </HelmetProvider>
   );
 };
 

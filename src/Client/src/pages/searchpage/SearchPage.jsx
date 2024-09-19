@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Helmet } from "react-helmet";
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Link, useLocation } from "react-router-dom";
 import RecentSearchCard from "../../components/cards/RecentSearchCard";
 import GenreCard from "../../components/cards/GenreCard";
@@ -195,6 +195,7 @@ const SearchPage = () => {
   };
 
   return (
+    <HelmetProvider>
     <div className="bg-zinc-900 p-4 rounded-md">
       <Helmet>
         <title>Search Page</title>
@@ -249,6 +250,7 @@ const SearchPage = () => {
 
       <Footer />
     </div>
+    </HelmetProvider>
   );
 };
 

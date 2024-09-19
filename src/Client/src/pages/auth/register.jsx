@@ -1,15 +1,13 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet";
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 
 import TextField from "@mui/material/TextField";
 import LoginIcon from "@mui/icons-material/Login";
 import { InputAdornment, IconButton } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import GoogleIcon from "@mui/icons-material/Google";
 import { makeStyles } from "@material-ui/styles";
 
 import "./auth.css";
@@ -55,6 +53,7 @@ const Register = () => {
   };
 
   return (
+    <HelmetProvider>
     <>
       <Helmet>
         <title>Register</title>
@@ -206,7 +205,7 @@ const Register = () => {
                   className="w-full py-2 px-4 bg-black border border-[#6a6a6a]  text-white rounded-3xl shadow-md flex items-center justify-center hover:border-white hover:border-[1px] hover:ring-1 hover:ring-white transition-all"
                   type="submit"
                 >
-                  <GoogleIcon />
+                   <img className="w-5 h-5" src={`/images/logo/Google.png`} alt="Google Logo" />
                   <span className="flex-1 text-center">
                     Sign up with Google
                   </span>
@@ -215,7 +214,7 @@ const Register = () => {
                   className="w-full py-2 px-4 bg-black border border-[#6a6a6a]  text-white rounded-3xl shadow-md flex items-center justify-center mt-2 hover:border-white hover:border-[1px] hover:ring-1 hover:ring-white transition-all"
                   type="submit"
                 >
-                  <FacebookIcon />
+                  <img className="w-5 h-5" src={`/images/logo/Facebook.png`} alt="Facebook Logo" />
                   <span className="flex-1 text-center">
                     Sign up with Facebook
                   </span>
@@ -236,6 +235,7 @@ const Register = () => {
         </div>
       </section>
     </>
+    </HelmetProvider>
   );
 };
 

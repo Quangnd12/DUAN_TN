@@ -1,0 +1,42 @@
+/* Volume.css */
+.volume-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 25px;
+  }
+  
+  .icon {
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  .icon-QueueMusic {
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+  }
+  .volume-slider {
+    width: 100px;
+    cursor: pointer;
+    appearance: none;
+    background: #535353;
+    height: 4px;
+    border-radius: 2px;
+  }
+  
+  .volume-slider::-webkit-slider-thumb {
+    appearance: none;
+    background: #3b82f6;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+  }
+  
+  .volume-slider::-moz-range-thumb {
+    background: #3b82f6;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+  }
+  

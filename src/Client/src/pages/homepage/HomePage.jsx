@@ -1,5 +1,5 @@
-import React from "react";
-import { Helmet } from "react-helmet";
+import React, { useState, useEffect } from "react";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 import { Box } from "@mui/material";
 import RowItems from "../../components/row_items/RowItems";
 import GridItems from "../../components/grid_items/GridItems";
@@ -139,22 +139,53 @@ const data = {
 };
 
 const HomePage = () => {
-  return (
-    <Box sx={{ flexGrow: 1 }}>
-      <Helmet>
-        <title>Home Page</title>
-        <meta
-          name="description"
-          content="This is the home page of our music app."
-        />
-      </Helmet>
-      <GridItems />
-      <RowItems title={"Popular artist"} data={data.artist} />
-      <RowItems title={"Popular albums"} data={data.album} />
-      <RowItems title={"Popular Radio"} data={data.radio} />
-      <GridGenreItems />
+  //Khởi tạo globalPlayingState bằng cách kiểm tra localStorage. Nếu có dữ liệu được lưu, sử dụng nó; nếu không, sử dụng giá trị mặc định.
+  const [globalPlayingState, setGlobalPlayingState] = useState(() => {
+    const savedState = localStorage.getItem("globalPlayingState");
+    return savedState ? JSON.parse(savedState) : { rowId: null, index: null };
+  });
+  useEffect(() => {
+    localStorage.setItem(
+      "globalPlayingState",
+      JSON.stringify(globalPlayingState)
+    );
+  }, [globalPlayingState]);
 
-      {/* <RowItems
+  return (
+    <HelmetProvider>
+      <Box sx={{ flexGrow: 1 }}>
+        <Helmet>
+          <title>Home Page</title>
+          <meta
+            name="description"
+            content="This is the home page of our music app."
+          />
+        </Helmet>
+        <GridItems />
+        <RowItems
+          title={"Popular artist"}
+          data={data.artist}
+          rowId="popular-artist"
+          globalPlayingState={globalPlayingState}
+          setGlobalPlayingState={setGlobalPlayingState}
+        />
+        <RowItems
+          title={"Popular albums"}
+          data={data.album}
+          rowId="popular-albums"
+          globalPlayingState={globalPlayingState}
+          setGlobalPlayingState={setGlobalPlayingState}
+        />
+        <RowItems
+          title={"Popular Radio"}
+          data={data.radio}
+          rowId="popular-radio"
+          globalPlayingState={globalPlayingState}
+          setGlobalPlayingState={setGlobalPlayingState}
+        />
+        <GridGenreItems />
+
+        {/* <RowItems
         title={"Featured charts"}
         data={data.artist}
       />
@@ -166,8 +197,9 @@ const HomePage = () => {
         title={"Trending episodes"}
         data={data.artist}
       /> */}
-      <Footer />
-    </Box>
+        <Footer />
+      </Box>
+    </HelmetProvider>
   );
 };
 

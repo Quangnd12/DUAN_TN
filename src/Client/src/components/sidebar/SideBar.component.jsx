@@ -51,12 +51,16 @@ const SideBar = () => {
         >
           {isOpen ? (
             <Tooltip title="Collapse the library">
+              <>
               {" "}
               <MenuIcon fontSize="medium" />
+              </>
             </Tooltip>
           ) : (
             <Tooltip title="Expand the library">
+              <>
               <ArrowForwardIosIcon />
+              </>
             </Tooltip>
           )}
         </button>
@@ -108,12 +112,16 @@ const SideBar = () => {
         >
           {" "}
           <Tooltip title="Change language">
-            <LanguageIcon className={isClicked ? "text-black" : "text-white"} />
-            {isOpen && (
-              <span className="ml-0">
-                {isClicked ? "Tiếng Việt" : "English"}
-              </span>
-            )}
+            <div>
+              <LanguageIcon
+                className={isClicked ? "text-black" : "text-white"}
+              />
+              {isOpen && (
+                <span className="ml-0">
+                  {isClicked ? "Tiếng Việt" : "English"}
+                </span>
+              )}
+            </div>
           </Tooltip>
         </div>
       </div>
@@ -125,11 +133,13 @@ const NavItem = ({ to, icon, text, isOpen }) => (
   <Link to={to}>
     <Tooltip title={text} placement="bottom">
       <div className="flex items-center gap-2 hover:bg-gray-600 rounded py-2 px-2 mb-2">
-        {React.cloneElement(icon, {
-          fontSize: "large",
-          sx: { color: "white" },
-        })}
-        {isOpen && <div className="text-white font-bold">{text}</div>}
+      
+          {React.cloneElement(icon, {
+            fontSize: "large",
+            sx: { color: "white" },
+          })}
+          {isOpen && <div className="text-white font-bold">{text}</div>}
+       
       </div>
     </Tooltip>
   </Link>

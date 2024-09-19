@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Helmet } from "react-helmet";
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 import SendIcon from "@mui/icons-material/Send";
 import TextField from "@mui/material/TextField";
 
@@ -32,6 +32,7 @@ const ForgotPass = () => {
   };
 
   return (
+    <HelmetProvider>
     <>
       <Helmet>
         <title>Forgot</title>
@@ -117,6 +118,7 @@ const ForgotPass = () => {
         </div>
       </section>
     </>
+    </HelmetProvider>
   );
 };
 

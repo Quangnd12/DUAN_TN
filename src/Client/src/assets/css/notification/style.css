@@ -1,0 +1,33 @@
+.custom-toast {
+    background-color: black !important;
+    color: #fff !important;
+  }
+  
+  .custom-toast .Toastify__close-button {
+    color: white !important;
+    background: none !important;
+  }
+  
+  .custom-toast .Toastify__progress-bar {
+    background-color: #00aeff !important;
+  }
+  
+  .custom-toast .Toastify__toast-icon svg {
+    fill: #00aeff !important;
+  }
+  .custom-toast-fav .Toastify__close-button {
+    color: white !important;
+    background: none !important;
+  }
+  
+  .custom-toast-fav .Toastify__progress-bar {
+    background-color: #d51e1e !important;
+  }
+  
+  .custom-toast-fav .Toastify__toast-icon svg {
+    fill: #d51e1e !important;
+  }
+  .custom-toast-fav {
+    background-color: black !important;
+    color: #fff !important;
+  }
