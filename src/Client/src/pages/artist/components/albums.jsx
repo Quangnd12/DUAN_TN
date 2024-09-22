@@ -15,9 +15,8 @@ const ArtistAlbum = () => {
       </div>
       <div className="grid grid-cols-5 gap-4">
         {data.albums.slice(0, 5).map((album, index) => (
-          <Link to={`/listalbum/${album.id}`}>
+          <Link to={`/listalbum/${album.id}`} key={album.id}>
             <div
-              key={index}
               className="flex flex-col items-start"
             >
               <img
@@ -26,8 +25,10 @@ const ArtistAlbum = () => {
                 className="w-52 h-52 object-cover rounded-lg"
               />
               <div className="mt-2 text-left">
-                <p className="text-white font-semibold">{album.name}</p>
-                <p className="text-gray-400">{album.date}</p>
+                <p className="text-white font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-[200px]">{album.name}</p>
+                <p className="text-gray-400">
+                  {`${new Date(album.date).getMonth() + 1}/${new Date(album.date).getFullYear()}`}
+                </p>
               </div>
             </div>
           </Link>

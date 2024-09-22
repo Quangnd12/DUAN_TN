@@ -28,7 +28,7 @@ background-color: #09A6EF;
 /* Dropdown căn trái */
 .dropdown.left-aligned {
   bottom: 200px;
-  left: 200px;
+  left: 300px;
   transform: none;
 }
 .dropdown-button {
@@ -80,16 +80,57 @@ background-color: #09A6EF;
 .share-options button:hover {
   background-color: #5a5a5a; /* Màu nền khi hover */
 }
-.song-name {
-  white-space: nowrap; 
-  overflow: hidden;    
-  text-overflow: ellipsis; 
-}
 
 .custom-width {
   width: 80%; 
 }
 
+/* ArtistInfo.css */
+.track {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: absolute;
+}
+
+.track__image img {
+  width: 70px;
+  height: 70px;
+  border-radius: 5px;
+}
+
+.track__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.track__info__track__name {
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  color: white;
+  padding-right: 10px;
+}
 
 
+.track__info__track__artists {
+  color: #b3b3b3;
+}
 
+.track__info__like {
+  margin-left: 20px;
+  display: flex;
+  align-items: center;
+}
+
+
+.track__info__track__artists {
+  color: #b3b3b3;
+}
+
+
+.track__info__more {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+}

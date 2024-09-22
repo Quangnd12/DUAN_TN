@@ -13,6 +13,7 @@ const PopularSong = () => {
   const [showShareOptions, setShowShareOptions] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const dropdownRefs = useRef([]);
+  const MAX_ARTISTS_TO_SHOW = 1;
 
   const handleRowClick = (song) => {
     setSelectedPlayer(song);
@@ -48,10 +49,10 @@ const PopularSong = () => {
                   className="w-48 h-48 object-cover rounded-lg mt-3"
                 />
                 <div className="flex flex-col text-left mt-12">
-                  <p className="text-sm font-semibold break-words custom-width">
+                  <p className="text-sm font-semibold overflow-hidden text-ellipsis w-[200px] line-clamp-2">
                     {firstSong.name}
                   </p>
-                  <p className="text-gray-400 text-sm break-words">
+                  <p className="text-gray-400 text-sm break-words pt-2">
                     {firstSong.artist}
                   </p>
                 </div>
@@ -71,11 +72,10 @@ const PopularSong = () => {
               <div
                 key={index}
                 className={`relative flex items-center p-2 rounded-lg transition-colors 
-                 ${
-                   hoveredIndex === index || clickedIndex === index
-                     ? "bg-gray-700"
-                     : ""
-                 } 
+                 ${hoveredIndex === index || clickedIndex === index
+                    ? "bg-gray-700"
+                    : ""
+                  } 
                  ${itemHeight}`}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
@@ -92,21 +92,36 @@ const PopularSong = () => {
                 <div className="flex flex-col flex-grow ml-3">
                   <div className="flex justify-between items-center">
                     <div style={{ width: "150px" }}>
-                      <p className="text-sm font-semibold song-name">
+                      <p className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-[150px]">
                         {song.name}
                       </p>
                     </div>
                     <div className="absolute inset-0 flex items-center justify-end">
                       <p
-                        className={`text-gray-500 text-sm w-20 text-right ${
-                          hoveredIndex === index ? "opacity-0" : ""
-                        }`}
+                        className={`text-gray-500 text-sm w-20 text-right mr-2 ${hoveredIndex === index ? "opacity-0" : ""
+                          }`}
                       >
                         {song.duration}
                       </p>
                     </div>
                   </div>
-                  <p className="text-gray-400 text-sm mt-1">{song.artist}</p>
+                  <div className="flex flex-wrap gap-1 mt-1" style={{ zIndex: 1 }}>
+                    {song.artist.split(", ").slice(0, MAX_ARTISTS_TO_SHOW).map((artist, artistIndex, array) => (
+                      <span key={artistIndex} className="flex items-center">
+                        <Link to={`/artist/${artistIndex + 1}`} className="relative z-10" onClick={(e) => {
+                          e.stopPropagation()
+                        }}>
+                          <p className="text-gray-400 text-sm whitespace-nowrap overflow-hidden text-ellipsis hover:text-blue-500 hover:underline">
+                            {artist}
+                          </p>
+                        </Link>
+                        {artistIndex < array.length - 1 && <span className="text-gray-400">, </span>}
+                      </span>
+                    ))}
+                    {song.artist.split(", ").length > MAX_ARTISTS_TO_SHOW && (
+                      <span className="text-gray-400">... </span>
+                    )}
+                  </div>
                   <SongItem
                     key={index}
                     song={song}
@@ -146,7 +161,7 @@ const PopularSong = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

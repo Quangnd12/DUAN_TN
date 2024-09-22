@@ -1,6 +1,6 @@
 import React from "react";
-import ListSongOfPlaylist from "../component/PlaylistList";
-import PlaylistRandom from "../component/RelatedPlaylist";
+import ListSongOfPlaylist from "../components/PlaylistList";
+import PlaylistRandom from "../components/RelatedPlaylist";
 
 const PlaylistList = () => {
   return (
