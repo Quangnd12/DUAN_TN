@@ -17,9 +17,8 @@ const Artist = () => {
 
             <div className="grid grid-cols-5 gap-4">
                 {data.artists.slice(0, 5).map((artist, index) => (
-                    <Link to={`/artist/${artist.id}`}>
+                    <Link to={`/artist/${artist.id}`} key={artist.id}>
                         <div
-                            key={index}
                             className="flex flex-col items-center"
                         >
                             <img

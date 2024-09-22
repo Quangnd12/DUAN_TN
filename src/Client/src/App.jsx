@@ -19,7 +19,6 @@ import Albums from './pages/album';
 import Playlist from "./pages/playlist";
 
 
-
 function Client() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);

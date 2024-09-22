@@ -6,7 +6,6 @@ import SongMoreButton from "../button/moreSong";
 const SongItem = ({ index, hoveredIndex, likedSongs, handleLikeToggle }) => {
   const handleSongOptionSelect = (action) => {
     console.log("Selected action:", action);
-    // Xử lý action tại đây
   };
 
   return (

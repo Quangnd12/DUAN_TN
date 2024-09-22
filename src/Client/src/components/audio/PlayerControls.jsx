@@ -77,7 +77,9 @@ const PlayerControls = ({ audioUrl, title, artist, Image, onDurationChange, next
           <CgPlayTrackNext className="icon" onClick={next} />
           <MdShuffle className="icon-custom" title="Shuffle" />
         </div>
+        <div className="parent-container">
         <Volume volume={volume} onVolumeChange={(e) => setVolume(parseFloat(e.target.value))} />
+        </div>
       </div>
       <div className="progress-container">
         <span>{formatTime(currentTime)}</span>

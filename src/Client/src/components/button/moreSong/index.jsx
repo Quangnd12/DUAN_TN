@@ -8,27 +8,31 @@ import AlbumIcon from '@mui/icons-material/Album';
 import AddIcon from '@mui/icons-material/Add';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import FeaturedPlayListIcon from '@mui/icons-material/FeaturedPlayList';
+import ShareOptions from '../share';
+import { handleAddFavorite, handleAddPlaylist, handleAddWaitlist } from "../../notification";
 
-// New SongMoreButton component
 const SongMoreButton = ({ onOptionSelect }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isShareOpen, setIsShareOpen] = useState(false);
     const dropdownRef = useRef(null);
+    const shareDropdownRef = useRef(null);
 
     const songMenuOptions = [
-        { label: 'Thêm vào danh sách phát', action: 'add_to_playlist', icon: <AddIcon /> },
-        { label: 'Lưu vào bài hát đã thích của bạn', action: 'favorite_songs', icon: <AddCircleOutlineIcon /> },
-        { label: 'Thêm vào danh sách chờ', action: 'waiting_list', icon: <PlaylistAddIcon /> },
-        { label: 'Chuyển đến radio theo bài hát', action: 'go_to_song_radio', icon: <RadioIcon /> },
-        { label: 'Chuyển tới nghệ sĩ', action: 'go_to_artist', icon: <PersonIcon /> },
-        { label: 'Chuyển tới album', action: 'go_to_album', icon: <AlbumIcon /> },
-        { label: 'Xem thông tin ghi công', action: 'attribution_information', icon: <FeaturedPlayListIcon /> },
-        { label: 'Chia sẻ', action: 'share', icon: <ShareIcon /> },
+        { label: 'Add to playlist', action: 'add_to_playlist', icon: <AddIcon /> },
+        { label: 'Save to your favorite songs', action: 'favorite_songs', icon: <AddCircleOutlineIcon /> },
+        { label: 'Add to waiting list', action: 'waiting_list', icon: <PlaylistAddIcon /> },
+        { label: 'Jump to radio by song', action: 'go_to_song_radio', icon: <RadioIcon /> },
+        { label: 'Go to artist', action: 'go_to_artist', icon: <PersonIcon /> },
+        { label: 'Go to album', action: 'go_to_album', icon: <AlbumIcon /> },
+        { label: 'View credit information', action: 'attribution_information', icon: <FeaturedPlayListIcon /> },
+        { label: 'Share', action: 'share', icon: <ShareIcon />, isShare: true },
     ];
 
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setIsOpen(false);
+                setIsShareOpen(false);
             }
         };
 
@@ -38,16 +42,45 @@ const SongMoreButton = ({ onOptionSelect }) => {
         };
     }, []);
 
+    const handleOptionClick = (action) => {
+        if (action === 'share') {
+            setIsShareOpen(!isShareOpen);
+        } else {
+            onOptionSelect(action);
+            setIsOpen(false);
+        }
+    };
+
+    const handleNotification = (action) => {
+        switch (action) {
+            case 'add_to_playlist':
+                handleAddPlaylist();
+                break;
+            case 'favorite_songs':
+                handleAddFavorite();
+                break;
+            case 'waiting_list':
+                handleAddWaitlist();
+                break;
+            default:
+                console.log("Action not handled:", action);
+        }
+    };
+
     const toggleDropdown = (e) => {
         e.stopPropagation();
         setIsOpen(!isOpen);
     };
+    const dropdownStyle = (e) => {
+        const dropdownHeight = 200;
+        const spaceBelow = window.innerHeight - e.currentTarget.getBoundingClientRect().bottom;
 
-    const handleOptionClick = (action) => {
-        onOptionSelect(action);
-        setIsOpen(false);
+        if (spaceBelow < dropdownHeight) {
+            return { top: 'auto', bottom: '100%', marginBottom: '8px' };
+        }
+
+        return { top: '100%', marginTop: '8px' };
     };
-
     return (
         <div className="relative" ref={dropdownRef}>
             <MdMoreHoriz
@@ -56,18 +89,48 @@ const SongMoreButton = ({ onOptionSelect }) => {
                 onClick={toggleDropdown}
             />
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-72 rounded-md z-50 shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5">
+                 <div
+                 className="absolute right-0 w-72 rounded-md z-50 shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5"
+                 style={dropdownStyle({ currentTarget: dropdownRef.current })}
+             >
                     <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                         {songMenuOptions.map((option, index) => (
-                            <button
-                                key={index}
-                                className="flex items-center w-full text-left px-4 py-2 text-sm rounded-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                                role="menuitem"
-                                onClick={() => handleOptionClick(option.action)}
-                            >
-                                <span className="mr-3">{option.icon}</span>
-                                {option.label}
-                            </button>
+                            <div key={index}>
+                                <button
+                                    className={`flex items-center w-full text-left px-4 py-2 text-sm rounded-sm 
+                                    ${option.action === 'share' && isShareOpen ? 'bg-gray-700' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}
+                                    role="menuitem"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleOptionClick(option.action);
+                                        handleNotification(option.action);
+                                    }}
+                                    onMouseEnter={() => {
+                                        if (option.action === 'share') {
+                                            setIsShareOpen(true);
+                                        }
+                                    }}
+                                    onMouseLeave={() => {
+                                        if (option.action === 'share') {
+                                            setIsShareOpen(false);
+                                        }
+                                    }}
+                                >
+                                    <span className="mr-3">{option.icon}</span>
+                                    {option.label}
+                                </button>
+                                {isShareOpen && option.action === 'share' && (
+                                    <div
+                                        ref={shareDropdownRef}
+                                        onMouseEnter={() => setIsShareOpen(true)}
+                                        onMouseLeave={() => {
+                                            setIsShareOpen(false);
+                                        }}
+                                    >
+                                        <ShareOptions onOptionClick={handleOptionClick} />
+                                    </div>
+                                )}
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -75,4 +138,5 @@ const SongMoreButton = ({ onOptionSelect }) => {
         </div>
     );
 };
-export default SongMoreButton
+
+export default SongMoreButton;

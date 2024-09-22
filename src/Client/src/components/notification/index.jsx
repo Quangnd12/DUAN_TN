@@ -9,7 +9,18 @@ const handleAddPlaylist = () => {
         className: 'custom-toast',
     });
 }
-
+const handleAddWaitlist = () => {
+    toast.success("Song added to waiting list", {
+        autoClose: 2000,
+        className: 'custom-toast',
+    });
+}
+const handleAddLibrary = () => {
+    toast.success("Song added to library", {
+        autoClose: 2000,
+        className: 'custom-toast',
+    });
+}
 const handleAddFavorite = () => {
     toast.success("Song added to favorite", {
         autoClose: 2000,
@@ -17,4 +28,4 @@ const handleAddFavorite = () => {
     });
 }
 
-export { handleAddPlaylist, handleAddFavorite };
+export { handleAddPlaylist, handleAddFavorite,handleAddWaitlist,handleAddLibrary };

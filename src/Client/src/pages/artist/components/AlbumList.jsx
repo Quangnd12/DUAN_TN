@@ -14,10 +14,8 @@ const AllAlbums = () => {
                 </div>
                 <div className="grid grid-cols-5 gap-4 ">
                     {data.albums.map((album, index) => (
-                        <>
-                            <Link to={`/listalbum/${album.id}`}>
+                            <Link to={`/listalbum/${album.id}`} key={album.id}>
                                 <div
-                                    key={index}
                                     className="flex flex-col items-start mb-6"
                                 >
                                     <img
@@ -26,12 +24,11 @@ const AllAlbums = () => {
                                         className="w-52 h-52 object-cover rounded-lg"
                                     />
                                     <div className="mt-2 text-left">
-                                        <p className="text-white font-semibold">{album.name}</p>
+                                        <p className="text-white font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-[200px]">{album.name}</p>
                                         <p className="text-gray-400">{album.date}</p>
                                     </div>
                                 </div>
                             </Link>
-                        </>
                     ))}
                 </div>
             </div>

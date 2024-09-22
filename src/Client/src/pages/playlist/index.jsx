@@ -1,6 +1,6 @@
 import React from "react";
 import PlaylistList from "./sections/playlist";
-import PlayListInfo from "./component/PlaylistInfo";
+import PlayListInfo from "./components/PlaylistInfo";
 
 const Playlist = () => {
   return (
