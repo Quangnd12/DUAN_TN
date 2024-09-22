@@ -12,6 +12,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import BlockIcon from '@mui/icons-material/Block';
 import ReportIcon from '@mui/icons-material/Report';
+import EditIcon from '@mui/icons-material/Edit';
 
 
 
@@ -42,6 +43,13 @@ const MoreButton = ({ type, onOptionSelect }) => {
             { label: 'Không phát nghệ sĩ này', action: 'dont_play_this_artist', icon: <BlockIcon /> },
             { label: 'Chuyển đến radio theo nghệ sĩ', action: 'go_to_artist_radio', icon: <RadioIcon /> },
             { label: 'Báo cáo', action: 'report', icon: <ReportIcon /> },
+            { label: 'Chia sẻ', action: 'share', icon: <ShareIcon /> },
+        ],
+        playlist: [
+            { label: 'Thêm vào danh sách chờ', action: 'add_to_queue', icon: <PersonAddIcon /> },
+            { label: 'Xóa khỏi hồ sơ', action: 'remove_from_profile', icon: <BlockIcon /> },
+            { label: 'Sửa thông tin chi tiết', action: 'edit_detail_info', icon: <RadioIcon /> },
+            { label: 'Xóa', action: 'delete', icon: <EditIcon /> },
             { label: 'Chia sẻ', action: 'share', icon: <ShareIcon /> },
         ],
     };

@@ -17,4 +17,11 @@ const handleAddFavorite = () => {
     });
 }
 
-export { handleAddPlaylist, handleAddFavorite };
+const handleCopyLinkSong = () => {
+    toast.success("The link has been copied to the clipboard", {
+        autoClose: 2000,
+        className: 'custom-toast-copy',
+    })
+}
+
+export { handleAddPlaylist, handleAddFavorite, handleCopyLinkSong };

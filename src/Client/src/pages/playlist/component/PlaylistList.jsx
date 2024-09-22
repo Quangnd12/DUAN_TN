@@ -25,6 +25,10 @@ const ListSongOfPlaylist = () => {
         setClickedIndex(index);
     };
 
+    const handleOptionSelect = (action) => {
+        console.log('Selected action:', action);
+        // Xử lý action tại đây
+      };
     const handleCheckboxToggle = (index) => {
         setSelectedCheckboxes(prevSelectedCheckboxes => {
             const updatedCheckboxes = new Set(prevSelectedCheckboxes);
@@ -87,15 +91,7 @@ const ListSongOfPlaylist = () => {
                             />
                         </div>
                         <div className="ml-6">
-                            <MoreButton
-                                index={0}
-                                dropdownIndex={dropdownIndex}
-                                handleDropdownToggle={handleDropdownToggle}
-                                dropdownRefs={dropdownRefs}
-                                setShowShareOptions={setShowShareOptions}
-                                showShareOptions={showShareOptions}
-                                align="left"
-                            />
+                        <MoreButton type="playlist" onOptionSelect={handleOptionSelect} />
                         </div>
                     </div>
                     <button className="flex items-center bg-icon text-white p-2 rounded-full hover:bg-blue-700 transition">
