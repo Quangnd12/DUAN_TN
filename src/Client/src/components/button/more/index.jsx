@@ -14,6 +14,8 @@ import BlockIcon from '@mui/icons-material/Block';
 import ReportIcon from '@mui/icons-material/Report';
 import ShareOptions from '../share';
 import { handleAddFavorite, handleAddPlaylist, handleAddWaitlist, handleAddLibrary } from "../../notification";
+import EditIcon from '@mui/icons-material/Edit';
+
 
 
 
@@ -48,10 +50,12 @@ const MoreButton = ({ type, onOptionSelect }) => {
             { label: 'Báo cáo', action: 'report', icon: <ReportIcon /> },
             { label: 'Chia sẻ', action: 'share', icon: <ShareIcon /> },
         ],
-        songPlay: [
-            { label: 'Play similar content', action: 'follow', icon: <PersonAddIcon /> },
-            { label: 'Add to playlist', action: 'dont_play_this_artist', icon: <PlaylistAddIcon /> },
-            { label: 'Share', action: 'share', icon: <ShareIcon /> },
+        playlist: [
+            { label: 'Thêm vào danh sách chờ', action: 'add_to_queue', icon: <PersonAddIcon /> },
+            { label: 'Xóa khỏi hồ sơ', action: 'remove_from_profile', icon: <BlockIcon /> },
+            { label: 'Sửa thông tin chi tiết', action: 'edit_detail_info', icon: <RadioIcon /> },
+            { label: 'Xóa', action: 'delete', icon: <EditIcon /> },
+            { label: 'Chia sẻ', action: 'share', icon: <ShareIcon /> },
         ],
     };
 

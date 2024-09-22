@@ -28,6 +28,7 @@ const ListSongOfPlaylist = () => {
         setClickedIndex(index);
     };
 
+
     const handleCheckboxToggle = (index) => {
         setSelectedCheckboxes(prevSelectedCheckboxes => {
             const updatedCheckboxes = new Set(prevSelectedCheckboxes);
