@@ -44,6 +44,13 @@ const MoreButton = ({ type, onOptionSelect }) => {
             { label: 'Báo cáo', action: 'report', icon: <ReportIcon /> },
             { label: 'Chia sẻ', action: 'share', icon: <ShareIcon /> },
         ],
+        lyrics: [
+            { label: 'Theo dõi', action: 'follow', icon: <PersonAddIcon /> },
+         
+            { label: 'Chia sẻ', action: 'share', icon: <ShareIcon /> },
+            
+            
+        ],
     };
 
     useEffect(() => {

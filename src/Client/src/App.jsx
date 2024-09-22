@@ -17,6 +17,7 @@ import Library from "./pages/library/library";
 import AllSong from './pages/artist/components/SongList';
 import AllAlbums from './pages/artist/components/AlbumList';
 import Albums from './pages/album';
+import Lyrics from "./pages/lyrics/lyrics";
 
 
 function Client() {
@@ -64,6 +65,7 @@ function Client() {
               <Route path="/track" element={<Track />} />
               <Route path='/toprank' element={<TopRank />} />
               <Route path='/library' element={<Library />} />
+              <Route path='/lyrics' element={<Lyrics />} />
             </Routes>
           </div>
         </div>
