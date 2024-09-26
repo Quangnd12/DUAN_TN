@@ -6,7 +6,7 @@ import {
   FaStepBackward,
   FaTimes,
 } from "react-icons/fa";
-import data from "../../pages/artist/utils/fetchSongData";
+import data from "../../data/fetchSongData";
 import { usePip } from "../../../../redux/pip";
 
 const PictureInPicturePlayer = () => {

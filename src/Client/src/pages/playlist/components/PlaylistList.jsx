@@ -165,7 +165,7 @@ const ListSongOfPlaylist = () => {
                             />
                             <div className="flex flex-grow flex-col ml-3">
                                 <div className="flex justify-between items-center">
-                                    <p className="text-sm font-semibold w-48 whitespace-nowrap overflow-hidden text-ellipsis w-[370px]">
+                                    <p className="text-sm font-semibold  whitespace-nowrap overflow-hidden text-ellipsis w-[370px]">
                                         {song.name}
                                     </p>
                                     <div className="absolute top-[25px] justify-end right-[200px]">
