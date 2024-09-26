@@ -56,6 +56,13 @@ const MoreButton = ({ type, onOptionSelect }) => {
             { label: 'Delete', action: 'delete', icon: <EditIcon /> },
             { label: 'Share', action: 'share', icon: <ShareIcon /> },
         ],
+        lyrics: [
+            { label: 'Theo dõi', action: 'follow', icon: <PersonAddIcon /> },
+         
+            { label: 'Chia sẻ', action: 'share', icon: <ShareIcon /> },
+            
+            
+        ],
     };
 
 

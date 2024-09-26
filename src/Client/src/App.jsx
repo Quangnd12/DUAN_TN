@@ -19,6 +19,8 @@ import AllAlbums from './pages/artist/components/AlbumList';
 import Albums from './pages/album';
 import Playlist from "./pages/playlist";
 import PictureInPicturePlayer from "./components/pip";
+import Lyrics from "./pages/lyrics/lyrics";
+
 
 function Client() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -65,6 +67,7 @@ function Client() {
                 <Route path="/playlist/:id" element={<Playlist />} />
                 <Route path="/toprank" element={<TopRank />} />
                 <Route path="/library" element={<Library />} />
+                <Route path='/lyrics' element={<Lyrics />} />
               </Routes>
             </div>
           </div>
