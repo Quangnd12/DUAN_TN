@@ -27,7 +27,6 @@ const handleAddFavorite = () => {
         className: 'custom-toast-fav',
     });
 }
-
 const handleCopyLinkSong = () => {
     toast.success("The link has been copied to the clipboard", {
         autoClose: 2000,
