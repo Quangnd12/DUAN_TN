@@ -13,11 +13,17 @@ import Track from "./pages/track/Track";
 import Content from "./pages/content/Content";
 import InfoClient from "./pages/info-client/Info-client";
 import TopRank from "./pages/toprank/TopRank";
+import TopChart from "./pages/topchart/sections/chart";
 import Library from "./pages/library/library";
 import AllSong from './pages/artist/components/SongList';
 import AllAlbums from './pages/artist/components/AlbumList';
 import Albums from './pages/album';
+import Genres from "./pages/genre";
+import AllGenre from "./pages/genre/GenreList";
 import Lyrics from "./pages/lyrics/lyrics";
+
+
+
 
 
 function Client() {
@@ -45,7 +51,7 @@ function Client() {
       <div className="flex gap-2">
         <div>{!isMobile && <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />}</div>
         <div className={`flex-1 flex flex-col ${isSidebarOpen ? 'ml-0' : 'ml-16'} transition-all duration-300`}>
-        <Header toggleSidebar={toggleSidebar} />
+          <Header toggleSidebar={toggleSidebar} />
           <div
             className="overflow-y-auto scrollbar-custom "
             style={{ height: "620px" }}
@@ -56,6 +62,7 @@ function Client() {
               <Route path='/artist/:id' element={<Artist />} />
               <Route path='/allsong' element={<AllSong />} />
               <Route path='/allalbum' element={<AllAlbums />} />
+              <Route path='/allgenre' element={<AllGenre />} />
               <Route path='/listalbum/:id' element={<Albums />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
@@ -64,9 +71,13 @@ function Client() {
               <Route path="/info" element={<InfoClient />} />
               <Route path="/track" element={<Track />} />
               <Route path='/toprank' element={<TopRank />} />
+              <Route path='/topchart' element={<TopChart />} />
               <Route path='/library' element={<Library />} />
               <Route path='/lyrics' element={<Lyrics />} />
+              <Route path='/listgenre' element={<Genres />} />
             </Routes>
+
+         
           </div>
         </div>
       </div>

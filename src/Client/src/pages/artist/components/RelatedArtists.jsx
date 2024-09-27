@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import data from "../../../data/fetchSongData";
 
 const Artist = () => {
-
     useEffect(() => {
-
+        // Any effect code if needed
     }, []);
-
 
     return (
         <div className="p-4">
@@ -17,11 +15,8 @@ const Artist = () => {
 
             <div className="grid grid-cols-5 gap-4">
                 {data.artists.slice(0, 5).map((artist, index) => (
-                    <Link to={`/artist/${artist.id}`}>
-                        <div
-                            key={index}
-                            className="flex flex-col items-center"
-                        >
+                    <Link to={`/artist/${artist.id}`} key={index}>
+                        <div className="flex flex-col items-center">
                             <img
                                 src={artist.image}
                                 alt={artist.name}

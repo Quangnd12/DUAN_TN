@@ -1,7 +1,9 @@
-.artist-bg{
-    background: linear-gradient(180deg, #2A2A35 0%, #292A41 50%, #1F214A 100%);
-
+.artist-bg {
+  background: linear-gradient(180deg, #002b4c 0%, #2997d6 100%);
 }
+
+
+
 .bg-icon{
 background-color: #09A6EF;
 }
