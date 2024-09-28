@@ -10,7 +10,7 @@
   left: 0;
   background-color: #181818;
   padding: 0.5rem 0;
-  z-index: 10;
+  z-index: 1500;
 }
 
 .controls {
@@ -86,4 +86,9 @@
 .progress-container span {
   color: white;
   font-size: 0.875rem;
+}
+.parent-container {
+  display: flex;
+  justify-content: flex-end; /* Đẩy nội dung về bên phải */
+  width: 100%; /* Đảm bảo có đủ không gian */
 }

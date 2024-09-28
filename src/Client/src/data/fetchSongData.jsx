@@ -9,15 +9,15 @@ const data = {
       },
       {
         image: "https://i.scdn.co/image/ab67616d00001e027c17174be9cdaa69349f47d6",
-        name: "giá như",
-        artist: "Adele",
+        name: "NGÁO NGƠ- LYRICS (feat. HIEUTHUHAI, JSOL, Erik, Anh Tú ATUS, Orange) | ANH TRAI SAY HI",
+        artist: "HIEUTHUHAI, JSOL, Erik, Anh Tú ATUS, Orange, HIEUTHUHAI, JSOL, Erik, Anh Tú ATUS, Orange",
         details: "4,065,807",
         duration: "3:43",
       },
       {
         image: "https://i.scdn.co/image/ab67616d00001e022922307c16bb852a0849bea0",
         name: "Anh Đã Quen Với Cô Đơn",
-        artist: "Adele",
+        artist: "HIEUTHUHAI, JSOL, Erik, Anh Tú ATUS",
         details: "10,119,884",
         duration: "4:28",
       },
@@ -127,6 +127,51 @@ const data = {
         image: "https://th.bing.com/th/id/OIP.ZOO_GYv50IJq13htfEv_dwHaHf?rs=1&pid=ImgDetMain",
         title: "Drake",
         date:'11/12/2024'
+      },
+    ],
+    playlists: [
+      {
+        id: 1,
+        name: "NGÁO NGƠ- LYRICS ",
+        image: "https://th.bing.com/th/id/OIP.WvBa5FEOB-eU1WcSRdmppQAAAA?w=474&h=474&rs=1&pid=ImgDetMain",
+        title: "HIEUTHUHAI, JSOL, Erik,",
+        song:"7 songs"
+      },
+      {
+        id: 2,
+        name: "Album này rất suy",
+        image:
+          "https://bloganchoi.com/wp-content/uploads/2024/06/loi-bai-hat-dung-lam-trai-tim-anh-dau-lyrics-son-tung-mtp-5-1-696x870.jpg",
+        title: "Sơn Tùng MTP",
+        song:"7 songs"
+      },
+      {
+        id: 3,
+        name: "Ai Cũng Phải Bắt Đầu Từ Đâu Đó",
+        image: "https://th.bing.com/th/id/OIP.a9y4ZYtf2szQO2xpWSZW4wAAAA?rs=1&pid=ImgDetMain",
+        title: "Hiếu Thứ Hai",
+        song:"7 songs"
+      },
+      {
+        id: 4,
+        name: "m-tp M-TP",
+        image: "https://th.bing.com/th/id/R.507942273181bc5c5ee7d4383edbd47f?rik=bnaU0HuAKoX8cA&pid=ImgRaw&r=0",
+        title: "Sơn Tùng MTP",
+        song:"7 songs"
+      },
+      {
+        id: 5,
+        name: "99%",
+        image: "https://th.bing.com/th/id/OIP.C43hoOrXpwjHKWbLg4bMBAHaHa?w=600&h=600&rs=1&pid=ImgDetMain",
+        title: "MCK",
+        song:"7 songs"
+      },
+      {
+        id: 6,
+        name: "Take Care",
+        image: "https://th.bing.com/th/id/OIP.ZOO_GYv50IJq13htfEv_dwHaHf?rs=1&pid=ImgDetMain",
+        title: "Drake",
+        song:"7 songs"
       },
     ]
   };

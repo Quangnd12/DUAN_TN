@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import styled from "styled-components";
+import React, { useState, useEffect, useRef } from "react";
+import Marquee from "react-fast-marquee";
+import "../../assets/css/artist/artist.css";
 import LikeButton from "../button/favorite";
-
+import MoreButton from "../button/morePlaycontroll";
 
 export default function ArtistInfo({ title, image, artist }) {
   const [likedSongs, setLikedSongs] = useState({});
@@ -13,56 +14,44 @@ export default function ArtistInfo({ title, image, artist }) {
     }));
   };
 
+  const shouldUseMarquee = title.length > 35;
+
+  const handleOptionSelect = (action) => {
+    console.log('Selected action:', action);
+    // Xử lý action tại đây
+  };
+
   return (
-    <Container>
-      <div className="track">
-        <div className="track__image">
-          <img src={image} alt={title} />
-        </div>
-        <div className="track__info">
-          <h4 className="track__info__track__name">{title}</h4>
-          <h6 className="track__info__track__artists">{artist}</h6>
-        </div>
-        <div className="track__info__like">
-          <LikeButton
-            likedSongs={likedSongs[0]}
-            handleLikeToggle={() => handleLikeToggle(0)}
-          />
-        </div>
+    <div className="track">
+      <div className="track__image">
+        <img src={image} alt={title} />
       </div>
-    </Container>
+      <div className="track__info">
+        <div style={{ width: '280px' }}>
+          {shouldUseMarquee ? (
+            <Marquee style={{ width: '100%' }} gap={0}>
+              <h4 className="track__info__track__name">{title}</h4>
+            </Marquee>
+          ) : (
+            <h4 className="track__info__track__name">{title}</h4>
+          )}
+        </div>
+        <h6 className="track__info__track__artists whitespace-nowrap overflow-hidden text-ellipsis w-[280px]">{artist}</h6>
+      </div>
+      <div className="track__info__like">
+        <LikeButton
+          likedSongs={likedSongs[0]}
+          handleLikeToggle={() => handleLikeToggle(0)}
+        />
+      </div>
+      <div className="track__info__more">
+        <MoreButton type="songPlay"
+          onOptionSelect={handleOptionSelect}
+          songImage={image}
+          songTitle={title}
+          artistName={artist}
+        />
+      </div>
+    </div>
   );
 }
-
-const Container = styled.div`
-  .track {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    position: absolute;
-
-    &__image {
-      img {
-        width: 70px;
-        height: 70px;
-        border-radius: 5px;
-      }
-    }
-    &__info {
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-      &__track__name {
-        color: white;
-      }
-      &__track__artists {
-        color: #b3b3b3;
-      }
-      &__like {
-        margin-left:30px;
-        display: flex;
-        align-items: center;
-      }
-    }
-  }
-`;

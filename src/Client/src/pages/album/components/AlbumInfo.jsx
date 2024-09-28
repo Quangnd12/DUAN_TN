@@ -1,7 +1,7 @@
 import React from "react";
 import "../../../assets/css/artist/artist.css";
 import data from "../../../data/fetchSongData";
-import { useParams } from "react-router-dom";  
+import { useParams } from "react-router-dom";
 
 const AlbumInfo = () => {
     const { id } = useParams();
@@ -19,10 +19,13 @@ const AlbumInfo = () => {
                         />
                     </div>
                     <div className="text-white ml-6">
+                        <div className="flex items-center space-x-2 mb-2">
+                            <h6 className="text-sm font-bold">Album</h6>
+                        </div>
                         <div className="flex items-center space-x-2">
                             <h6 className="text-5xl font-bold">{albums.name}</h6>
                         </div>
-                        <div className="flex pt-6">
+                        <div className="flex items-center pt-2">
                             <img
                                 src={albums.image}
                                 alt="Album Cover"
