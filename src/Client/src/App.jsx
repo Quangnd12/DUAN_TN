@@ -15,10 +15,16 @@ import InfoClient from "./pages/info-client/Info-client";
 import TopRank from "./pages/toprank/TopRank";
 import Library from "./pages/library/library";
 import AllSong from './pages/artist/components/SongList';
-import AllAlbums from './pages/artist/components/AlbumList';
+import AllAlbums from './pages/artist/components/AllAlbum';
 import Albums from './pages/album';
 import Playlist from "./pages/playlist";
 import PictureInPicturePlayer from "./components/pip";
+import PlaylistAll from "./pages/playlist/components/PlaylistAll";
+import AddPlaylist from "./pages/playlist/components/PlaylistAdd";
+import EmptyLayout from "./layouts";
+import LayoutArtist from "./pages/showAll/artists";
+import LayoutAlbums from "./pages/showAll/albums";
+import LayoutRadio from "./pages/showAll/radios";
 
 function Client() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -53,16 +59,28 @@ function Client() {
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/search" element={<SearchPage />} />
-                <Route path='/artist/:id' element={<Artist />} />
-                <Route path='/allsong' element={<AllSong />} />
-                <Route path='/allalbum' element={<AllAlbums />} />
-                <Route path='/listalbum/:id' element={<Albums />} />
+                <Route path='/artist' element={<EmptyLayout />}>
+                  <Route path=':artistName' element={<Artist />} />
+                  <Route path=":artistName/album" element={<AllAlbums />} />
+                  <Route path=":artistName/song" element={<AllSong />} />
+                </Route>
+                <Route path='/show-all' element={<EmptyLayout />} >
+                  <Route path="artist" element={<LayoutArtist />} />
+                  <Route path="album" element={<LayoutAlbums />} />
+                
+                   <Route path="radio" element={<LayoutRadio />} />
+                </Route>
+                <Route path='/album/:albumName' element={<Albums />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/forgot" element={<ForgotPass />} />
+                <Route path="/forgot-password" element={<ForgotPass />} />
                 <Route path="/content" element={<Content />} />
                 <Route path="/info" element={<InfoClient />} />
-                <Route path="/playlist/:id" element={<Playlist />} />
+                <Route path="/playlist" element={<EmptyLayout />}>
+                  <Route path=":playlistName" element={<Playlist />} />
+                  <Route path="add" element={<AddPlaylist />} />
+                  <Route path="all" element={<PlaylistAll />} />
+                </Route>
                 <Route path="/toprank" element={<TopRank />} />
                 <Route path="/library" element={<Library />} />
               </Routes>

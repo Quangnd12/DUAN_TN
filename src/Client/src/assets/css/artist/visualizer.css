@@ -1,0 +1,37 @@
+
+
+.visualizer {
+    display: flex;
+    gap: 2px; /* Khoảng cách giữa các cột nhỏ hơn để phù hợp với kích thước nút */
+  }
+  
+  .bar {
+    width: 3px;
+    height: 10px;
+    background: white;
+    transform-origin: bottom;
+    animation: bounce 0.5s infinite ease-in-out;
+  }
+  
+  .bar:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  .bar:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  .bar:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  .bar:nth-child(4) {
+    animation-delay: 0.4s;
+  }
+  
+  @keyframes bounce {
+    0%, 100% {
+      transform: scaleY(1);
+    }
+    50% {
+      transform: scaleY(1.6); /* Chỉnh cột cao hơn một chút */
+    }
+  }
+  

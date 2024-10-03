@@ -3,7 +3,7 @@ import "../../assets/css/artist/artist.css";
 import LikeButton from "../button/favorite";
 import SongMoreButton from "../button/moreSong";
 
-const SongItem = ({ index, hoveredIndex, likedSongs, handleLikeToggle }) => {
+const SongItem = ({ index, hoveredIndex, likedSongs, handleLikeToggle ,type}) => {
   const handleSongOptionSelect = (action) => {
     console.log("Selected action:", action);
   };
@@ -17,7 +17,7 @@ const SongItem = ({ index, hoveredIndex, likedSongs, handleLikeToggle }) => {
             handleLikeToggle={() => handleLikeToggle(index)}
           />
           <div className="relative ">
-            <SongMoreButton onOptionSelect={handleSongOptionSelect} />
+            <SongMoreButton type={type} onOptionSelect={handleSongOptionSelect} />
           </div>
         </div>
       )}

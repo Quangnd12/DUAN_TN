@@ -13,8 +13,11 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import BlockIcon from '@mui/icons-material/Block';
 import ReportIcon from '@mui/icons-material/Report';
 import ShareOptions from '../share';
-import { handleAddFavorite, handleAddPlaylist, handleAddWaitlist, handleAddLibrary } from "../../notification";
+import { handleAddFavorite, handleAddWaitlist, handleAddLibrary } from "../../notification";
 import EditIcon from '@mui/icons-material/Edit';
+import CancelIcon from '@mui/icons-material/Cancel';
+import NoAccountsIcon from '@mui/icons-material/NoAccounts';
+import AddPlaylistOption from '../../dropdown/dropdownAddPlaylist';
 
 
 
@@ -22,16 +25,18 @@ import EditIcon from '@mui/icons-material/Edit';
 const MoreButton = ({ type, onOptionSelect }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
+    const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
     const dropdownRef = useRef(null);
     const shareDropdownRef = useRef(null);
+    const playlistDropdownRef = useRef(null);
 
 
     const menuOptions = {
         albumPlaylist: [
-            { label: 'Add to library', action: 'add_to_library', icon: <LibraryAddIcon /> },
+            { label: 'Add to playlist', action: 'add_to_playlist', icon: <PlaylistAddIcon /> },
             { label: 'Add to waiting list', action: 'waiting_list', icon: <QueueMusicIcon /> },
             { label: 'Jump to radio by artist', action: 'go_to_radio', icon: <RadioIcon /> },
-            { label: 'Add to playlist', action: 'add_to_playlist', icon: <PlaylistAddIcon /> },
+            { label: 'Add to library', action: 'add_to_library', icon: <LibraryAddIcon /> },
             { label: 'Share', action: 'share', icon: <ShareIcon /> },
         ],
         track: [
@@ -51,12 +56,13 @@ const MoreButton = ({ type, onOptionSelect }) => {
             { label: 'Chia sẻ', action: 'share', icon: <ShareIcon /> },
         ],
         playlist: [
-            { label: 'Thêm vào danh sách chờ', action: 'add_to_queue', icon: <PersonAddIcon /> },
-            { label: 'Xóa khỏi hồ sơ', action: 'remove_from_profile', icon: <BlockIcon /> },
-            { label: 'Sửa thông tin chi tiết', action: 'edit_detail_info', icon: <RadioIcon /> },
-            { label: 'Xóa', action: 'delete', icon: <EditIcon /> },
-            { label: 'Chia sẻ', action: 'share', icon: <ShareIcon /> },
+            { label: 'Remove from library', action: 'delete', icon: <CancelIcon /> },
+            { label: 'Add to waiting list', action: 'waiting_list', icon: <PlaylistAddIcon /> },
+            { label: 'Remove from your interest profile', action: 'remove_from_profile', icon: <NoAccountsIcon /> },
+            { label: 'Report', action: 'edit_detail_info', icon: <ReportIcon /> },
+            { label: 'Share', action: 'share', icon: <ShareIcon /> },
         ],
+        
     };
 
 
@@ -77,27 +83,26 @@ const MoreButton = ({ type, onOptionSelect }) => {
     }, []);
 
     const handleOptionClick = (action) => {
-        if (action === 'share') {
-            setIsShareOpen((prev) => !prev);
-        } else {
-            onOptionSelect(action);
-            setIsOpen(false);
-        }
-    };
-
-    const handleNotification = (action) => {
         switch (action) {
+            case 'share':
+                setIsShareOpen(!isShareOpen);
+                setIsOpen(false);
+                break;
             case 'add_to_playlist':
-                handleAddPlaylist();
+                setIsPlaylistOpen(!isPlaylistOpen);
+                setIsOpen(false);
                 break;
             case 'add_to_library':
                 handleAddLibrary();
+                setIsOpen(false);
                 break;
             case 'waiting_list':
                 handleAddWaitlist();
+                setIsOpen(false);
                 break;
             default:
-                console.log("Action not handled:", action);
+                onOptionSelect(action);
+                setIsOpen(false);
         }
     };
 
@@ -134,27 +139,45 @@ const MoreButton = ({ type, onOptionSelect }) => {
                             <div key={index}>
                                 <button
                                     className={`flex items-center w-full text-left px-4 py-2 text-sm rounded-sm 
-                                    ${option.action === 'share' && isShareOpen ? 'bg-gray-700' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}
+                                    ${isShareOpen && option.action === 'share' && isShareOpen ? 'bg-gray-700' :
+                                            isPlaylistOpen && option.action === 'add_to_playlist' ? 'bg-gray-700' :
+                                                'text-gray-300 hover:bg-gray-700 hover:text-white'}`}
                                     role="menuitem"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         handleOptionClick(option.action);
-                                        handleNotification(option.action);
                                     }}
                                     onMouseEnter={() => {
                                         if (option.action === 'share') {
                                             setIsShareOpen(true);
+                                        }
+                                        if (option.action === 'add_to_playlist') {
+                                            setIsPlaylistOpen(true);
                                         }
                                     }}
                                     onMouseLeave={() => {
                                         if (option.action === 'share') {
                                             setIsShareOpen(false);
                                         }
+                                        if (option.action === 'add_to_playlist') {
+                                            setIsPlaylistOpen(false);
+                                        }
                                     }}
                                 >
                                     <span className="mr-3">{option.icon}</span>
                                     {option.label}
                                 </button>
+                                {isPlaylistOpen && option.action === 'add_to_playlist' && (
+                                    <div
+                                        ref={playlistDropdownRef}
+                                        onMouseEnter={() => setIsPlaylistOpen(true)}
+                                        onMouseLeave={() => {
+                                            setIsPlaylistOpen(false);
+                                        }}
+                                    >
+                                        <AddPlaylistOption onOptionClick={handleOptionClick} />
+                                    </div>
+                                )}
                                 {isShareOpen && option.action === 'share' && (
                                     <div
                                         ref={shareDropdownRef}
@@ -163,7 +186,7 @@ const MoreButton = ({ type, onOptionSelect }) => {
                                             setIsShareOpen(false);
                                         }}
                                     >
-                                        <ShareOptions onOptionClick={handleOptionClick}  />
+                                        <ShareOptions onOptionClick={handleOptionClick} />
                                     </div>
                                 )}
                             </div>

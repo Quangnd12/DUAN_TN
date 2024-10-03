@@ -6,7 +6,7 @@ import { Helmet, HelmetProvider } from 'react-helmet-async';
 const Albums = () => {
   return (
     <HelmetProvider>
-    <div className="relative w-full h-screen">
+    <div className="relative w-full h-auto overflow-hidden">
        <Helmet>
           <title>Album</title>
           <meta name="description" content="" />

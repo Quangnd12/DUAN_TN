@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import data from "../../../pages/artist/utils/fetchSongData";
+import data from "../../../data/fetchSongData";
 const PlaylistTab = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [clickedIndex, setClickedIndex] = useState(null);

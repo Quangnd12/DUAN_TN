@@ -7,13 +7,15 @@ import ShareIcon from '@mui/icons-material/Share';
 import { FaMicrophoneAlt } from 'react-icons/fa';
 import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb';
 import ShareOptions from '../share';
-import { handleAddPlaylist } from "../../notification";
+import AddPlaylistOption from '../../dropdown/dropdownAddPlaylist';
 
 const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
+    const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
     const dropdownRef = useRef(null);
     const shareDropdownRef = useRef(null);
+    const playlistDropdownRef = useRef(null);
 
     const menuOptions = {
         songPlay: [
@@ -38,23 +40,22 @@ const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName }) => {
     }, []);
 
     const handleOptionClick = (action) => {
-        if (action === 'share') {
-            setIsShareOpen((prev) => !prev);
-        } else {
-            onOptionSelect(action);
-            setIsOpen(false);
+        switch (action) {
+            case 'share':
+                setIsShareOpen(!isShareOpen);
+                setIsOpen(false);
+                break;
+            case 'add_to_playlist':
+                setIsPlaylistOpen(!isPlaylistOpen);
+                setIsOpen(false);
+                break;      
+            default:
+                onOptionSelect(action);
+                setIsOpen(false);
         }
     };
 
-    const handleNotification = (action) => {
-        switch (action) {
-            case 'add_to_playlist':
-                handleAddPlaylist();
-                break;
-            default:
-                console.log("Action not handled:", action);
-        }
-    };
+
 
     const toggleDropdown = (e) => {
         e.stopPropagation();
@@ -107,27 +108,46 @@ const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName }) => {
                         {menuOptions.songPlay.map((option, index) => (
                             <div key={index}>
                                 <button
-                                    className="flex items-center w-full text-left px-4 py-2 text-sm rounded-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                                    className={`flex items-center w-full text-left px-4 py-2 text-sm rounded-sm text-gray-300 hover:bg-gray-700 hover:text-white
+                                    ${isShareOpen && option.action === 'share' && isShareOpen ? 'bg-gray-700' :
+                                    isPlaylistOpen && option.action === 'add_to_playlist' ? 'bg-gray-700' :
+                                        'text-gray-300 hover:bg-gray-700 hover:text-white'}`}
                                     role="menuitem"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         handleOptionClick(option.action);
-                                        handleNotification(option.action);
                                     }}
                                     onMouseEnter={() => {
                                         if (option.action === 'share') {
                                             setIsShareOpen(true);
+                                        }
+                                        if (option.action === 'add_to_playlist') {
+                                            setIsPlaylistOpen(true);
                                         }
                                     }}
                                     onMouseLeave={() => {
                                         if (option.action === 'share') {
                                             setIsShareOpen(false);
                                         }
+                                        if (option.action === 'add_to_playlist') {
+                                            setIsPlaylistOpen(false);
+                                        }
                                     }}
                                 >
                                     <span className="mr-3">{option.icon}</span>
                                     {option.label}
                                 </button>
+                                {isPlaylistOpen && option.action === 'add_to_playlist' && (
+                                    <div
+                                        ref={playlistDropdownRef}
+                                        onMouseEnter={() => setIsPlaylistOpen(true)}
+                                        onMouseLeave={() => {
+                                            setIsPlaylistOpen(false);
+                                        }}
+                                    >
+                                        <AddPlaylistOption onOptionClick={handleOptionClick} />
+                                    </div>
+                                )}
                                 {isShareOpen && option.action === 'share' && (
                                     <div
                                         ref={shareDropdownRef}

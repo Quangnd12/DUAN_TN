@@ -4,7 +4,7 @@ import PlayListInfo from "./components/PlaylistInfo";
 
 const Playlist = () => {
   return (
-    <div className="relative w-full h-screen">
+    <div className="relative w-full h-auto overflow-hidden">
       <PlayListInfo />
       <div className="relative text-left">
         <PlaylistList />
