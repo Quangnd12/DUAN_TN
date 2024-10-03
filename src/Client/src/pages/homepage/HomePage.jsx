@@ -81,7 +81,7 @@ const data = {
       id: 5,
       name: "99%",
       image:
-        "https://th.bing.com/th/id/OIP.C43hoOrXpwjHKWbLg4bMBAHaHa?w=600&h=600&rs=1&pid=ImgDetMain",
+        "https://i.scdn.co/image/ab67616d00001e02b315e8bb7ef5e57e9a25bb0f",
       title: "MCK",
     },
     {
