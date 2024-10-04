@@ -90,7 +90,7 @@ const data = {
       name: "Golden",
       image: "https://th.bing.com/th/id/OIP.WvBa5FEOB-eU1WcSRdmppQAAAA?w=474&h=474&rs=1&pid=ImgDetMain",
       title: "Jungkook",
-      date:'11/12/2024'
+      date: '11/12/2024'
     },
     {
       id: 2,
@@ -98,35 +98,35 @@ const data = {
       image:
         "https://bloganchoi.com/wp-content/uploads/2024/06/loi-bai-hat-dung-lam-trai-tim-anh-dau-lyrics-son-tung-mtp-5-1-696x870.jpg",
       title: "Sơn Tùng MTP",
-      date:'11/12/2024'
+      date: '11/12/2024'
     },
     {
       id: 3,
       name: "Ai Cũng Phải Bắt Đầu Từ Đâu Đó",
       image: "https://th.bing.com/th/id/OIP.a9y4ZYtf2szQO2xpWSZW4wAAAA?rs=1&pid=ImgDetMain",
       title: "Hiếu Thứ Hai",
-      date:'11/12/2024'
+      date: '11/12/2024'
     },
     {
       id: 4,
       name: "m-tp M-TP",
       image: "https://th.bing.com/th/id/R.507942273181bc5c5ee7d4383edbd47f?rik=bnaU0HuAKoX8cA&pid=ImgRaw&r=0",
       title: "Sơn Tùng MTP",
-      date:'11/12/2024'
+      date: '11/12/2024'
     },
     {
       id: 5,
       name: "99%",
       image: "https://th.bing.com/th/id/OIP.C43hoOrXpwjHKWbLg4bMBAHaHa?w=600&h=600&rs=1&pid=ImgDetMain",
       title: "MCK",
-      song:"7 songs"
+      song: "7 songs"
     },
     {
       id: 6,
       name: "Take Care",
       image: "https://th.bing.com/th/id/OIP.ZOO_GYv50IJq13htfEv_dwHaHf?rs=1&pid=ImgDetMain",
       title: "Drake",
-      song:"7 songs"
+      song: "7 songs"
     },
   ],
   playlists: [
@@ -135,7 +135,7 @@ const data = {
       name: "Golden",
       image: "https://th.bing.com/th/id/OIP.WvBa5FEOB-eU1WcSRdmppQAAAA?w=474&h=474&rs=1&pid=ImgDetMain",
       title: "Jungkook",
-      song:"7 songs"
+      song: "7 songs"
     },
     {
       id: 2,
@@ -143,35 +143,82 @@ const data = {
       image:
         "https://bloganchoi.com/wp-content/uploads/2024/06/loi-bai-hat-dung-lam-trai-tim-anh-dau-lyrics-son-tung-mtp-5-1-696x870.jpg",
       title: "Sơn Tùng MTP",
-      song:"7 songs"
+      song: "7 songs"
     },
     {
       id: 3,
       name: "Ai Cũng Phải Bắt Đầu Từ Đâu Đó",
       image: "https://th.bing.com/th/id/OIP.a9y4ZYtf2szQO2xpWSZW4wAAAA?rs=1&pid=ImgDetMain",
       title: "Hiếu Thứ Hai",
-      song:"7 songs"
+      song: "7 songs"
     },
     {
       id: 4,
       name: "m-tp M-TP",
       image: "https://th.bing.com/th/id/R.507942273181bc5c5ee7d4383edbd47f?rik=bnaU0HuAKoX8cA&pid=ImgRaw&r=0",
       title: "Sơn Tùng MTP",
-      song:"7 songs"
+      song: "7 songs"
     },
     {
       id: 5,
       name: "99%",
       image: "https://th.bing.com/th/id/OIP.C43hoOrXpwjHKWbLg4bMBAHaHa?w=600&h=600&rs=1&pid=ImgDetMain",
       title: "MCK",
-      song:"7 songs"
+      song: "7 songs"
     },
     {
       id: 6,
       name: "Take Care",
       image: "https://th.bing.com/th/id/OIP.ZOO_GYv50IJq13htfEv_dwHaHf?rs=1&pid=ImgDetMain",
       title: "Drake",
-      song:"7 songs"
+      song: "7 songs"
+    },
+  ],
+  topranks: [
+    {
+      id: 1,
+      song: "Có Chắc Yêu Là Đây",
+      artist: "Sơn Tùng MTP",
+      image: "https://th.bing.com/th/id/OIP.fLnk_eILwplVquL4wn3t2gHaHa?rs=1&pid=ImgDetMain",
+      time: "3:50",
+      album: "Sky Tour",
+      likes: 1200,
+    },
+    {
+      id: 2,
+      song: "Người Đưa Thư",
+      artist: "Hiếu Thứ Hai",
+      image: "https://i.scdn.co/image/ab6761610000e5eb17e2d498df7cbd7c43bd5e6a",
+      time: "4:05",
+      album: "Thói Quen",
+      likes: 950,
+    },
+    {
+      id: 3,
+      song: "Va vào giai điệu này",
+      artist: "GREY D",
+      image: "https://th.bing.com/th/id/OIP.WshOb4R7xjxBCcmI-va5CAHaHa?rs=1&pid=ImgDetMain",
+      time: "3:45",
+      album: "Cuộc Hẹn",
+      likes: 800,
+    },
+    {
+      id: 4,
+      song: "Thích em hơi nhiều",
+      artist: "Wren Evans",
+      image: "https://th.bing.com/th/id/OIP.YLbGsAe1-psdikDDn6zk-gHaHa?rs=1&pid=ImgDetMain",
+      time: "4:15",
+      album: "Phong Cách",
+      likes: 600,
+    },
+    {
+      id: 5,
+      song: "Phía Sau Một Cô Gái",
+      artist: "Soobin",
+      image: "https://i.scdn.co/image/ab6761610000e5ebb9c9e23c646125922719489e",
+      time: "3:30",
+      album: "Chill cùng Soobin",
+      likes: 1100,
     },
   ]
 };

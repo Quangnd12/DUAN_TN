@@ -17,7 +17,7 @@ import AllSong from './pages/artist/components/SongList';
 import AllAlbums from './pages/artist/components/AlbumList';
 import Albums from './pages/album';
 import Playlist from "./pages/playlist";
-
+import AllTopranks from "./pages/artist/components/ToprankList";
 
 
 function Client() {
@@ -45,9 +45,9 @@ function Client() {
       <div className="flex gap-2">
         <div>{!isMobile && <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />}</div>
         <div className={`flex-1 flex flex-col ${isSidebarOpen ? 'ml-0' : 'ml-16'} transition-all duration-300`}>
-        <Header toggleSidebar={toggleSidebar} />
+          <Header toggleSidebar={toggleSidebar} />
           <div
-            className="overflow-y-auto scrollbar-custom "
+            className="overflow-y-auto  scrollbar-custom "
             style={{ height: "620px" }}
           >
             <Routes>
@@ -63,7 +63,8 @@ function Client() {
               <Route path="/content" element={<Content />} />
               <Route path="/info" element={<InfoClient />} />
               <Route path="/playlist/:id" element={<Playlist />} />
-              <Route path="/toprank" element={<TopRank />} />
+              <Route path="/toprank" element={<AllTopranks />} />
+              <Route path="/toprank/:id" element={<TopRank />} />
               <Route path="/library" element={<Library />} />
             </Routes>
           </div>
