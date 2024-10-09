@@ -23,6 +23,9 @@ import AllGenre from "./pages/genre/GenreList";
 import Playlist from "./pages/playlist";
 import PictureInPicturePlayer from "./components/pip";
 import Lyrics from "./pages/lyrics/lyrics";
+import Report from "./pages/report/Report";
+import Event from "./pages/event/Event";
+import EventDetail from "./pages/event/Detail-event/Detail-event";
 
 
 
@@ -74,7 +77,11 @@ function Client() {
                 <Route path="/toprank" element={<TopRank />} />
                 <Route path="/library" element={<Library />} />
                 <Route path='/lyrics' element={<Lyrics />} />
+                <Route path='/genre' element={<AllGenre />} />
                 <Route path='/track' element={<Genres />} />
+                <Route path='/report' element={<Report />} />
+                <Route path='/event' element={<Event />} />
+                <Route path='/event/:id' element={<EventDetail />} />
               </Routes>
             </div>
           </div>

@@ -26,7 +26,7 @@ const AllGenre = () => {
       <h2 className="text-2xl font-bold text-white mb-4">All Genres</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
         {genres.map((genre, index) => (
-          <Link key={index} to={`/listgenre?name=${genre.name}`} className={`transition-transform transform hover:scale-105 ${genre.color} rounded-lg p-4 shadow-md`}>
+          <Link key={index} to={`/track?name=${genre.name}`} className={`transition-transform transform hover:scale-105 ${genre.color} rounded-lg p-4 shadow-md`}>
           <GenreCard genre={genre} />
         </Link>
         

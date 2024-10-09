@@ -85,11 +85,11 @@ const ListSongOfGenres = () => {
                             <MdPlayArrow size={24} />
                         </button>
                         <div className="ml-6">
-                            <LikeButton
+                            {/* <LikeButton
                                 likedSongs={likedSongs[0]}
                                 handleLikeToggle={() => handleLikeToggle(0)}
 
-                            />
+                            /> */}
                         </div>
                         <div className="ml-6">
                         <MoreButton type="albumPlaylist" onOptionSelect={handleOptionSelect} />

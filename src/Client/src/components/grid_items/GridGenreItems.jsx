@@ -56,7 +56,7 @@ const GridGenreItems = () => {
       <div className="bg-zinc-900 p-4 rounded-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl text-left font-bold text-white">Genres</h2>
-          <Link to="/allgenre" className="text-sm text-gray-400 hover:text-white">
+          <Link to="/genre" className="text-sm text-gray-400 hover:text-white">
             See all
           </Link>
         </div>
