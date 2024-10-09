@@ -29,6 +29,7 @@ import EmptyLayout from "./layouts";
 import LayoutArtist from "./pages/showAll/artists";
 import LayoutAlbums from "./pages/showAll/albums";
 import LayoutRadio from "./pages/showAll/radios";
+import AllTopranks from "./pages/artist/components/ToprankList";
 
 function MainLayout({ children }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -102,7 +103,8 @@ function Client() {
                 </Route>
             <Route path='/album/:albumName' element={<Albums />} />
             <Route path='/listalbum/:id' element={<Albums />} />
-            <Route path="/toprank" element={<TopRank />} />
+            <Route path="/toprank" element={<AllTopranks />} />
+            <Route path="/toprank/:id" element={<TopRank />} />
             <Route path='/lyrics' element={<Lyrics />} />
 
             {/* Auth routes - protected from logged-in users */}
