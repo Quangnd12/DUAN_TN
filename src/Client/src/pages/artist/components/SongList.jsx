@@ -79,7 +79,7 @@ const AllSong = () => {
     };
 
     return (
-        <div className="p-4 mt-4 text-white">
+        <div className="p-6 text-white bg-zinc-900 p-4 rounded-md overflow-hidden">
             <div className="max-w-full mx-auto">
                 <div className="flex flex-col">
                     <div className="flex items-center justify-between mb-6">
@@ -221,6 +221,7 @@ const AllSong = () => {
                                         setShowShareOptions={setShowShareOptions}
                                         showShareOptions={showShareOptions}
                                         align={'right'}
+                                        type="song"
                                     />
                                     {selectedPlayer && (
                                         <PlayerControls

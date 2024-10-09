@@ -1,20 +1,21 @@
 import React from "react";
 import ArtistInfo from "./components/ArtistInfo";
-import Playlist from "./sections/Artist";
+import ArtistPage from "./sections/ArtistPage";
 import { Helmet, HelmetProvider } from 'react-helmet-async';
+import { Outlet } from "react-router-dom";
 
 const Artist = () => {
   return (
     <HelmetProvider>
-    <div className="relative w-full h-screen">
+    <div className="relative w-full h-auto overflow-hidden"> 
        <Helmet>
           <title>Artist</title>
           <meta name="description" content="" />
-        </Helmet>
+        </Helmet>  
       <ArtistInfo />
       <div className="relative text-left">
-        <Playlist />
-      </div>
+        <ArtistPage />
+      </div>    
     </div>
     </HelmetProvider>
   );

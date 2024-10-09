@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link,useParams } from "react-router-dom";
 import data from "../../../data/fetchSongData";
 import PlayerControls from "../../../components/audio/PlayerControls";
 import SongItem from "../../../components/dropdown/dropdownMenu";
@@ -14,6 +14,7 @@ const PopularSong = () => {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const dropdownRefs = useRef([]);
   const MAX_ARTISTS_TO_SHOW = 1;
+  const {artistName}=useParams();
 
   const handleRowClick = (song) => {
     setSelectedPlayer(song);
@@ -63,7 +64,7 @@ const PopularSong = () => {
         <div className="flex flex-col flex-grow ml-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">Popular</h2>
-            <Link to={"/allsong"} className="text-blue-400 hover:underline">
+            <Link to={`/artist/${artistName}/song`} className="text-blue-400 hover:underline">
               Show All
             </Link>
           </div>

@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import data from "../../../data/fetchSongData";
-import { MdPlayArrow, MdShuffle, MdCheckBoxOutlineBlank, MdPlaylistAdd, MdCheck } from "react-icons/md";
+import { MdPlayArrow, MdShuffle, MdCheckBoxOutlineBlank, MdCheck } from "react-icons/md";
 import PlayerControls from "../../../components/audio/PlayerControls";
 import SongItem from "../../../components/dropdown/dropdownMenu";
 import "../../../assets/css/artist/artist.css";
 import LikeButton from "../../../components/button/favorite";
 import MoreButton from "../../../components/button/more";
-import { handleAddPlaylist } from "../../../components/notification"
 
 const ListSongOfAlbums = () => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -18,6 +17,7 @@ const ListSongOfAlbums = () => {
     const [clickedIndex, setClickedIndex] = useState(null);
     const [selectedCheckboxes, setSelectedCheckboxes] = useState(new Set());
     const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
 
     const dropdownRefs = useRef({});
     const MAX_ARTISTS_TO_SHOW = 4;
@@ -214,15 +214,19 @@ const ListSongOfAlbums = () => {
                                     setShowShareOptions={setShowShareOptions}
                                     showShareOptions={showShareOptions}
                                     align={'right'}
+                                    type="song"
                                 />
                                 {selectedPlayer && (
                                     <PlayerControls
+                                        audioUrl={selectedPlayer.audioUrl} // Thay thế audioUrl bằng thuộc tính tương ứng trong đối tượng song
                                         title={selectedPlayer.name}
                                         artist={selectedPlayer.artist}
                                         Image={selectedPlayer.image}
                                         next={() => {/*  next track */ }}
                                         prevsong={() => {/*  previous track */ }}
                                         onTrackEnd={() => {/* Handle track end */ }}
+                                        isPlaying={isPlaying}
+                                        setIsPlaying={setIsPlaying} // Truyền setIsPlaying
                                     />
                                 )}
                             </div>

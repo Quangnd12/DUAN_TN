@@ -11,6 +11,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import MenuIcon from "@mui/icons-material/Menu";
 import Tooltip from "@mui/material/Tooltip";
 import Logo from "../../assets/images/logo.png";
+import { createAlbumSlug } from "../../components/createSlug"
 
 const SideBar = () => {
   const [isClicked, setIsClicked] = useState(false);
@@ -26,7 +27,12 @@ const SideBar = () => {
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
-  const id = 1;
+
+  const data = ["NGÁO NGƠ- LYRICS", "HIEUTHUHAI, JSOL, Erik"];
+  const [playlistName, artistName] = data; // ĐÚNG
+  
+  const validPlaylistName = playlistName || "unknown";
+  const validArtistName = artistName || "unknown";
 
   return (
     <div
@@ -52,14 +58,14 @@ const SideBar = () => {
           {isOpen ? (
             <Tooltip title="Collapse the library">
               <>
-              {" "}
-              <MenuIcon fontSize="medium" />
+                {" "}
+                <MenuIcon fontSize="medium" />
               </>
             </Tooltip>
           ) : (
             <Tooltip title="Expand the library">
               <>
-              <ArrowForwardIosIcon />
+                <ArrowForwardIosIcon />
               </>
             </Tooltip>
           )}
@@ -86,11 +92,11 @@ const SideBar = () => {
         isOpen={isOpen}
       />
       <NavItem
-        to={`/playlist/${id}`}
-        icon={<QueueMusicIcon />}
-        text="Playlist"
-        isOpen={isOpen}
-      />
+   to={`/playlist/${createAlbumSlug(validPlaylistName, validArtistName)}`}
+   icon={<QueueMusicIcon />}
+   text="Playlist"
+   isOpen={isOpen}
+/>
       <NavItem
         to="/toprank"
         icon={<StarRateIcon />}
@@ -132,13 +138,13 @@ const NavItem = ({ to, icon, text, isOpen }) => (
   <Link to={to}>
     <Tooltip title={text} placement="bottom">
       <div className="flex items-center gap-2 hover:bg-gray-600 rounded py-2 px-2 mb-2">
-      
-          {React.cloneElement(icon, {
-            fontSize: "large",
-            sx: { color: "white" },
-          })}
-          {isOpen && <div className="text-white font-bold">{text}</div>}
-       
+
+        {React.cloneElement(icon, {
+          fontSize: "large",
+          sx: { color: "white" },
+        })}
+        {isOpen && <div className="text-white font-bold">{text}</div>}
+
       </div>
     </Tooltip>
   </Link>

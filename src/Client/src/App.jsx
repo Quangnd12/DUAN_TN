@@ -16,12 +16,19 @@ import InfoClient from "./pages/info-client/Info-client";
 import TopRank from "./pages/toprank/TopRank";
 import Library from "./pages/library/library";
 import AllSong from './pages/artist/components/SongList';
-import AllAlbums from './pages/artist/components/AlbumList';
+import AllAlbums from './pages/artist/components/AllAlbum';
 import Albums from './pages/album';
 import Playlist from "./pages/playlist";
 import PictureInPicturePlayer from "./components/pip";
 import Lyrics from "./pages/lyrics/lyrics";
 import NotFound from "./pages/notfound/index";
+
+import PlaylistAll from "./pages/playlist/components/PlaylistAll";
+import AddPlaylist from "./pages/playlist/components/PlaylistAdd";
+import EmptyLayout from "./layouts";
+import LayoutArtist from "./pages/showAll/artists";
+import LayoutAlbums from "./pages/showAll/albums";
+import LayoutRadio from "./pages/showAll/radios";
 
 function MainLayout({ children }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -82,9 +89,18 @@ function Client() {
             {/* Public routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/search" element={<SearchPage />} />
-            <Route path='/artist/:id' element={<Artist />} />
-            <Route path='/allsong' element={<AllSong />} />
-            <Route path='/allalbum' element={<AllAlbums />} />
+            <Route path='/artist' element={<EmptyLayout />}>
+                  <Route path=':artistName' element={<Artist />} />
+                  <Route path=":artistName/album" element={<AllAlbums />} />
+                  <Route path=":artistName/song" element={<AllSong />} />
+                </Route>
+            <Route path='/allsong' element={<AllSong />} /><Route path='/show-all' element={<EmptyLayout />} >
+                  <Route path="artist" element={<LayoutArtist />} />
+                  <Route path="album" element={<LayoutAlbums />} />
+                
+                   <Route path="radio" element={<LayoutRadio />} />
+                </Route>
+            <Route path='/album/:albumName' element={<Albums />} />
             <Route path='/listalbum/:id' element={<Albums />} />
             <Route path="/toprank" element={<TopRank />} />
             <Route path='/lyrics' element={<Lyrics />} />
@@ -98,6 +114,11 @@ function Client() {
             {/* Private routes */}
             <Route path="/library" element={<PrivateRoute><Library /></PrivateRoute>} />
             <Route path="/playlist/:id" element={<PrivateRoute><Playlist /></PrivateRoute>} />
+            <Route path="/playlist" element={<PrivateRoute><EmptyLayout /></PrivateRoute>}>
+                  <Route path=":playlistName" element={<PrivateRoute><Playlist /> </PrivateRoute>} />
+                  <Route path="add" element={<PrivateRoute><AddPlaylist /></PrivateRoute>} />
+                  <Route path="all" element={<PrivateRoute><PlaylistAll /></PrivateRoute>} />
+                </Route>
             <Route path="/info/:userId" element={<PrivateRoute><InfoClient /></PrivateRoute>} />
             <Route path="/content" element={<PrivateRoute><Content /></PrivateRoute>} />
 

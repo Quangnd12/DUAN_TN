@@ -1,16 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import data from "../../../data/fetchSongData";
+import data from "../../../../data/fetchSongData";
 import { MdPlayArrow, MdShuffle, MdCheckBoxOutlineBlank, MdCheck } from "react-icons/md";
-import PlayerControls from "../../../components/audio/PlayerControls";
-import SongItem from "../../../components/dropdown/dropdownMenu";
-import "../../../assets/css/artist/artist.css";
-import LikeButton from "../../../components/button/favorite";
-import MoreButton from "../../../components/button/more";
-import { useParams } from "react-router-dom";
-import {createAlbumSlug} from "../../../components/createSlug";
+import PlayerControls from "../../../../components/audio/PlayerControls";
+import SongItem from "../../../../components/dropdown/dropdownMenu";
+import "../../../../assets/css/artist/artist.css";
+import MoreButton from "../../../../components/button/more";
 
-const ListSongOfPlaylist = () => {
+
+const YourPlayList = ({ playlistAdd }) => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
     const [dropdownIndex, setDropdownIndex] = useState(null);
     const [showShareOptions, setShowShareOptions] = useState(false);
@@ -19,15 +17,16 @@ const ListSongOfPlaylist = () => {
     const [clickedIndex, setClickedIndex] = useState(null);
     const [selectedCheckboxes, setSelectedCheckboxes] = useState(new Set());
     const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
+    
 
     const dropdownRefs = useRef({});
     const MAX_ARTISTS_TO_SHOW = 4;
-
 
     const handleRowClick = (song, index) => {
         setSelectedPlayer(song);
         setClickedIndex(index);
     };
+
 
     const handleCheckboxToggle = (index) => {
         setSelectedCheckboxes(prevSelectedCheckboxes => {
@@ -84,16 +83,20 @@ const ListSongOfPlaylist = () => {
             <div className="flex flex-col">
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center">
-                        <button className="bg-icon text-white p-2 rounded-full hover:bg-blue-700 transition ml-3">
-                            <MdPlayArrow size={24} />
-                        </button>                       
+                        {playlistAdd.length > 0 ?
+                            <button className="bg-icon text-white p-2 rounded-full hover:bg-blue-700 transition ml-3">
+                                <MdPlayArrow size={24} />
+                            </button>
+                            : ""}
                         <div className="ml-8">
                             <MoreButton type="playlist" onOptionSelect={handleOptionSelect} />
                         </div>
                     </div>
-                    <button className="flex items-center bg-icon text-white p-2 rounded-full hover:bg-blue-700 transition">
-                        <MdShuffle size={24} />
-                    </button>
+                    {playlistAdd.length > 0 ?
+                        <button className="flex items-center bg-icon text-white p-2 mr-4 rounded-full hover:bg-blue-700 transition">
+                            <MdShuffle size={24} />
+                        </button>
+                        : ""}
                 </div>
                 <div className="flex">
                     {isAnyCheckboxSelected() && (
@@ -123,7 +126,7 @@ const ListSongOfPlaylist = () => {
 
                 </div>
                 <div className="flex flex-col gap-4 pt-2">
-                    {data.songs.map((song, index) => (
+                    {playlistAdd.map((song, index) => (
                         <div
                             key={index}
                             className={`relative flex items-center p-2 rounded-lg transition-colors hover:bg-gray-700 
@@ -159,11 +162,11 @@ const ListSongOfPlaylist = () => {
                             />
                             <div className="flex flex-grow flex-col ml-3">
                                 <div className="flex justify-between items-center">
-                                    <p className="text-sm font-semibold  whitespace-nowrap overflow-hidden text-ellipsis w-[370px]">
+                                    <p className="text-sm font-semibold w-48 whitespace-nowrap overflow-hidden text-ellipsis w-[370px]">
                                         {song.name}
                                     </p>
                                     <div className="absolute top-[25px] justify-end right-[200px]">
-                                        <Link to={``}>
+                                        <Link to={"/listalbum/2"}>
                                             <p className="text-gray-500 text-sm text-center whitespace-nowrap overflow-hidden text-ellipsis w-[370px] hover:text-blue-500 hover:underline no-underline">
                                                 {"Sky tour"}
                                             </p>
@@ -209,7 +212,7 @@ const ListSongOfPlaylist = () => {
                                     setShowShareOptions={setShowShareOptions}
                                     showShareOptions={showShareOptions}
                                     align={'right'}
-                                    type="song"
+                                    type="playlist" 
                                 />
                                 {selectedPlayer && (
                                     <PlayerControls
@@ -230,4 +233,4 @@ const ListSongOfPlaylist = () => {
     );
 };
 
-export default ListSongOfPlaylist;
+export default YourPlayList;
