@@ -33,4 +33,12 @@ const handleCopyLinkSong = () => {
         className: 'custom-toast-copy',
     })
 }
-export { handleAddPlaylist, handleAddFavorite,handleAddWaitlist,handleAddLibrary, handleCopyLinkSong };
+
+const handleAddReport = () => {
+    toast.success("Response sent", {
+        autoClose: 2000,
+        className: 'custom-toast',
+    });
+}
+
+export { handleAddPlaylist, handleAddFavorite,handleAddWaitlist,handleAddLibrary, handleCopyLinkSong, handleAddReport };

@@ -154,8 +154,8 @@ const InfoClient = () => {
       <br />
       <div className="mt-8">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-gray-400 font-semibold inline-block">
-            #<span className="ml-1">Title</span>
+          <span className="text-gray-400 font-semibold inline-block ml-2">
+            #<span className="ml-10">Title</span>
           </span>
           <img
             src={tb}

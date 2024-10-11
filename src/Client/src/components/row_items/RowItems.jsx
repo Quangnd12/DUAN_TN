@@ -61,7 +61,7 @@ const RowItems = ({ title, data, rowId, globalPlayingState, setGlobalPlayingStat
   };
 
   return (
-    <div className="flex flex-col p-4 bg-zinc-900 rounded-md">
+    <div className="flex flex-col p-4 bg-zinc-900">
       <div className="flex justify-between mb-4">
         <h2 className="rowItemTitle">{title}</h2>
         <Link

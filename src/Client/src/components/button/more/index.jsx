@@ -13,7 +13,8 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import BlockIcon from '@mui/icons-material/Block';
 import ReportIcon from '@mui/icons-material/Report';
 import ShareOptions from '../share';
-import { handleAddFavorite, handleAddWaitlist, handleAddLibrary } from "../../notification";
+import ShareOptionsList from '../share-list/share-list';
+import { handleAddFavorite, handleAddPlaylist, handleAddWaitlist, handleAddLibrary } from "../../notification";
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
 import NoAccountsIcon from '@mui/icons-material/NoAccounts';
@@ -29,7 +30,6 @@ const MoreButton = ({ type, onOptionSelect }) => {
     const dropdownRef = useRef(null);
     const shareDropdownRef = useRef(null);
     const playlistDropdownRef = useRef(null);
-
 
     const menuOptions = {
         albumPlaylist: [
@@ -50,21 +50,10 @@ const MoreButton = ({ type, onOptionSelect }) => {
             { label: 'Share', action: 'share', icon: <ShareIcon /> },
         ],
         artist: [
-            { label: 'Do not play this artist', action: 'dont_play_this_artist', icon: <BlockIcon /> },
-            { label: 'Jump to radio by artist', action: 'go_to_artist_radio', icon: <RadioIcon /> },
-            { label: 'Report', action: 'report', icon: <ReportIcon /> },
-            { label: 'Share', action: 'share', icon: <ShareIcon /> },
-        ],
-        playlist: [
-            { label: 'Add to waiting list', action: 'add_to_queue', icon: <PlaylistAddIcon /> },
-            { label: 'Removed from profile', action: 'remove_from_profile', icon: <BlockIcon /> },
-            { label: 'Edit detailed information', action: 'edit_detail_info', icon: <RadioIcon /> },
-            { label: 'Delete', action: 'delete', icon: <EditIcon /> },
-            { label: 'Share', action: 'share', icon: <ShareIcon /> },
-        ],
-        lyrics: [
             { label: 'Theo dõi', action: 'follow', icon: <PersonAddIcon /> },
-         
+            { label: 'Không phát nghệ sĩ này', action: 'dont_play_this_artist', icon: <BlockIcon /> },
+            { label: 'Chuyển đến radio theo nghệ sĩ', action: 'go_to_artist_radio', icon: <RadioIcon /> },
+            { label: 'Báo cáo', action: 'report', icon: <ReportIcon /> },
             { label: 'Chia sẻ', action: 'share', icon: <ShareIcon /> },
             
             
@@ -76,7 +65,6 @@ const MoreButton = ({ type, onOptionSelect }) => {
         ],
         
     };
-
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -133,7 +121,6 @@ const MoreButton = ({ type, onOptionSelect }) => {
 
         return { top: '100%', marginTop: '8px' };
     };
-
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -198,7 +185,11 @@ const MoreButton = ({ type, onOptionSelect }) => {
                                             setIsShareOpen(false);
                                         }}
                                     >
-                                        <ShareOptions onOptionClick={handleOptionClick} />
+                                        {type === 'albumPlaylist' ? (
+                                            <ShareOptionsList onOptionClick={handleOptionClick} />
+                                        ) : (
+                                            <ShareOptions onOptionClick={handleOptionClick} />
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -209,5 +200,6 @@ const MoreButton = ({ type, onOptionSelect }) => {
         </div>
     );
 };
-
 export default MoreButton;
+
+

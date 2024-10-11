@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import "../../../assets/css/artist/artist.css";
 import data from "../../../data/fetchSongData";
 import { useParams, Link } from "react-router-dom";
@@ -9,18 +9,14 @@ const AlbumInfo = () => {
     
     const albums = data.albums.find(album => `${createAlbumSlug(album.name, album.title)}` === albumName);
 
-    const countSongs = () => {
-        return data.albums.length;
-    };
-
     return (
         <div className="relative w-full h-[300px] flex">
             <div className="w-full h-full artist-bg flex items-center p-8">
                 <div className="flex items-center">
-                    <div className="w-52 h-52 bg-gray-300 rounded-lg overflow-hidden">
+                    <div className="w-52 h-52 album-image-border overflow-hidden">
                         <img
                             src={albums.image}
-                            alt="Artist Avatar"
+                            alt="Album Cover"
                             className="w-full h-full object-cover"
                         />
                     </div>
@@ -36,7 +32,7 @@ const AlbumInfo = () => {
                         <div className="flex items-center pt-2">
                             <img
                                 src={albums.image}
-                                alt="Artist Avatar"
+                                alt="Album Cover"
                                 className="w-10 h-10 bg-gray-300 rounded-full overflow-hidden mr-4"
                             />
                             <Link to={`/artist/${slugify(albums.title)}`}>
@@ -46,11 +42,12 @@ const AlbumInfo = () => {
                                 <p style={{ fontSize: '40px', color: 'white', marginBottom: '20px', marginRight: '5px' }}>.</p>
                                 <p className="text-left text-lg mt-2 mr-2 text-gray-400">{new Date(albums.date).getFullYear()}</p>
                                 <p style={{ fontSize: '40px', color: 'white', marginBottom: '20px', marginRight: '5px' }}>.</p>
-                                <p className="text-left text-lg mt-2 text-gray-400">{countSongs()} songs,</p>
+                                {/* <p className="text-left text-lg mt-2 text-gray-400">{countSongs()} songs,</p> */}
                                 <p className="text-left text-lg mt-2 text-gray-400 ml-2">{"30 min 28 sec"}</p>
                             </div>
+                            <p className="text-left text-lg mt-2 pr-6">{albums.title}</p>
+                            <p className="text-left text-lg mt-2">{albums.date}</p>
                         </div>
-
                     </div>
                 </div>
             </div>

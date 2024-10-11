@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import SearchIcon from "@mui/icons-material/Search";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 import StarRateIcon from "@mui/icons-material/StarRate";
 import QueueMusicIcon from "@mui/icons-material/QueueMusic";
+import CelebrationIcon from '@mui/icons-material/Celebration';
 import LanguageIcon from "@mui/icons-material/Language";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -80,9 +80,9 @@ const SideBar = () => {
       />
       <NavItem to="/" icon={<HomeIcon />} text="Home" isOpen={isOpen} />
       <NavItem
-        to="/favorite"
-        icon={<FavoriteIcon />}
-        text="Favorite"
+        to="/event"
+        icon={<CelebrationIcon />}   // Sử dụng icon Celebration
+        text="Event"
         isOpen={isOpen}
       />
       <NavItem

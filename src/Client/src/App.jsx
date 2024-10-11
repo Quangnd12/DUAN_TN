@@ -14,14 +14,23 @@ import ResetPass from "./pages/auth/resetPass";
 import Content from "./pages/content/Content";
 import InfoClient from "./pages/info-client/Info-client";
 import TopRank from "./pages/toprank/TopRank";
+import TopChart from "./pages/topchart/sections/chart";
 import Library from "./pages/library/library";
 import AllSong from './pages/artist/components/SongList';
 import AllAlbums from './pages/artist/components/AllAlbum';
 import Albums from './pages/album';
+import Genres from "./pages/genre";
+import AllGenre from "./pages/genre/GenreList";
 import Playlist from "./pages/playlist";
 import PictureInPicturePlayer from "./components/pip";
 import Lyrics from "./pages/lyrics/lyrics";
 import NotFound from "./pages/notfound/index";
+import Report from "./pages/report/Report";
+import Event from "./pages/event/Event";
+import EventDetail from "./pages/event/Detail-event/Detail-event";
+
+
+
 
 import PlaylistAll from "./pages/playlist/components/PlaylistAll";
 import AddPlaylist from "./pages/playlist/components/PlaylistAdd";
@@ -106,6 +115,8 @@ function Client() {
             <Route path="/toprank" element={<AllTopranks />} />
             <Route path="/toprank/:id" element={<TopRank />} />
             <Route path='/lyrics' element={<Lyrics />} />
+            <Route path='/genre' element={<AllGenre />} />
+            <Route path='/track' element={<Genres />} />
 
             {/* Auth routes - protected from logged-in users */}
             <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
@@ -123,6 +134,9 @@ function Client() {
                 </Route>
             <Route path="/info/:userId" element={<PrivateRoute><InfoClient /></PrivateRoute>} />
             <Route path="/content" element={<PrivateRoute><Content /></PrivateRoute>} />
+            <Route path='/report' element={<PrivateRoute><Report /></PrivateRoute>} />
+            <Route path='/event' element={<PrivateRoute><Event /></PrivateRoute>} />
+            <Route path='/event/:id' element={<PrivateRoute><EventDetail /></PrivateRoute>} />
 
             {/* NotFound route */}
             <Route path="*" element={<NotFound />} />
