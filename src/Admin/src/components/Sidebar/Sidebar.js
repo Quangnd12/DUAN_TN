@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 
 import NotificationDropdown from "../Dropdowns/NotificationDropdown.js";
 import UserDropdown from "../Dropdowns/UserDropdown.js";
-import { MdDashboard, MdSettings, MdMusicNote, MdLogout, MdMic, MdHome  } from "react-icons/md";
+import { MdDashboard, MdSettings, MdMusicNote, MdLogout, MdMic, MdHome,MdPerson,MdAlbum  } from "react-icons/md";
 
 export default function Sidebar() {
   const location = useLocation();
@@ -153,7 +153,7 @@ export default function Sidebar() {
                       : "text-white hover:text-cyan-500"
                   }`}
                 >
-                  <MdMic
+                  <MdPerson
                     className={`mr-2 text-sm ${
                       isActive("/admin/artist")
                         ? "text-cyan-400"
@@ -161,6 +161,25 @@ export default function Sidebar() {
                     }`}
                   />
                   <span>Artist</span>
+                </NavLink>
+              </li>
+              <li className="flex items-center">
+                <NavLink
+                  to="/admin/album"
+                  className={`text-xs uppercase py-3 font-bold flex items-center ${
+                    isActive("/admin/album")
+                      ? "text-cyan-400 hover:text-cyan-500"
+                      : "text-white hover:text-cyan-500"
+                  }`}
+                >
+                  <MdAlbum
+                    className={`mr-2 text-sm ${
+                      isActive("/admin/album")
+                        ? "text-cyan-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                  <span>Album</span>
                 </NavLink>
               </li>
             </ul>

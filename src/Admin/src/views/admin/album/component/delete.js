@@ -1,7 +1,7 @@
 import React from "react";
 import { MdDelete } from "react-icons/md";
 
-const DeleteSong = ({ onClose, songToDelete }) => {
+const DeleteAlbum = ({ onClose, songToDelete }) => {
     const handleConfirmDelete = () => {
         console.log("Deleting song:", songToDelete);
         onClose(); // Đóng modal sau khi xóa
@@ -12,7 +12,7 @@ const DeleteSong = ({ onClose, songToDelete }) => {
             <div className="relative top-36 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
                 <div className="mt-3 text-center">
                     <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                    <MdDelete className="text-red-600" size={28} />
+                        <MdDelete className="text-red-600" size={28} />
                     </div>
                     <h3 className="text-base leading-6 font-medium text-gray-900 mt-4">
                         Are you sure you want to delete this item?
@@ -42,4 +42,4 @@ const DeleteSong = ({ onClose, songToDelete }) => {
     );
 };
 
-export default DeleteSong;
+export default DeleteAlbum;

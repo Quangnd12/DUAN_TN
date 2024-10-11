@@ -7,6 +7,7 @@ import DropdownMenu from "../../../../components/Dropdowns/dropdownMenu";
 import DeleteSong from "./delete";
 import PreviewSong from "./preview";
 import PlayerControls from "../../../../components/audio/PlayerControls";
+import { MdMoreVert } from "react-icons/md";
 
 const SongList = () => {
   const navigate = useNavigate();
@@ -254,7 +255,7 @@ const SongList = () => {
                   alt={song.name}
                   className="w-8 h-8 sm:w-10 sm:h-10 mr-2 object-cover rounded"
                 />
-                <span className="truncate">{song.name}</span>
+                <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis w-[250px]">{song.name}</span>
               </td>
               <td className="py-2 px-4 hidden sm:table-cell">
                 {song.category}
@@ -273,7 +274,7 @@ const SongList = () => {
                   onClick={(e) => handleDropdownClick(e, song.id)}
                   className="focus:outline-none"
                 >
-                  <i className="fas fa-ellipsis-v cursor-pointer "></i>
+                  <MdMoreVert />
                 </button>
                 <DropdownMenu
                   isOpen={activeDropdown === song.id}
@@ -281,6 +282,7 @@ const SongList = () => {
                   onEdit={() => handleEditSong(song.id)}
                   onPreview={() => handlePreviewClick(song.id)}
                   onDelete={() => handleDeleteClick(song.id)}
+                  showPreview={() => handlePreviewClick(song.id)} 
                 />
               </td>
             </tr>
