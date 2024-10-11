@@ -31,6 +31,7 @@ const AdminRoutes = (
     <Route path="album" element={<Albums />} />
     <Route path="album/add" element={<AddAlbum />} />
     <Route path="album/edit/:id" element={<EditAlbum />} />
+   
     {/* Bạn có thể thêm các route khác ở đây */}
     <Route path="/" element={<Navigate to="dashboard" replace />} />
   </>
