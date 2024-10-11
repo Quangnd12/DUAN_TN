@@ -1,251 +1,140 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import { Drawer, IconButton, useMediaQuery } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import MenuIcon from "@mui/icons-material/Menu";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 import NotificationDropdown from "../Dropdowns/NotificationDropdown.js";
 import UserDropdown from "../Dropdowns/UserDropdown.js";
-import { MdDashboard, MdSettings, MdMusicNote, MdLogout, MdMic, MdHome  } from "react-icons/md";
+import {
+  MdDashboard,
+  MdSettings,
+  MdMusicNote,
+  MdLogout,
+  MdMic,
+  MdHome,
+} from "react-icons/md";
 
 export default function Sidebar() {
   const location = useLocation();
-  const [collapseShow, setCollapseShow] = React.useState("hidden");
-  // Check if the current path matches the link
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  const [open, setOpen] = useState(() => {
+    const savedOpen = localStorage.getItem("sidebarOpen");
+    return savedOpen !== null ? JSON.parse(savedOpen) : true;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("sidebarOpen", JSON.stringify(open));
+  }, [open]);
+
+  const handleDrawerToggle = () => {
+    setOpen(!open);
+  };
+
   const isActive = (path) => location.pathname === path;
 
-  return (
+  const drawerWidth = open ? 240 : 73;
+
+  const MenuItem = ({ to, icon: Icon, label }) => (
+    <NavLink
+      to={to}
+      className={`flex items-center py-3 px-4 text-sm font-bold uppercase ${
+        isActive(to)
+          ? "text-cyan-400 hover:text-cyan-500"
+          : "text-white hover:text-cyan-500"
+      }`}
+    >
+      <Icon
+        className={`mr-2 text-lg ${
+          isActive(to) ? "text-cyan-400" : "text-gray-300"
+        }`}
+      />
+      {open && <span>{label}</span>}
+    </NavLink>
+  );
+
+  const drawerContent = (
     <>
-      <nav className="md:left-0 md:block md:fixed md:top-0 md:bottom-0 md:overflow-y-auto md:flex-row md:flex-nowrap md:overflow-hidden shadow-xl bg-gray-700 flex flex-wrap items-center justify-between relative md:w-64 z-10 py-4 px-6">
-        <div className="md:flex-col md:items-stretch md:min-h-full md:flex-nowrap px-0 flex flex-wrap items-center justify-between w-full mx-auto">
-          {/* Toggler */}
-          <button
-            className="cursor-pointer text-black opacity-50 md:hidden px-3 py-1 text-xl leading-none bg-transparent rounded border border-solid border-transparent"
-            type="button"
-            onClick={() => setCollapseShow("bg-white m-2 py-3 px-6")}
-          >
-            <i className="fas fa-bars"></i>
-          </button>
-          {/* Brand */}
+      <div className="flex justify-between items-center p-4">
+        {open && (
           <NavLink
-            className="md:block text-left md:pb-2 text-gray-300 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
             to="/admin/dashboard"
+            className="text-gray-300 text-lg font-bold"
           >
             Music Heals
           </NavLink>
-          {/* User */}
-          <ul className="md:hidden items-center flex flex-wrap list-none">
-            <li className="inline-block relative">
-              <NotificationDropdown />
-            </li>
-            <li className="inline-block relative">
-              <UserDropdown />
-            </li>
-          </ul>
-          {/* Collapse */}
-          <div
-            className={
-              "md:flex md:flex-col md:items-stretch md:opacity-100 md:relative md:mt-4 md:shadow-none shadow absolute top-0 left-0 right-0 z-40 overflow-y-auto overflow-x-hidden h-auto items-center flex-1 rounded " +
-              collapseShow
-            }
-          >
-            {/* Collapse header */}
-            <div className="md:min-w-full md:hidden block pb-4 mb-4 border-b border-solid border-blueGray-200">
-              <div className="flex flex-wrap">
-                <div className="w-6/12">
-                  <NavLink
-                    className="md:block text-left md:pb-2 text-white mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
-                    to="/"
-                  >
-                    Music Heals
-                  </NavLink>
-                </div>
-                <div className="w-6/12 flex justify-end">
-                  <button
-                    type="button"
-                    className="cursor-pointer text-black opacity-50 md:hidden px-3 py-1 text-xl leading-none bg-transparent rounded border border-solid border-transparent"
-                    onClick={() => setCollapseShow("hidden")}
-                  >
-                    <i className="fas fa-times"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-            {/* Form */}
-            <form className="mt-6 mb-4 md:hidden">
-              <div className="mb-3 pt-0">
-                <input
-                  type="text"
-                  placeholder="Search"
-                  className="border-0 px-3 py-2 h-12 border-solid  border-blueGray-500 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-base leading-snug shadow-none outline-none focus:outline-none w-full font-normal"
-                />
-              </div>
-            </form>
+        )}
+        <IconButton onClick={handleDrawerToggle} className="text-white">
+          {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+        </IconButton>
+      </div>
+      <div className="mt-5 ml-2">
+        <MenuItem to="/admin/dashboard" icon={MdDashboard} label="Dashboard" />
+        <MenuItem to="/admin/home" icon={MdHome} label="Home" />
+        <MenuItem to="/admin/song" icon={MdMusicNote} label="Song" />
+        <MenuItem to="/admin/artist" icon={MdMic} label="Artist" />
+        <MenuItem to="/admin/settings" icon={MdSettings} label="Settings" />
+        <MenuItem to="/admin/logout" icon={MdLogout} label="Log out" />
+      </div>
+    </>
+  );
 
-            {/* Divider */}
-            <hr className="my-4 md:min-w-full" />
-            {/* Heading */}
-            <h6 className="md:min-w-full text-gray-300 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
-              Admin Layout Pages
-            </h6>
-            {/* Navigation */}
-            <ul className="md:flex-col md:min-w-full flex flex-col list-none">
-              <li className="flex items-center">
-                <NavLink
-                  to="/admin/dashboard"
-                  className={`text-xs uppercase py-3 font-bold flex items-center ${
-                    isActive("/admin/dashboard")
-                      ? "text-cyan-400 hover:text-cyan-500"
-                      : "text-white hover:text-cyan-500"
-                  }`}
-                >
-                  <MdDashboard
-                    className={`mr-2 text-sm ${
-                      isActive("/admin/dashboard")
-                        ? "text-cyan-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                  <span>Dashboard</span>
-                </NavLink>
-              </li>
-              <li className="flex items-center">
-                <NavLink
-                  to="/admin/home"
-                  className={`text-xs uppercase py-3 font-bold flex items-center ${
-                    isActive("/admin/home")
-                      ? "text-cyan-400 hover:text-cyan-500"
-                      : "text-white hover:text-cyan-500"
-                  }`}
-                >
-                  <MdHome
-                    className={`mr-2 text-sm ${
-                      isActive("/admin/home")
-                        ? "text-cyan-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                  <span>Home</span>
-                </NavLink>
-              </li>
-              <li className="flex items-center">
-                <NavLink
-                  to="/admin/song"
-                  className={`text-xs uppercase py-3 font-bold flex items-center ${
-                    isActive("/admin/song")
-                      ? "text-cyan-400 hover:text-cyan-500"
-                      : "text-white hover:text-cyan-500"
-                  }`}
-                >
-                  <MdMusicNote
-                    className={`mr-2 text-sm ${
-                      isActive("/admin/song")
-                        ? "text-cyan-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                  <span>Song</span>
-                </NavLink>
-              </li>
-              <li className="flex items-center">
-                <NavLink
-                  to="/admin/artist"
-                  className={`text-xs uppercase py-3 font-bold flex items-center ${
-                    isActive("/admin/artist")
-                      ? "text-cyan-400 hover:text-cyan-500"
-                      : "text-white hover:text-cyan-500"
-                  }`}
-                >
-                  <MdMic
-                    className={`mr-2 text-sm ${
-                      isActive("/admin/artist")
-                        ? "text-cyan-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                  <span>Artist</span>
-                </NavLink>
-              </li>
-            </ul>
-
-            {/* Divider */}
-            <hr className="my-4 md:min-w-full" />
-            {/* Heading */}
-            <h6 className="md:min-w-full text-gray-300 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
-              Profile Layout Pages
-            </h6>
-            {/* Navigation */}
-            <ul className="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
-              <li className="flex items-center">
-                <NavLink
-                  to="/admin/settings"
-                  className={`text-xs uppercase py-3 font-bold flex items-center ${
-                    isActive("/admin/settings")
-                      ? "text-cyan-400 hover:text-cyan-500"
-                      : "text-white hover:text-cyan-500"
-                  }`}
-                >
-                  <MdSettings
-                    className={`mr-2 text-sm ${
-                      isActive("/admin/settings")
-                        ? "text-cyan-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                  <span>Settings</span>
-                </NavLink>
-              </li>
-
-              <li className="flex items-center">
-                <NavLink
-                  to="/admin/logout"
-                  className={`text-xs uppercase py-3 font-bold flex items-center ${
-                    isActive("/admin/logout")
-                      ? "text-cyan-400 hover:text-cyan-500"
-                      : "text-white hover:text-cyan-500"
-                  }`}
-                >
-                  <MdLogout
-                    className={`mr-2 text-sm ${
-                      isActive("/admin/logout")
-                        ? "text-cyan-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                  <span>Log out</span>
-                </NavLink>
-              </li>
-            </ul>
-
-            {/* Divider */}
-            <hr className="my-4 md:min-w-full" />
-            {/* Heading */}
-            <h6 className="md:min-w-full text-white text-xs uppercase font-bold block pt-1 pb-4 no-underline">
-              No Layout Pages
-            </h6>
-            {/* Navigation */}
-
-            {/* <ul className="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
-              <li className="items-center">
-                <NavLink
-                  className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
-                  to="/landing"
-                >
-                  <i className="fas fa-newspaper text-blueGray-400 mr-2 text-sm"></i>{" "}
-                  Landing Page
-                </NavLink>
-              </li>
-
-              <li className="items-center">
-                <NavLink
-                  className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
-                  to="/profile"
-                >
-                  <i className="fas fa-user-circle text-blueGray-400 mr-2 text-sm"></i>{" "}
-                  Profile Page
-                </NavLink>
-              </li>
-            </ul> */}
-          </div>
-        </div>
-      </nav>
+  return (
+    <>
+      {isMobile ? (
+        <Drawer
+          variant="temporary"
+          open={open}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+              backgroundColor: theme.palette.grey[800],
+            },
+          }}
+        >
+          {drawerContent}
+        </Drawer>
+      ) : (
+        <Drawer
+          variant="permanent"
+          open={open}
+          sx={{
+            width: drawerWidth,
+            flexShrink: 0,
+            "& .MuiDrawer-paper": {
+              width: drawerWidth,
+              boxSizing: "border-box",
+              backgroundColor: theme.palette.grey[800],
+              transition: theme.transitions.create("width", {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
+            },
+          }}
+        >
+          {drawerContent}
+        </Drawer>
+      )}
+      {isMobile && (
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="start"
+          onClick={handleDrawerToggle}
+          sx={{ mr: 2, position: "absolute", top: 8, left: 8 }}
+        >
+          <MenuIcon />
+        </IconButton>
+      )}
     </>
   );
 }

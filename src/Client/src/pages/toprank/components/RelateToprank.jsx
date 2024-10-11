@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-import data from "../../artist/utils/fetchSongData";
+import data from "../../../data/fetchSongData";
 
 const ToprankRamdom = () => {
 
