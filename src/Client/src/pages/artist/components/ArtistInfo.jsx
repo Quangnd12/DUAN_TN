@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { MdPersonAdd, MdCheck } from "react-icons/md";
 import { useParams } from "react-router-dom";
-
 import "../../../assets/css/artist/artist.css";
 import data from "../../../data/fetchSongData";
 import MoreButton from "../../../components/button/more";

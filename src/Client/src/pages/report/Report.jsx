@@ -1,20 +1,20 @@
 import React, { useState } from "react";
-import { toast } from "react-toastify";
-import { handleAddReport } from "../../components/notification"; // Adjust the path
+import { handleAddReport, handleAcceptTerms } from "../../components/notification"; // Adjust the path
 import Tb from "../../../public/assets/img/tc.jpg";
-import '../../../src/assets/css/report/report.css'; // Import tệp CSS
+import '../../../src/assets/css/report/report.css'; // Import CSS file
 
 const Report = () => {
   const [selectedReasons, setSelectedReasons] = useState([]);
   const [description, setDescription] = useState("");
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false); // New state for terms acceptance
 
   const reportReasons = [
-    "Inappropriate language",
-    "Harassment",
-    "Cheating",
-    "Spamming",
-    "Intentional feeding",
-    "AFK / Leaving the game",
+    "Inappropriate content",
+    "Copyright violation",
+    "Hateful content",
+    "Spam",
+    "Impersonation",
+    "Disruptive content",
   ];
 
   const handleReasonToggle = (reason) => {
@@ -26,9 +26,22 @@ const Report = () => {
   };
 
   const handleSubmit = () => {
+    if (!isTermsAccepted) {
+      handleAcceptTerms(); // Show notification if terms are not accepted
+      return; // Return if terms are not accepted
+    }
+
     console.log("Selected Reasons:", selectedReasons);
     console.log("Description:", description);
-    handleAddReport(); // Display the toast notification when report is submitted
+    handleAddReport(); // Show notification when report is submitted
+
+    // Open a new tab with the thank-you message
+    window.open('/thankYou.html', '_blank');
+
+    // Reset state
+    setSelectedReasons([]);
+    setDescription("");
+    setIsTermsAccepted(false);
   };
 
   return (
@@ -37,7 +50,7 @@ const Report = () => {
         <div className="flex flex-col md:flex-row w-full h-full">
           <div className="md:w-1/2 p-6">
             <h2 className="text-3xl font-extrabold text-white mb-6">
-              Report Player
+              Report Content
             </h2>
             <div className="space-y-4">
               {reportReasons.map((reason) => (
@@ -64,7 +77,7 @@ const Report = () => {
             <div className="relative w-full h-80">
               <img
                 src={Tb}
-                alt="Reported player"
+                alt="Reported content"
                 className="w-full h-full object-cover filter brightness-75"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80 flex items-center justify-center">
@@ -82,6 +95,19 @@ const Report = () => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
+        </div>
+
+        <div className="flex items-center ml-7">
+          <input
+            type="checkbox"
+            id="terms"
+            checked={isTermsAccepted}
+            onChange={() => setIsTermsAccepted((prev) => !prev)} // Toggle the checkbox state
+            className="custom-checkbox"
+          />
+          <label htmlFor="terms" className="ml-2 text-white">
+            I agree to the terms
+          </label>
         </div>
 
         <div className="flex justify-center mt-6 space-x-4">

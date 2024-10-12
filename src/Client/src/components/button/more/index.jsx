@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { MdMoreHoriz } from 'react-icons/md';
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
 import QueueMusicIcon from '@mui/icons-material/QueueMusic';
@@ -20,9 +21,6 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import NoAccountsIcon from '@mui/icons-material/NoAccounts';
 import AddPlaylistOption from '../../dropdown/dropdownAddPlaylist';
 
-
-
-
 const MoreButton = ({ type, onOptionSelect }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
@@ -30,6 +28,7 @@ const MoreButton = ({ type, onOptionSelect }) => {
     const dropdownRef = useRef(null);
     const shareDropdownRef = useRef(null);
     const playlistDropdownRef = useRef(null);
+    const navigate = useNavigate(); // Initialize useNavigate
 
     const menuOptions = {
         albumPlaylist: [
@@ -50,20 +49,12 @@ const MoreButton = ({ type, onOptionSelect }) => {
             { label: 'Share', action: 'share', icon: <ShareIcon /> },
         ],
         artist: [
-            { label: 'Theo dõi', action: 'follow', icon: <PersonAddIcon /> },
-            { label: 'Không phát nghệ sĩ này', action: 'dont_play_this_artist', icon: <BlockIcon /> },
-            { label: 'Chuyển đến radio theo nghệ sĩ', action: 'go_to_artist_radio', icon: <RadioIcon /> },
-            { label: 'Báo cáo', action: 'report', icon: <ReportIcon /> },
-            { label: 'Chia sẻ', action: 'share', icon: <ShareIcon /> },
-            
-            
             { label: 'Remove from library', action: 'delete', icon: <CancelIcon /> },
             { label: 'Add to waiting list', action: 'waiting_list', icon: <PlaylistAddIcon /> },
             { label: 'Remove from your interest profile', action: 'remove_from_profile', icon: <NoAccountsIcon /> },
-            { label: 'Report', action: 'edit_detail_info', icon: <ReportIcon /> },
+            { label: 'Report', action: 'report', icon: <ReportIcon /> }, // Changed action to 'report'
             { label: 'Share', action: 'share', icon: <ShareIcon /> },
         ],
-        
     };
 
     useEffect(() => {
@@ -98,6 +89,10 @@ const MoreButton = ({ type, onOptionSelect }) => {
                 break;
             case 'waiting_list':
                 handleAddWaitlist();
+                setIsOpen(false);
+                break;
+            case 'report': // Handle the report action
+                navigate('/report'); // Navigate to the report page
                 setIsOpen(false);
                 break;
             default:
@@ -200,6 +195,5 @@ const MoreButton = ({ type, onOptionSelect }) => {
         </div>
     );
 };
+
 export default MoreButton;
-
-

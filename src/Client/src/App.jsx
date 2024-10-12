@@ -134,7 +134,7 @@ function Client() {
                 </Route>
             <Route path="/info/:userId" element={<PrivateRoute><InfoClient /></PrivateRoute>} />
             <Route path="/content" element={<PrivateRoute><Content /></PrivateRoute>} />
-            <Route path='/report' element={<PrivateRoute><Report /></PrivateRoute>} />
+            <Route path='/report' element= {<Report/>}/>
             <Route path='/event' element={<PrivateRoute><Event /></PrivateRoute>} />
             <Route path='/event/:id' element={<PrivateRoute><EventDetail /></PrivateRoute>} />
 
