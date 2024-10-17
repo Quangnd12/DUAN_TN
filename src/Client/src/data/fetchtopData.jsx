@@ -195,15 +195,6 @@ const data = {
                     title: "Top 100 Synthpop",
                     top100: [
                         {
-                            id: 4,
-                            song: "Blinding Lights",
-                            artist: "The Weeknd",
-                            image: "https://th.bing.com/th/id/OIP.tsWLH6bLDSobhMiSIPz2CwHaHa?w=196&h=196&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-                            time: "3:20",
-                            album: "After Hours",
-                            likes: 2500,
-                        },
-                        {
                             id: 5,
                             song: "Blinding Lights",
                             artist: "The Weeknd",

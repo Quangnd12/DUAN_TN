@@ -99,6 +99,13 @@ const UserProfile = () => (
         >
           Separated link
         </button>
+        <button
+          onClick={(e) => e.preventDefault()}
+          className="block px-4 py-2 text-left w-full text-sm text-gray-700 hover:bg-gray-100 hover:rounded-sm"
+          role="menuitem"
+        >
+           <Link to="/auth/login">Logout</Link>
+        </button>
       </>
     }
   />
