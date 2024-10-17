@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom'
 import { createPopper } from '@popperjs/core';
 
 const Dropdown = ({ buttonContent, dropdownContent }) => {
@@ -72,31 +73,38 @@ const UserProfile = () => (
       <>
         <button
           onClick={(e) => e.preventDefault()}
-          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          className="block px-4 py-2 text-left w-full text-sm text-gray-700 hover:bg-gray-100 hover:rounded-sm"
           role="menuitem"
         >
-          My information
+         <Link to="/admin/info"> My information</Link>
         </button>
         <button
           onClick={(e) => e.preventDefault()}
-          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          className="block px-4 py-2 text-left w-full text-sm text-gray-700 hover:bg-gray-100 hover:rounded-sm"
           role="menuitem"
         >
           Another action
         </button>
         <button
           onClick={(e) => e.preventDefault()}
-          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          className="block px-4 py-2 text-left w-full text-sm text-gray-700 hover:bg-gray-100 hover:rounded-sm"
           role="menuitem"
         >
           Something else here
         </button>
         <button
           onClick={(e) => e.preventDefault()}
-          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          className="block px-4 py-2 text-left w-full text-sm text-gray-700 hover:bg-gray-100 hover:rounded-sm"
           role="menuitem"
         >
           Separated link
+        </button>
+        <button
+          onClick={(e) => e.preventDefault()}
+          className="block px-4 py-2 text-left w-full text-sm text-gray-700 hover:bg-gray-100 hover:rounded-sm"
+          role="menuitem"
+        >
+           <Link to="/auth/login">Logout</Link>
         </button>
       </>
     }

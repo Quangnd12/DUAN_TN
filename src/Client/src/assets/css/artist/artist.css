@@ -1,7 +1,9 @@
-.artist-bg{
-    background: linear-gradient(180deg, #2A2A35 0%, #292A41 50%, #1F214A 100%);
-
+.artist-bg {
+  background: linear-gradient(180deg, #002b4c 0%, #2997d6 100%);
 }
+
+
+
 .bg-icon{
 background-color: #09A6EF;
 }
@@ -112,6 +114,19 @@ background-color: #09A6EF;
   padding-right: 10px;
 }
 
+/* artist.css */
+.scroll-hidden {
+  overflow-y: auto; /* Cho phép cuộn dọc */
+  scrollbar-width: none; /* Ẩn thanh cuộn trong Firefox */
+}
+
+.scroll-hidden::-webkit-scrollbar {
+  display: none; /* Ẩn thanh cuộn trong Chrome, Safari, và Opera */
+}
+
+.smooth-scroll {
+  scroll-behavior: smooth; /* Cuộn mượt mà */
+}
 
 .track__info__track__artists {
   color: #b3b3b3;

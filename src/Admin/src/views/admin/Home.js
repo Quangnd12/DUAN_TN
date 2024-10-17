@@ -1,4 +1,10 @@
 import React, { useState, useEffect } from "react";
+import SearchIcon from '@mui/icons-material/Search';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import EditIcon from '@mui/icons-material/Edit';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Home = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -87,7 +93,7 @@ const Home = () => {
   ];
 
   return (
-    <div className="container mx-auto py-2">
+    <div className="mx-auto py-2">
       {/* Form*/}
       <div className="pt-16">
         <div className="px-4 md:px-10 mx-auto w-full">
@@ -99,8 +105,8 @@ const Home = () => {
                 className="w-full px-4 py-2 pl-10 pr-4 text-gray-700 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-                <span className="w-5 h-5 text-gray-400">
-                  <i className="fas fa-search"></i>
+                <span className="text-gray-400">
+                 <SearchIcon></SearchIcon>
                 </span>
               </div>
             </div>
@@ -143,13 +149,13 @@ const Home = () => {
               className="absolute top-1/2 left-4 -translate-y-1/2 bg-white  active:bg-gray-400 text-cyan-400 p-2 rounded-full outline-none focus:outline-none"
               onClick={handlePrevious}
             >
-              <i className="fa fa-angle-left" aria-hidden="true"></i>
+              <ChevronLeftIcon></ChevronLeftIcon>
             </button>
             <button
               className="absolute top-1/2 right-4 -translate-y-1/2 bg-white active:bg-gray-400 text-cyan-400 p-2 rounded-full outline-none focus:outline-none"
               onClick={handleNext}
             >
-              <i className="fa fa-angle-right" aria-hidden="true"></i>
+             <ChevronRightIcon></ChevronRightIcon>
             </button>
           </div>
         </div>
@@ -200,24 +206,24 @@ const Home = () => {
                         setVisibleDropdown(visibleDropdown === i ? null : i);
                       }}
                     >
-                      <i className="fas fa-ellipsis-h" />
+                     <MoreVertIcon></MoreVertIcon>
                     </button>
                     {visibleDropdown === i && (
                       <div
                         id={`dropdown-${i}`}
-                        className="absolute  right-10 bg-white rounded-lg shadow-lg p-4 w-28"
+                        className="absolute  right-10 bg-white rounded-lg shadow-lg p-2 w-32"
                       >
-                        <span className="flex items-center py-2">
+                        <span className="flex items-center py-2 hover:bg-gray-300">
                           <button
                             type="button"
-                            className="ml-2 rounded outline-none focus:outline-none"
+                            className="ml-1 text-blue-500 rounded outline-none focus:outline-none"
                           >
-                            <i className="fas fa-edit" /> Edit
+                           <EditIcon></EditIcon> Edit
                           </button>
                         </span>
-                        <span className="flex items-center py-2">
+                        <span className="flex items-center text-red-500 py-2 hover:bg-gray-300">
                           <button className="ml-2 rounded outline-none focus:outline-none">
-                            <i className="fas fa-trash" /> Delete
+                           <DeleteIcon></DeleteIcon> Delete
                           </button>
                         </span>
                       </div>

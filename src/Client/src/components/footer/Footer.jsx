@@ -74,25 +74,25 @@ const Footer = () => {
         {/* Thêm các icon và liên kết mạng xã hội */}
 
         <div className="text-sm mt-4">
-          <p>&copy; 2024 My Website. All rights reserved.</p>
+          <p>&copy; 2024 Our online music website. All rights reserved.</p>
           <div className="mt-2">
             <Link href="#" className="hover:underline mx-2">
-              Pháp lý
+              Legal
             </Link>
             <Link to="#" className="hover:underline mx-2">
-              Trung tâm an toàn và quyền riêng tư
+              Safety and Privacy Center
             </Link>
             <Link to="#" className="hover:underline mx-2">
-              Chính sách quyền riêng tư
+              Privacy policy
             </Link>
             <Link to="#" className="hover:underline mx-2">
               Cookie
             </Link>
             <Link to="#" className="hover:underline mx-2">
-              Giới thiệu
+              Introduce
             </Link>
             <Link to="#" className="hover:underline mx-2">
-              Quảng cáo
+              Advertisement
             </Link>
           </div>
         </div>

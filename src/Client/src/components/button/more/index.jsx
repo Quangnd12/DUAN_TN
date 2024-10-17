@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { MdMoreHoriz } from 'react-icons/md';
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
 import QueueMusicIcon from '@mui/icons-material/QueueMusic';
@@ -13,14 +14,12 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import BlockIcon from '@mui/icons-material/Block';
 import ReportIcon from '@mui/icons-material/Report';
 import ShareOptions from '../share';
-import { handleAddFavorite, handleAddWaitlist, handleAddLibrary } from "../../notification";
+import ShareOptionsList from '../share-list/share-list';
+import { handleAddFavorite, handleAddPlaylist, handleAddWaitlist, handleAddLibrary } from "../../notification";
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
 import NoAccountsIcon from '@mui/icons-material/NoAccounts';
 import AddPlaylistOption from '../../dropdown/dropdownAddPlaylist';
-
-
-
 
 const MoreButton = ({ type, onOptionSelect }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +28,7 @@ const MoreButton = ({ type, onOptionSelect }) => {
     const dropdownRef = useRef(null);
     const shareDropdownRef = useRef(null);
     const playlistDropdownRef = useRef(null);
-
+    const navigate = useNavigate(); // Initialize useNavigate
 
     const menuOptions = {
         albumPlaylist: [
@@ -40,31 +39,23 @@ const MoreButton = ({ type, onOptionSelect }) => {
             { label: 'Share', action: 'share', icon: <ShareIcon /> },
         ],
         track: [
-            { label: 'Thêm vào danh sách phát', action: 'add_to_playlist', icon: <PlaylistAddIcon /> },
-            { label: 'Lưu vào Bài hát đã thích của bạn', action: 'save_to_liked_songs', icon: <FavoriteIcon /> },
-            { label: 'Thêm vào danh sách chờ', action: 'add_to_queue', icon: <QueueMusicIcon /> },
-            { label: 'Chuyển đến radio theo bài hát', action: 'go_to_song_radio', icon: <RadioIcon /> },
-            { label: 'Chuyển tới nghệ sĩ', action: 'go_to_artist', icon: <PersonIcon /> },
-            { label: 'Chuyển đến album', action: 'go_to_album', icon: <AlbumIcon /> },
-            { label: 'Xem thông tin ghi công', action: 'view_credits', icon: <InfoIcon /> },
-            { label: 'Chia sẻ', action: 'share', icon: <ShareIcon /> },
+            { label: 'Add to playlist', action: 'add_to_playlist', icon: <PlaylistAddIcon /> },
+            { label: 'Save to Your Liked Songs', action: 'save_to_liked_songs', icon: <FavoriteIcon /> },
+            { label: 'Add to waiting list', action: 'add_to_queue', icon: <QueueMusicIcon /> },
+            { label: 'Go to the radio by song', action: 'go_to_song_radio', icon: <RadioIcon /> },
+            { label: 'Go to artist', action: 'go_to_artist', icon: <PersonIcon /> },
+            { label: 'Go to album', action: 'go_to_album', icon: <AlbumIcon /> },
+            { label: 'View attribution information', action: 'view_credits', icon: <InfoIcon /> },
+            { label: 'Share', action: 'share', icon: <ShareIcon /> },
         ],
         artist: [
-            { label: 'Không phát nghệ sĩ này', action: 'dont_play_this_artist', icon: <BlockIcon /> },
-            { label: 'Chuyển đến radio theo nghệ sĩ', action: 'go_to_artist_radio', icon: <RadioIcon /> },
-            { label: 'Báo cáo', action: 'report', icon: <ReportIcon /> },
-            { label: 'Chia sẻ', action: 'share', icon: <ShareIcon /> },
-        ],
-        playlist: [
             { label: 'Remove from library', action: 'delete', icon: <CancelIcon /> },
             { label: 'Add to waiting list', action: 'waiting_list', icon: <PlaylistAddIcon /> },
             { label: 'Remove from your interest profile', action: 'remove_from_profile', icon: <NoAccountsIcon /> },
-            { label: 'Report', action: 'edit_detail_info', icon: <ReportIcon /> },
+            { label: 'Report', action: 'report', icon: <ReportIcon /> }, // Changed action to 'report'
             { label: 'Share', action: 'share', icon: <ShareIcon /> },
         ],
-        
     };
-
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -100,6 +91,10 @@ const MoreButton = ({ type, onOptionSelect }) => {
                 handleAddWaitlist();
                 setIsOpen(false);
                 break;
+            case 'report': // Handle the report action
+                navigate('/report'); // Navigate to the report page
+                setIsOpen(false);
+                break;
             default:
                 onOptionSelect(action);
                 setIsOpen(false);
@@ -121,7 +116,6 @@ const MoreButton = ({ type, onOptionSelect }) => {
 
         return { top: '100%', marginTop: '8px' };
     };
-
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -186,7 +180,11 @@ const MoreButton = ({ type, onOptionSelect }) => {
                                             setIsShareOpen(false);
                                         }}
                                     >
-                                        <ShareOptions onOptionClick={handleOptionClick} />
+                                        {type === 'albumPlaylist' ? (
+                                            <ShareOptionsList onOptionClick={handleOptionClick} />
+                                        ) : (
+                                            <ShareOptions onOptionClick={handleOptionClick} />
+                                        )}
                                     </div>
                                 )}
                             </div>

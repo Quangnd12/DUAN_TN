@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-
+import axios from 'axios';
+import { API_BASE_URL, registerWithGoogle } from '../../../../services/Api_url';
 import TextField from "@mui/material/TextField";
 import LoginIcon from "@mui/icons-material/Login";
 import { InputAdornment, IconButton } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { makeStyles } from "@material-ui/styles";
+import { signInWithGoogle  } from '../../../../config/firebaseConfig';
 
 import "./auth.css";
 const useStyles = makeStyles({
@@ -32,8 +34,10 @@ const useStyles = makeStyles({
 });
 const Register = () => {
   const classes = useStyles();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
   // Use useForm hook
   const {
     register,
@@ -48,10 +52,54 @@ const Register = () => {
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = (event) => event.preventDefault();
 
-  const onSubmit = (data) => {
-    console.log("Form Submitted: ", data);
+ const onSubmit = async (data) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/auth/register`, {
+        email: data.email,
+        password: data.password
+      }, {
+        withCredentials: true // Điều quan trọng là phải bao gồm cookie
+      });
+      
+      if (response.data.user) {
+        // Store user data in localStorage
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        // Redirect to home page
+        navigate('/');
+      }
+    } catch (error) {
+      setError(error.response?.data?.message || "An error occurred during registration");
+    }
   };
 
+const handleGoogleSignUp = async () => {
+  try {
+    const { user, token } = await signInWithGoogle();
+
+    // Gửi idToken tới backend để đăng ký
+    const response = await registerWithGoogle(token);
+
+    if (response.user) {
+      // Đảm bảo rằng response.user có đầy đủ thông tin, bao gồm id
+      const userToSave = {
+        id: response.user.id || user.uid, // Sử dụng id từ response hoặc uid từ Google
+        username: response.user.username || user.displayName,
+        email: response.user.email || user.email,
+        avatar: response.user.avatar || user.photoURL
+      };
+
+      // Lưu thông tin người dùng vào localStorage
+      localStorage.setItem("user", JSON.stringify(userToSave));
+      localStorage.setItem("accessToken", response.accessToken);
+      localStorage.setItem("refreshToken", response.refreshToken);
+      
+      navigate("/");
+    }
+  } catch (error) {
+    setError(error.message || "An error occurred during Google registration");
+  }
+};
+  
   return (
     <HelmetProvider>
     <>
@@ -68,6 +116,7 @@ const Register = () => {
             <div className="bg-black shadow-lg rounded-md p-5">
               <div className="text-center">
                 <h3 className="text-2xl font-bold mb-8 text-white">Sign up</h3>
+                {error && <p className="text-red-500 mb-4">{error}</p>}
                 <form onSubmit={handleSubmit(onSubmit)}>
                   {/* Email Field */}
                   <div className="relative mb-4">
@@ -204,6 +253,7 @@ const Register = () => {
                 <button
                   className="w-full py-2 px-4 bg-black border border-[#6a6a6a]  text-white rounded-3xl shadow-md flex items-center justify-center hover:border-white hover:border-[1px] hover:ring-1 hover:ring-white transition-all"
                   type="submit"
+                  onClick={handleGoogleSignUp}
                 >
                    <img className="w-5 h-5" src={`/images/logo/Google.png`} alt="Google Logo" />
                   <span className="flex-1 text-center">

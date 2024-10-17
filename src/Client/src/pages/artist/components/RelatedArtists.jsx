@@ -6,9 +6,8 @@ import data from "../../../data/fetchSongData";
 const RelatedArtist = () => {
 
     useEffect(() => {
-
+        // Any effect code if needed
     }, []);
-
 
     return (
         <div className="p-4">

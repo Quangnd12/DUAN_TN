@@ -11,7 +11,7 @@ function TopFansCard() {
 
   return (
     <div className="bg-white p-4 rounded-lg shadow">
-      <h3 className="text-md font-semibold mb-2">Top fans this week</h3>
+      <h3 className="text-md font-semibold mb-2">Top users this week</h3>
       {fans.map((fan, index) => (
         <div key={index} className="flex justify-between items-center mb-1">
           <span>{fan.name}</span>
