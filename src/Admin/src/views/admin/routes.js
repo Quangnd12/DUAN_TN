@@ -15,6 +15,9 @@ import EditArtist from "./artist/component/edit.js";
 import Albums from "./album";
 import AddAlbum from "./album/component/add.js";
 import EditAlbum from "./album/component/edit.js";
+import Favorites from "./favorite";
+import FollowList from "./follow";
+import GenreList from "./genre/component/list.js";
 
 const AdminRoutes = (
   <>
@@ -31,7 +34,9 @@ const AdminRoutes = (
     <Route path="album" element={<Albums />} />
     <Route path="album/add" element={<AddAlbum />} />
     <Route path="album/edit/:id" element={<EditAlbum />} />
-   
+    <Route path="favorite" element={<Favorites />} />
+    <Route path="follow" element={<FollowList />} />
+    <Route path="genre" element={<GenreList />} />
     {/* Bạn có thể thêm các route khác ở đây */}
     <Route path="/" element={<Navigate to="dashboard" replace />} />
   </>
