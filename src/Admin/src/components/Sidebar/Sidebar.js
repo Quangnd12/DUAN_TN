@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from "react";
+import { Tooltip } from "@mui/material";
 import { NavLink, useLocation } from "react-router-dom";
-import { Drawer, IconButton, useMediaQuery, List, ListItem, ListItemIcon, ListItemText, Collapse, Box } from "@mui/material";
+import {
+  Drawer,
+  IconButton,
+  useMediaQuery,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Collapse,
+  Box,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -59,26 +70,32 @@ export default function Sidebar() {
 
   const isActive = (path) => location.pathname === path;
 
-  const drawerWidth = open ? 300 : 73;
+  const drawerWidth = open ? 300 : 100;
 
   const MenuItem = ({ to, icon: Icon, label }) => (
-    <ListItem
-      component={NavLink}
-      to={to}
-      selected={isActive(to)}
-      sx={{
-        color: isActive(to) ? "cyan.400" : "white",
-        "&:hover": { color: "cyan.500", backgroundColor: "rgba(255,255,255,0.1)" },
-        transition: "all 0.3s",
-        borderRadius: "8px",
-        margin: "4px 0",
-      }}
-    >
-      <ListItemIcon>
-        <Icon color={isActive(to) ? "cyan" : "inherit"} />
-      </ListItemIcon>
-      {open && <ListItemText primary={label} />}
-    </ListItem>
+    <Tooltip title={label} placement="right" arrow>
+      <ListItem
+        component={NavLink}
+        to={to}
+        selected={isActive(to)}
+        style={{ fontSize: "2rem" }}
+        sx={{
+          color: isActive(to) ? "black" : "white",
+          "&:hover": {
+            color: "black",
+            backgroundColor: "rgba(255,255,255,0.1)",
+          },
+          transition: "all 0.3s",
+          borderRadius: "8px",
+          margin: "4px 0",
+        }}
+      >
+        <ListItemIcon>
+          <Icon style={{ color: isActive(to) ? "black" : "white", fontSize: "2rem" }} />
+        </ListItemIcon>
+        {open && <ListItemText primary={label} />}
+      </ListItem>
+    </Tooltip>
   );
 
   const categories = [
@@ -93,6 +110,7 @@ export default function Sidebar() {
         { to: "/admin/genre", icon: MdCategory, label: "Genre" },
         { to: "/admin/artist", icon: MdMic, label: "Artist" },
         { to: "/admin/album", icon: MdAlbum, label: "Album" },
+        { to: "/admin/playlist", icon: MdQueueMusic, label: "Playlist" },
       ],
     },
     {
@@ -101,7 +119,11 @@ export default function Sidebar() {
       items: [
         { to: "/admin/explore", icon: MdExplore, label: "Explore" },
         { to: "/admin/trending", icon: MdTrendingUp, label: "Trending" },
-        { to: "/admin/new-releases", icon: MdNewReleases, label: "New Releases" },
+        {
+          to: "/admin/new-releases",
+          icon: MdNewReleases,
+          label: "New Releases",
+        },
       ],
     },
     {
@@ -128,28 +150,44 @@ export default function Sidebar() {
       sx={{
         height: "100%",
         background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
-        overflow: "hidden",
+        overflow: "auto",
         position: "relative",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%)",
-          animation: "pulse 15s infinite",
+        "&::-webkit-scrollbar": {
+          width: "0.4em",
         },
-        "@keyframes pulse": {
-          "0%": { opacity: 0.5 },
-          "50%": { opacity: 1 },
-          "100%": { opacity: 0.5 },
+        "&::-webkit-scrollbar-track": {
+          boxShadow: "inset 0 0 6px rgba(0,0,0,0.00)",
+          webkitBoxShadow: "inset 0 0 6px rgba(0,0,0,0.00)",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: "#ffffff", // Màu trắng của thanh kéo
+          borderRadius: "5px", // Bo góc thanh kéo
+          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)", // Hiệu ứng đổ bóng cho thanh kéo
+          transition: "background-color 0.3s ease, box-shadow 0.3s ease", // Hiệu ứng mượt khi hover
+        },
+        "&:hover::-webkit-scrollbar-thumb": {
+          backgroundColor: "rgba(0,0,0,.2)",
         },
       }}
     >
-      <Box sx={{ p: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <Box
+        sx={{
+          p: 2,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         {open && (
-          <NavLink to="/admin/dashboard" style={{ textDecoration: "none", color: "white", fontWeight: "bold", fontSize: "1.2rem" }}>
+          <NavLink
+            to="/admin/dashboard"
+            style={{
+              textDecoration: "none",
+              color: "white",
+              fontWeight: "bold",
+              fontSize: "1.2rem",
+            }}
+          >
             Music Heals
           </NavLink>
         )}
@@ -160,26 +198,42 @@ export default function Sidebar() {
       <List sx={{ pt: 0 }}>
         {categories.map((category, index) => (
           <React.Fragment key={index}>
-            <ListItem
-              onClick={() => handleCategoryToggle(category.title)}
-              sx={{
-                cursor: "pointer",
-                "&:hover": { backgroundColor: "rgba(255,255,255,0.1)" },
-                transition: "all 0.3s",
-                borderRadius: "8px",
-                margin: "4px 0",
-              }}
+            <Tooltip title={category.title} placement="right" arrow>
+              <ListItem
+                onClick={() => handleCategoryToggle(category.title)}
+                sx={{
+                  cursor: "pointer",
+                  "&:hover": { backgroundColor: "rgba(255,255,255,0.1)" },
+                  transition: "all 0.3s",
+                  borderRadius: "5px",
+                  margin: "4px 0",
+                }}
+              >
+                <ListItemIcon>
+                  <category.icon color="white" style={{ fontSize: "2rem" }} />
+                </ListItemIcon>
+                {open && (
+                  <ListItemText
+                    primary={category.title}
+                    sx={{ color: "white" }}
+                  />
+                )}
+                {open &&
+                  (openCategories[category.title] ? (
+                    <ExpandLess />
+                  ) : (
+                    <ExpandMore />
+                  ))}
+              </ListItem>
+            </Tooltip>
+            <Collapse
+              in={openCategories[category.title]}
+              timeout="auto"
+              unmountOnExit
             >
-              <ListItemIcon>
-                <category.icon color="white" />
-              </ListItemIcon>
-              {open && <ListItemText primary={category.title} sx={{ color: "white" }} />}
-              {open && (openCategories[category.title] ? <ExpandLess /> : <ExpandMore />)}
-            </ListItem>
-            <Collapse in={openCategories[category.title]} timeout="auto" unmountOnExit>
               <List component="div" disablePadding sx={{ pl: 2 }}>
                 {category.items.map((item, itemIndex) => (
-                  <MenuItem key={itemIndex} {...item} />
+                  <MenuItem key={itemIndex} {...item}  />
                 ))}
               </List>
             </Collapse>

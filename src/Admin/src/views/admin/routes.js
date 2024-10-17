@@ -7,15 +7,19 @@ import Home from "./Home.js";
 import Settings from "./Settings.js";
 import Info from "./info/index.js";
 import Songs from "./song";
+import Users from "./user";
 import AddSong from "./song/component/add";
 import EditSong from "./song/component/edit";
 import PreviewSong from "./song/component/preview.js";
 import Artists from "./artist";
-import AddArtist from "./artist/component/add"
+import AddArtist from "./artist/component/add";
 import EditArtist from "./artist/component/edit.js";
 import Albums from "./album";
 import AddAlbum from "./album/component/add.js";
 import EditAlbum from "./album/component/edit.js";
+import NotFound from "./notfound/index.js";
+import UnderDevelopment from "./underdev/index.js";
+import Login from "../auth/Login.js";
 
 const AdminRoutes = (
   <>
@@ -23,6 +27,7 @@ const AdminRoutes = (
     <Route path="home" element={<Home />} />
     <Route path="settings" element={<Settings />} />
     <Route path="info" element={<Info />} />
+    <Route path="user" element={<Users />} />
     <Route path="song" element={<Songs />} />
     <Route path="song/add" element={<AddSong />} />
     <Route path="song/edit/:id" element={<EditSong />} />
@@ -33,7 +38,23 @@ const AdminRoutes = (
     <Route path="album" element={<Albums />} />
     <Route path="album/add" element={<AddAlbum />} />
     <Route path="album/edit/:id" element={<EditAlbum />} />
-   
+
+    {/* Thêm routes mới cho các trang đang phát triển */}
+    <Route path="genre" element={<UnderDevelopment />} />
+    <Route path="playlist" element={<UnderDevelopment />} />
+    <Route path="explore" element={<UnderDevelopment />} />
+    <Route path="trending" element={<UnderDevelopment />} />
+    <Route path="new-releases" element={<UnderDevelopment />} />
+    <Route path="analytics" element={<UnderDevelopment />} />
+    <Route path="insights" element={<UnderDevelopment />} />
+    <Route path="report" element={<UnderDevelopment />} />
+    <Route path="profile" element={<UnderDevelopment />} />
+
+    {/* Route mới cho trang đăng nhập */}
+    <Route path="login" element={<Login />} />
+
+    <Route path="*" element={<NotFound />} />
+
     {/* Bạn có thể thêm các route khác ở đây */}
     <Route path="/" element={<Navigate to="dashboard" replace />} />
   </>

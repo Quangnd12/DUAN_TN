@@ -107,6 +107,30 @@ export const getUserById = async (userId) => {
   }
 };
 
+// API lấy tất cả thông tin người dùng với tùy chọn giới hạn và phân trang
+export const getAllUsers = async (page = 1, limit = 5, searchTerm = '') => { 
+  try { 
+    const response = await api.get('/admin/users', { 
+      params: { page, limit, searchTerm } // Truyền searchTerm vào
+    });
+    
+    if (!response.data || !response.data.users) { 
+      throw new Error('Invalid response format from server'); 
+    } 
+     
+    return { 
+      users: response.data.users, 
+      currentPage: response.data.currentPage, 
+      totalPages: response.data.totalPages, 
+      totalUsers: response.data.totalUsers 
+    }; 
+  } catch (error) { 
+    console.error("Error fetching users:", error.response?.data || error.message); 
+    throw error.response?.data || { message: 'Failed to fetch users.' }; 
+  } 
+};
+
+
 // API đăng xuất người dùng
 export const logoutUser = async () => {
   try {

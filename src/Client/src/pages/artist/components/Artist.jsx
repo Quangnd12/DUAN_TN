@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Link,useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import data from "../../../data/fetchSongData";
 import PlayerControls from "../../../components/audio/PlayerControls";
 import SongItem from "../../../components/dropdown/dropdownMenu";
@@ -14,7 +14,7 @@ const PopularSong = () => {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const dropdownRefs = useRef([]);
   const MAX_ARTISTS_TO_SHOW = 1;
-  const {artistName}=useParams();
+  const { artistName } = useParams();
 
   const handleRowClick = (song) => {
     setSelectedPlayer(song);
@@ -64,7 +64,10 @@ const PopularSong = () => {
         <div className="flex flex-col flex-grow ml-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">Popular</h2>
-            <Link to={`/artist/${artistName}/song`} className="text-blue-400 hover:underline">
+            <Link
+              to={`/artist/${artistName}/song`}
+              className="text-blue-400 hover:underline"
+            >
               Show All
             </Link>
           </div>
@@ -73,10 +76,11 @@ const PopularSong = () => {
               <div
                 key={index}
                 className={`relative flex items-center p-2 rounded-lg transition-colors 
-                 ${hoveredIndex === index || clickedIndex === index
-                    ? "bg-gray-700"
-                    : ""
-                  } 
+                 ${
+                   hoveredIndex === index || clickedIndex === index
+                     ? "bg-gray-700"
+                     : ""
+                 } 
                  ${itemHeight}`}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
@@ -99,26 +103,39 @@ const PopularSong = () => {
                     </div>
                     <div className="absolute inset-0 flex items-center justify-end">
                       <p
-                        className={`text-gray-500 text-sm w-20 text-right mr-2 ${hoveredIndex === index ? "opacity-0" : ""
-                          }`}
+                        className={`text-gray-500 text-sm w-20 text-right mr-2 ${
+                          hoveredIndex === index ? "opacity-0" : ""
+                        }`}
                       >
                         {song.duration}
                       </p>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-1 mt-1" style={{ zIndex: 1 }}>
-                    {song.artist.split(", ").slice(0, MAX_ARTISTS_TO_SHOW).map((artist, artistIndex, array) => (
-                      <span key={artistIndex} className="flex items-center">
-                        <Link to={`/artist/${artistIndex + 1}`} className="relative z-10" onClick={(e) => {
-                          e.stopPropagation()
-                        }}>
-                          <p className="text-gray-400 text-sm whitespace-nowrap overflow-hidden text-ellipsis hover:text-blue-500 hover:underline">
-                            {artist}
-                          </p>
-                        </Link>
-                        {artistIndex < array.length - 1 && <span className="text-gray-400">, </span>}
-                      </span>
-                    ))}
+                  <div
+                    className="flex flex-wrap gap-1 mt-1"
+                    style={{ zIndex: 1 }}
+                  >
+                    {song.artist
+                      .split(", ")
+                      .slice(0, MAX_ARTISTS_TO_SHOW)
+                      .map((artist, artistIndex, array) => (
+                        <span key={artistIndex} className="flex items-center">
+                          <Link
+                            to={`/artist/${artistIndex + 1}`}
+                            className="relative z-10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                          >
+                            <p className="text-gray-400 text-sm whitespace-nowrap overflow-hidden text-ellipsis hover:text-blue-500 hover:underline">
+                              {artist}
+                            </p>
+                          </Link>
+                          {artistIndex < array.length - 1 && (
+                            <span className="text-gray-400">, </span>
+                          )}
+                        </span>
+                      ))}
                     {song.artist.split(", ").length > MAX_ARTISTS_TO_SHOW && (
                       <span className="text-gray-400">... </span>
                     )}
@@ -139,6 +156,7 @@ const PopularSong = () => {
                     setShowShareOptions={setShowShareOptions}
                     showShareOptions={showShareOptions}
                     align={"right"}
+                    type="song"
                   />
                 </div>
               </div>
@@ -162,7 +180,7 @@ const PopularSong = () => {
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 

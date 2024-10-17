@@ -1,120 +1,174 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  TextField,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Paper,
+  Typography,
+  Box,
+  Grid,
+  Container,
+  Tabs,
+  Tab,
+} from "@mui/material";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import QueueMusicIcon from "@mui/icons-material/QueueMusic";
+import EqualizerIcon from "@mui/icons-material/Equalizer";
+import PeopleIcon from "@mui/icons-material/People";
+import ForgotPassword from "./Forgot"; // Import the ForgotPassword component
+
+const Feature = ({ Icon, title, description }) => (
+  <Box display="flex" alignItems="center" mb={2}>
+    <Icon sx={{ mr: 2, fontSize: 30, color: "primary.main" }} />
+    <Box>
+      <Typography variant="h6">{title}</Typography>
+      <Typography variant="body2" color="text.secondary">
+        {description}
+      </Typography>
+    </Box>
+  </Box>
+);
+
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Login attempt", { email, password, rememberMe });
+    navigate("/admin/dashboard");
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
   return (
-    <>
-      <div className="container mx-auto px-4 h-full">
-        <div className="flex content-center items-center justify-center h-full">
-          <div className="w-full lg:w-4/12 px-4">
-            <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-200 border-0">
-              <div className="rounded-t mb-0 px-6 py-6">
-                <div className="text-center mb-3">
-                  <h6 className="text-blueGray-500 text-sm font-bold">
-                    Sign in with
-                  </h6>
-                </div>
-                <div className="btn-wrapper text-center">
-                  <button
-                    className="bg-white active:bg-blueGray-50 text-blueGray-700 font-normal px-4 py-2 rounded outline-none focus:outline-none mr-2 mb-1 uppercase shadow hover:shadow-md inline-flex items-center font-bold text-xs ease-linear transition-all duration-150"
-                    type="button"
-                  >
-                    <img
-                      alt="..."
-                      className="w-5 mr-1"
-                      src={require("assets/img/github.svg").default}
+    <Container maxWidth="lg">
+      <Grid
+        container
+        spacing={4}
+        justifyContent="center"
+        alignItems="center"
+        style={{ minHeight: "100vh" }}
+      >
+        <Grid item xs={12} md={6}>
+          <Typography variant="h4" gutterBottom>
+            Music Heals Stream Administration
+          </Typography>
+          <Feature
+            Icon={MusicNoteIcon}
+            title="Content management"
+            description="Easily add, edit, and delete songs and albums in the system."
+          />
+          <Feature
+            Icon={QueueMusicIcon}
+            title="Create playlists"
+            description="Create and manage unique playlists for users."
+          />
+          <Feature
+            Icon={EqualizerIcon}
+            title="Data analysis"
+            description="Track music listening trends and user interactions."
+          />
+          <Feature
+            Icon={PeopleIcon}
+            title="User management"
+            description="Manage user accounts and access."
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Paper
+            elevation={3}
+            sx={{ padding: 4, width: "100%", maxWidth: 600, mx: "auto" }}
+          >
+            <Tabs value={tabValue} onChange={handleTabChange} centered>
+              <Tab label="Login" />
+              <Tab label="Forgot Password" />
+            </Tabs>
+            <TabPanel value={tabValue} index={0}>
+              <Typography variant="h5" align="center" gutterBottom>
+                Login
+              </Typography>
+              <form onSubmit={handleSubmit}>
+                <TextField
+                  label="Email"
+                  type="email"
+                  placeholder="Please enter your email"
+                  fullWidth
+                  margin="normal"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                <TextField
+                  label="Password"
+                  placeholder="Please enter your password"
+                  type="password"
+                  fullWidth
+                  margin="normal"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      color="primary"
                     />
-                    Github
-                  </button>
-                  <button
-                    className="bg-white active:bg-blueGray-50 text-blueGray-700 font-normal px-4 py-2 rounded outline-none focus:outline-none mr-1 mb-1 uppercase shadow hover:shadow-md inline-flex items-center font-bold text-xs ease-linear transition-all duration-150"
-                    type="button"
-                  >
-                    <img
-                      alt="..."
-                      className="w-5 mr-1"
-                      src={require("assets/img/google.svg").default}
-                    />
-                    Google
-                  </button>
-                </div>
-                <hr className="mt-6 border-b-1 border-blueGray-300" />
-              </div>
-              <div className="flex-auto px-4 lg:px-10 py-10 pt-0">
-                <div className="text-blueGray-400 text-center mb-3 font-bold">
-                  <small>Or sign in with credentials</small>
-                </div>
-                <form>
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                      htmlFor="grid-password"
-                    >
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      placeholder="Email"
-                    />
-                  </div>
-
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                      htmlFor="grid-password"
-                    >
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      placeholder="Password"
-                    />
-                  </div>
-                  <div>
-                    <label className="inline-flex items-center cursor-pointer">
-                      <input
-                        id="customCheckLogin"
-                        type="checkbox"
-                        className="form-checkbox border-0 rounded text-blueGray-700 ml-1 w-5 h-5 ease-linear transition-all duration-150"
-                      />
-                      <span className="ml-2 text-sm font-semibold text-blueGray-600">
-                        Remember me
-                      </span>
-                    </label>
-                  </div>
-
-                  <div className="text-center mt-6">
-                    <button
-                      className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all duration-150"
-                      type="button"
-                    >
-                      Sign In
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-            <div className="flex flex-wrap mt-6 relative">
-              <div className="w-1/2">
-                <a
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                  className="text-blueGray-200"
+                  }
+                  label="Remember to log in"
+                />
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  sx={{ mt: 3, mb: 2 }}
                 >
-                  <small>Forgot password?</small>
-                </a>
-              </div>
-              <div className="w-1/2 text-right">
-                <Link to="/auth/register" className="text-blueGray-200">
-                  <small>Create new account</small>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
+                  Sign in
+                </Button>
+              </form>
+              <button
+                className="w-full py-2 px-4 bg-white border border-[#6a6a6a] text-black rounded-md shadow-md flex items-center justify-center hover:border-white hover:border-[1px] hover:ring-1 hover:ring-white transition-all"
+                type="button"
+              >
+                <img
+                  className="w-5 h-5"
+                  src={`/images/logo/Google.png`}
+                  alt="Google Logo"
+                />
+                <span className="flex-1 text-center">Sign in with Google</span>
+              </button>
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+              <ForgotPassword />
+            </TabPanel>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }

@@ -28,8 +28,8 @@ const RowToprank = ({ title, data, rowId, globalPlayingState, setGlobalPlayingSt
       <Link to={`/toprank/${item.id}`}>
         <RoundCard
           image={item.image}
-          name={item.song}  {/* Sử dụng tên bài hát */}
-          title={item.artist} {/* Sử dụng tên nghệ sĩ */}
+          name={item.song}  /* Sử dụng tên bài hát */
+          title={item.artist} /* Sử dụng tên nghệ sĩ */
         />
       </Link>
       <div

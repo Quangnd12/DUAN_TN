@@ -1,23 +1,17 @@
 import React from "react";
-
-// components
-
-import CardSettings from "../../../components/Cards/CardSettings.js";
-import CardProfile from "../../../components/Cards/CardProfile.js";
+import AdminProfile from "./components/profile";
 
 export default function Info() {
+  const user = {
+    username: "MusicLover123",
+    email: "musiclover123@example.com",
+    avatar: "/path-to-avatar.jpg",
+    birthday: "1990-01-01",
+  };
+
   return (
-    <>
-      <div className="pt-32">
-      <div className="flex flex-wrap">
-        <div className="w-full lg:w-8/12 px-4">
-          <CardSettings />
-        </div>
-        <div className="w-full lg:w-4/12 px-4">
-          <CardProfile />
-        </div>
-      </div>
-      </div>
-    </>
+    <div className="pt-1">
+      <AdminProfile user={user} />
+    </div>
   );
 }
