@@ -1,7 +1,6 @@
 import React from "react";
-import Badge from "@mui/material/Badge";
-import MailIcon from "@mui/icons-material/Mail";
 import UserDropdown from "../Dropdowns/UserDropdown.js";
+import NotificationDropdown from "../Dropdowns/NotificationDropdown.js";
 import { useLocation } from "react-router-dom";
 
 export default function AdminNavbar() {
@@ -24,11 +23,9 @@ export default function AdminNavbar() {
           {currentPage}
         </a>
         {/* User */}
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-10">
           {" "}
-          <Badge badgeContent={4} color="primary">
-            <MailIcon color="action" />
-          </Badge>
+          <NotificationDropdown />
           <ul className="flex-col md:flex-row list-none items-center hidden md:flex">
             <UserDropdown />
           </ul>

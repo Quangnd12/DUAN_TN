@@ -8,6 +8,7 @@ const request = async ({
   path = "",
   data = {},
   headers = {},
+  params = {} // Thêm params ở đây
 }) => {
   try {
     const cookie = new Cookies();
@@ -22,14 +23,16 @@ const request = async ({
         ...headers,
         Authorization: `Bearer ${token}`,
       },
+      params: params, // Thêm params vào axios config
     });
 
     return res.data;
   } catch (error) {
-    alert(error?.response?.data?.message || "Error");
-    return null;
+    // alert(error?.response?.data?.message || "Error");
+   throw error;
   }
 };
+
 
 export default request;
 export { BASE_URL };

@@ -1,329 +1,329 @@
-import React, { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
-import PropTypes from "prop-types";
-import DropdownMenu from "../../../../components/Dropdowns/dropdownMenu";
-import PlayerControls from "../../../../components/audio/PlayerControls";
-import { MdMoreVert } from "react-icons/md";
-import DeleteArtist from "./delete";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import useSWR from "swr";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TextField,
+  IconButton,
+  Menu,
+  MenuItem,
+  CircularProgress,
+  Pagination,
+  Typography,
+  Alert,
+  Stack,
+  Collapse,
+  Box,
+  Avatar,
+  Backdrop,
+} from "@mui/material";
+import {
+  MoreVert as MoreVertIcon,
+  KeyboardArrowDown,
+  KeyboardArrowUp,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
+import AddIcon from "@mui/icons-material/Add";
+import { getArtists } from "../../../../../../services/artists";
 import { handleDelete } from "../../../../components/notification";
+import DeleteArtist from "./delete";
 
+const ITEMS_PER_PAGE = 5;
+
+const fetcher = (url, page, limit, searchTerm) =>
+  getArtists(page, limit, searchTerm);
 
 const ArtistList = () => {
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showActionMenu, setShowActionMenu] = useState(false);
-  const [showFilterMenu, setShowFilterMenu] = useState(false);
-  const [selectedGenres, setSelectedGenres] = useState([]);
-  const [activeDropdown, setActiveDropdown] = useState(null);
-  const [modalState, setModalState] = useState({ show: false, song: null });
-  const songsPerPage = 10;
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [page, setPage] = useState(1);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedArtist, setSelectedArtist] = useState(null);
+  const [openRow, setOpenRow] = useState({});
 
-  const [selectedSong, setSelectedSong] = useState(null);
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
-  const [selectedRowId, setSelectedRowId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [artistToDelete, setArtistToDelete] = useState(null);
 
-  const handleRowClick = (song) => {
-    if (activeDropdown === song.id) {
-      // Nếu dropdown đang mở, không thực hiện hành động chọn hàng
-      return;
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 1000);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
+
+  const { data, error, isLoading, mutate } = useSWR(
+    ["getArtists", page, ITEMS_PER_PAGE, debouncedSearchTerm],
+    () => fetcher("getArtists", page, ITEMS_PER_PAGE, debouncedSearchTerm),
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
     }
-    setSelectedRowId(song.id);
-    setSelectedPlayer(song);
-    // Thực hiện hành động phát nhạc ở đây
+  );
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
   };
 
-  const handleAddSong = () => {
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+    setPage(1); // Reset page to 1 when searching
+  };
+
+  const handleOpenMenu = (event, artist) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedArtist(artist);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+    setSelectedArtist(null);
+  };
+
+  const handleDeleteClick = (artist) => {
+    setArtistToDelete(artist);
+    setShowDeleteModal(true);
+    handleCloseMenu();
+  };
+
+  const handleDeleteSuccess = () => {
+    mutate(); // Cập nhật dữ liệu sau khi xóa thành công
+    handleDelete("Artist deleted successfully");
+  };
+
+  const toggleRow = (artistId) => {
+    setOpenRow((prevState) => ({
+      ...prevState,
+      [artistId]: !prevState[artistId],
+    }));
+  };
+
+  const handleAddArtist = () => {
     navigate("/admin/artist/add");
   };
 
-  const handleEditSong = (id) => {
-    navigate(`/admin/artist/edit/${id}`);
+  const handleEditArtist = (artist) => {
+    navigate(`/admin/artist/edit/${artist.id}`); // Chuyển hướng đến trang edit với ID của nghệ sĩ
+    handleCloseMenu(); // Đóng Menu sau khi chọn
   };
 
-  const genres = ["Việt Nam", "Âu Mỹ", "Hàn Quốc", "Trung Quốc"];
+  const getInitials = (name) => {
+    if (!name) return "";
+    const names = name.split(" ");
+    return names.length > 1 ? names[0][0] + names[1][0] : names[0][0];
+  };
 
-  const toggleGenre = (genre) => {
-    setSelectedGenres((prevGenres) =>
-      prevGenres.includes(genre)
-        ? prevGenres.filter((g) => g !== genre)
-        : [...prevGenres, genre]
+  if (error) {
+    return (
+      <Typography color="error">
+        Error: {error.message || "Failed to fetch artists"}
+      </Typography>
     );
-  };
-  
-  const songs = [
-    {
-      id: 1,
-      artist: "Sơn Tùng MTP",
-      image:
-        "https://th.bing.com/th/id/OIP.5sdXslc5LTHn1l0WpI-n9AHaHa?rs=1&pid=ImgDetMain",
-      album: "Sky tour",
-      playlist: "Sky-tour",
-      role: "Nghệ sĩ"
-    },
-    {
-      id: 2,
-      name: "Lạc trôi",
-      category: "V-Pop",
-      artist: "Sơn Tùng MTP",
-      description: "Popular song from Sơn Tùng MTP...",
-      image: "https://i.ytimg.com/vi/DrY_K0mT-As/maxresdefault.jpg",
-      album: "Sky tour",
-      playlist: "Sky-tour",
-      role: "Nghệ sĩ"
-    },
-    {
-      id: 3,
-      name: "Shape of You",
-      category: "Pop",
-      artist: "Ed Sheeran",
-      description: "Hit song from Ed Sheeran's album ÷...",
-      image:
-        "https://th.bing.com/th/id/OIP.EHwrQ_EMJJB3wfdhhWO7YwHaHa?rs=1&pid=ImgDetMain",
-      album: "Sky tour",
-      playlist: "Sky-tour",
-      role: "Nghệ sĩ"
-    },
-    {
-      id: 4,
-      name: "Blinding Lights",
-      category: "R&B",
-      artist: "The Weeknd",
-      description: "Chart-topping hit from The Weeknd...",
-      image:
-        "https://th.bing.com/th/id/R.68448df596cd3fbba0cca9bae732b767?rik=77B%2b0CVfFWikBg&pid=ImgRaw&r=0",
-      album: "Sky tour",
-      playlist: "Sky-tour",
-      role: "Nghệ sĩ"
-    },
-    {
-      id: 5,
-      name: "Uptown Funk",
-      category: "Funk",
-      artist: "Mark Ronson ft. Bruno Mars",
-      description: "Funk-pop collaboration...",
-      image:
-        "https://th.bing.com/th/id/OIP.B5Y33cHKwW6x3cCVxqhdrQHaEK?rs=1&pid=ImgDetMain",
-      album: "Sky tour",
-      playlist: "Sky-tour",
-      role: "Nghệ sĩ"
-    },
-  ];
-
-
-  const handleToggleDropdown = (id) => {
-    setActiveDropdown(activeDropdown === id ? null : id);
-  };
-
-  const handleDropdownClick = (e, id) => {
-    e.stopPropagation();
-    handleToggleDropdown(id);
-  };
-
-  const handleDeleteClick = (songId) => {
-    const song = songs.find(s => s.id === songId);
-    setModalState({ show: true, song });
-    handleDelete()
-  };
-
-  const closeModal = () => setModalState({ show: false, song: null });
-
+  }
 
   return (
-    <div className="bg-white shadow rounded-lg p-4 w-full max-w-full">
-      <div className="flex flex-col md:flex-row justify-between items-center mb-4">
-        <div className="relative w-full md:w-auto mb-4 md:mb-0">
-          <input
-            type="text"
-            placeholder="Search artist"
-            className="pl-8 pr-4 py-2 border rounded-md bg-gray-200 w-full md:w-64"
-          />
-          <i className="fas fa-search absolute left-2.5 top-3 text-gray-400"></i>
-        </div>
-        <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2">
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded-md w-full md:w-auto"
-            onClick={handleAddSong}
-          >
-            + Add artist
-          </button>
-          <div className="relative w-full md:w-auto">
-            <button
-              className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto"
-              onClick={() => setShowActionMenu(!showActionMenu)}
-            >
-              Actions <i className="fas fa-chevron-down ml-2"></i>
-            </button>
-            {showActionMenu && (
-              <div className="absolute right-0 mt-2 w-full md:w-48 bg-white rounded-md shadow-lg z-10">
-                <button
-                  onClick={() => console.log("Mass edit")}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  Mass edit
-                </button>
-                <button
-                  onClick={() => console.log("Delete all")}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  Delete all
-                </button>
-              </div>
-            )}
-          </div>
-          <div className="relative w-full md:w-auto">
-            <button
-              className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto"
-              onClick={() => setShowFilterMenu(!showFilterMenu)}
-            >
-              Filter <i className="fas fa-chevron-down ml-2"></i>
-            </button>
-            {showFilterMenu && (
-              <div className="absolute right-0 mt-2 w-full md:w-48 bg-white rounded-md shadow-lg z-10">
-                {genres.map((genre) => (
-                  <label
-                    key={genre}
-                    className="flex items-center px-4 py-2 hover:bg-gray-100"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedGenres.includes(genre)}
-                      onChange={() => toggleGenre(genre)}
-                      className="mr-2"
-                    />
-                    {genre}
-                  </label>
+    <div className="p-4">
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <div className="flex justify-between mb-4">
+        <TextField
+          label="Search Artist"
+          variant="outlined"
+          value={searchTerm}
+          onChange={handleSearch}
+          className="w-64"
+          placeholder="Search by artist name..."
+          disabled={isLoading}
+        />
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded-md w-full md:w-auto hover:bg-blue-600"
+          onClick={handleAddArtist}
+        >
+          ADD ARTIST +
+        </button>
+      </div>
+      {data?.artists.length > 0 ? (
+        <>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: "#18181b" }}>
+                  <TableCell sx={{ color: "white" }}>#</TableCell>
+                  <TableCell sx={{ color: "white" }}>Artist Name</TableCell>
+                  <TableCell sx={{ color: "white" }}>Avatar</TableCell>
+                  <TableCell sx={{ color: "white" }}>
+                    Monthly Listeners
+                  </TableCell>
+                  <TableCell sx={{ color: "white" }}>CreateAt</TableCell>
+                  <TableCell sx={{ color: "white" }}>Update At</TableCell>
+                  <TableCell sx={{ color: "white" }}>Actions</TableCell>
+                  <TableCell />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {data.artists.map((artist, index) => (
+                  <>
+                    <TableRow
+                      key={artist.id}
+                      sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}
+                    >
+                      <TableCell>
+                        {index + 1 + (page - 1) * ITEMS_PER_PAGE}
+                      </TableCell>
+                      <TableCell>{artist.name || "No name"}</TableCell>
+                      <TableCell>
+                        {artist.avatar ? (
+                          <img
+                            src={artist.avatar}
+                            alt={artist.name || "Avatar"}
+                            className="w-10 h-10 rounded-full"
+                          />
+                        ) : (
+                          <Avatar>{getInitials(artist.name)}</Avatar>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {artist.monthly_listeners.toLocaleString() || 0}
+                      </TableCell>
+                      <TableCell>
+                        {artist.createdAt
+                          ? new Date(
+                              artist.createdAt._seconds * 1000
+                            ).toLocaleDateString()
+                          : "N/A"}
+                      </TableCell>
+                      <TableCell>
+                        {artist.updatedAt
+                          ? new Date(
+                              artist.updatedAt._seconds * 1000
+                            ).toLocaleDateString()
+                          : "N/A"}
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          onClick={(event) => handleOpenMenu(event, artist)}
+                        >
+                          <MoreVertIcon />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          aria-label="expand row"
+                          size="small"
+                          onClick={() => toggleRow(artist.id)}
+                        >
+                          {openRow[artist.id] ? (
+                            <KeyboardArrowUp />
+                          ) : (
+                            <KeyboardArrowDown />
+                          )}
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell
+                        style={{ paddingBottom: 0, paddingTop: 0 }}
+                        colSpan={6}
+                      >
+                        <Collapse
+                          in={openRow[artist.id]}
+                          timeout="auto"
+                          unmountOnExit
+                        >
+                          <Box margin={1}>
+                            <Typography
+                              variant="h6"
+                              gutterBottom
+                              component="div"
+                            >
+                              Additional Information for {artist.name}
+                            </Typography>
+                            <Typography variant="body1">
+                              Bio: {artist.bio}
+                            </Typography>
+                            <Typography variant="body1">
+                              Albums:{" "}
+                              {artist.albumId && artist.albumId.length > 0
+                                ? artist.albumId
+                                    .map((album) => album.title || "No title")
+                                    .join(", ")
+                                : "No albums"}
+                            </Typography>
+                            <Typography variant="body1">
+                              Songs:{" "}
+                              {artist.songId
+                                ? artist.songId
+                                    .map((song) => song.title || "No title")
+                                    .join(", ")
+                                : "No songs"}
+                            </Typography>
+                            <Typography variant="body1">
+                              Followers:{" "}
+                              {artist.followerId ? artist.followerId.length : 0}
+                            </Typography>
+                          </Box>
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                  </>
                 ))}
-              </div>
-            )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleCloseMenu}
+          >
+            <MenuItem onClick={() => handleEditArtist(selectedArtist)}>
+              <EditIcon className="mr-2 text-yellow-500" /> Edit
+            </MenuItem>
+            <MenuItem onClick={() => handleDeleteClick(selectedArtist)}>
+              <DeleteIcon className="mr-2 text-red-500" /> Delete
+            </MenuItem>
+          </Menu>
+          {showDeleteModal && (
+            <DeleteArtist
+              artistToDelete={artistToDelete}
+              onClose={() => setShowDeleteModal(false)}
+              onDeleteSuccess={handleDeleteSuccess}
+            />
+          )}
+          <div className="mt-4 flex justify-end items-center">
+            <Stack spacing={2}>
+              <Pagination
+                count={data.totalPages || 1}
+                page={page}
+                onChange={handleChangePage}
+                color="primary"
+                variant="outlined"
+                shape="rounded"
+              />
+            </Stack>
           </div>
-        </div>
-      </div>
-
-      <table className="w-full table-fixed min-w-full">
-        <thead>
-          <tr className="border-b bg-gray-200">
-            <th className="text-left py-2 px-4 w-1/12 sm:w-1/16 md:w-1/24 lg:w-0.5%">
-              #
-            </th>
-            <th className="text-left py-2 px-4 w-1/2 sm:w-1/3 md:w-1/2 lg:w-1/3">
-              NAME
-            </th>
-            <th className="text-left py-2 px-4 hidden sm:table-cell sm:w-1/6 md:w-1/6 lg:w-1/6">
-              IMAGE
-            </th>
-            <th className="text-left py-2 px-4 hidden md:table-cell md:w-1/6 lg:w-1/6">
-              ROLE
-            </th>
-            <th className="text-left py-2 px-4 hidden lg:table-cell lg:w-1/6">
-              ALBUM
-            </th>
-            <th className="text-left py-2 px-4 hidden sm:table-cell sm:w-1/6 md:w-1/6 lg:w-1/6">
-              PLAYLIST
-            </th>
-            <th className="text-left py-2 px-4 w-8 sm:w-12 md:w-16 lg:w-1/12"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {songs.map((song, index) => (
-            <tr
-              key={song.id}
-              className={`border-b transition duration-200 cursor-pointer ${selectedRowId === song.id ? 'bg-[#e2eaf7]' : 'hover:bg-[#e2eaf7]'}`}
-              onClick={() => handleRowClick(song)}
-            >
-              <td className="py-2 px-4 hidden sm:table-cell">
-                {index + 1}
-              </td>
-              <td className="py-2 px-4 whitespace-nowrap overflow-hidden text-ellipsis w-[250px]">
-                {song.artist}
-              </td>
-              <td className="py-2 px-4 hidden sm:table-cell">
-                <img
-                  src={song.image}
-                  alt={song.name}
-                  className="w-8 h-8 sm:w-10 sm:h-10 mr-2 object-cover rounded"
-                />
-              </td>
-              <td className="py-2 px-4 hidden md:table-cell">
-                {song.role}
-              </td>
-              <td className="py-2 px-4 hidden lg:table-cell truncate">
-                {song.album}
-              </td>
-              <td className="py-2 px-4 hidden sm:table-cell">
-                {song.playlist}
-              </td>
-              <td className="py-2 px-4 text-right ">
-                <button
-                  onClick={(e) => handleDropdownClick(e, song.id)}
-                  className="focus:outline-none"
-                >
-                  <MdMoreVert />
-                </button>
-                <DropdownMenu
-                  isOpen={activeDropdown === song.id}
-                  onToggle={() => handleToggleDropdown(song.id)}
-                  onEdit={() => handleEditSong(song.id)}
-
-                  onDelete={() => handleDeleteClick(song.id)}
-                  showPreview={null}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <div className="flex flex-col sm:flex-row justify-between items-center mt-4 space-y-2 sm:space-y-0">
-        <span className="text-sm sm:text-base">Showing 1-5 of 1000</span>
-        <div className="flex space-x-1">
-          <button className="border px-2 sm:px-3 py-1 rounded-md text-sm sm:text-base">
-            <i className="fas fa-chevron-left"></i>
-          </button>
-          <button className="border px-2 sm:px-3 py-1 rounded-md text-sm sm:text-base">
-            1
-          </button>
-          <button className="border px-2 sm:px-3 py-1 rounded-md text-sm sm:text-base">
-            2
-          </button>
-          <button className="bg-blue-500 text-white px-2 sm:px-3 py-1 rounded-md text-sm sm:text-base">
-            3
-          </button>
-          <button className="border px-2 sm:px-3 py-1 rounded-md text-sm sm:text-base" >
-            ...
-          </button>
-          <button className="border px-2 sm:px-3 py-1 rounded-md text-sm sm:text-base">
-            100
-          </button>
-          <button className="border px-2 sm:px-3 py-1 rounded-md text-sm sm:text-base">
-            <i className="fas fa-chevron-right"></i>
-          </button>
-        </div>
-      </div>
-      {modalState.show && (
-        <DeleteArtist
-          onClose={closeModal}
-          songToDelete={modalState.song}
-        />
-      )}
-
-      {selectedPlayer && (
-        <PlayerControls
-          title={selectedPlayer.name}
-          artist={selectedPlayer.artist}
-          Image={selectedPlayer.image}
-          next={() => {/* Implement next track */ }}
-          prevsong={() => {/* Implement previous track */ }}
-          onTrackEnd={() => {/* Handle track end */ }}
-        />
+        </>
+      ) : (
+        <Alert severity="warning">
+          No artists found matching the search keyword.
+        </Alert>
       )}
     </div>
-
   );
 };
-
-ArtistList.propTypes = {
-  color: PropTypes.oneOf(["light", "dark"]),
-};
-
 
 export default ArtistList;

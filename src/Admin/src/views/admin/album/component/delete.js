@@ -1,10 +1,18 @@
 import React from "react";
 import { MdDelete } from "react-icons/md";
+import { deleteAlbum } from "../../../../../../services/albums";
 
-const DeleteAlbum = ({ onClose, songToDelete }) => {
-    const handleConfirmDelete = () => {
-        console.log("Deleting song:", songToDelete);
-        onClose(); // Đóng modal sau khi xóa
+const DeleteAlbum = ({ onClose, albumToDelete, onDeleteSuccess }) => {
+    const handleConfirmDelete = async () => {
+        try {
+            await deleteAlbum(albumToDelete.id);
+            console.log("Album deleted:", albumToDelete);
+            onDeleteSuccess(); // Gọi callback để cập nhật UI
+            onClose(); // Đóng modal sau khi xóa
+        } catch (error) {
+            console.error("Error deleting album:", error);
+            // Xử lý lỗi (ví dụ: hiển thị thông báo lỗi cho người dùng)
+        }
     };
 
     return (

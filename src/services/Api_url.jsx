@@ -171,7 +171,7 @@ export const registerWithGoogle = async (idToken) => {
     const response = await api.post('/auth/googleSignIn', { idToken });
     // Lưu token vào localStorage sau khi đăng ký thành công bằng Google
     localStorage.setItem('accessToken', response.data.accessToken);
-    localStorage.setItem('refreshToken', response.data.refreshToken);
+    // localStorage.setItem('refreshToken', response.data.refreshToken);
     localStorage.setItem('user', JSON.stringify(response.data.user));
     if (response.data.user) {
       // Đăng nhập hoặc đăng ký thành công

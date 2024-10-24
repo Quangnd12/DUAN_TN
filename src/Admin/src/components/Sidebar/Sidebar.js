@@ -203,6 +203,7 @@ export default function Sidebar() {
                 onClick={() => handleCategoryToggle(category.title)}
                 sx={{
                   cursor: "pointer",
+                  color: "white",
                   "&:hover": { backgroundColor: "rgba(255,255,255,0.1)" },
                   transition: "all 0.3s",
                   borderRadius: "5px",

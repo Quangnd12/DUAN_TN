@@ -1,10 +1,18 @@
 import React from "react";
 import { MdDelete } from "react-icons/md";
+import { deleteArtist } from "../../../../../../services/artists";
 
-const DeleteArtist = ({ onClose, songToDelete }) => {
-    const handleConfirmDelete = () => {
-        console.log("Deleting song:", songToDelete);
-        onClose(); // Đóng modal sau khi xóa
+const DeleteArtist = ({ onClose, artistToDelete, onDeleteSuccess }) => {
+    const handleConfirmDelete = async () => {
+        try {
+            await deleteArtist(artistToDelete.id);
+            console.log("Artist deleted:", artistToDelete);
+            onDeleteSuccess(); // Gọi callback để cập nhật UI
+            onClose(); // Đóng modal sau khi xóa
+        } catch (error) {
+            console.error("Error deleting artist:", error);
+            // Xử lý lỗi (ví dụ: hiển thị thông báo lỗi cho người dùng)
+        }
     };
 
     return (
@@ -15,7 +23,7 @@ const DeleteArtist = ({ onClose, songToDelete }) => {
                         <MdDelete className="text-red-600" size={28} />
                     </div>
                     <h3 className="text-base leading-6 font-medium text-gray-900 mt-4">
-                        Are you sure you want to delete this item?
+                        Are you sure you want to delete this artist?
                     </h3>
                     <div className="mt-2 px-7 py-3">
                         <p className="text-sm text-gray-500">

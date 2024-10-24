@@ -1,81 +1,125 @@
-import React from "react";
-import { createPopper } from "@popperjs/core";
+import React, { useState } from "react";
+import {
+  Badge,
+  IconButton,
+  Popover,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Typography,
+  Button,
+} from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import AlbumIcon from "@mui/icons-material/Album";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import PlaylistPlayIcon from "@mui/icons-material/PlaylistPlay";
+import ReportIcon from "@mui/icons-material/Report";
 
-const NotificationDropdown = () => {
-  // dropdown props
-  const [dropdownPopoverShow, setDropdownPopoverShow] = React.useState(false);
-  const btnDropdownRef = React.createRef();
-  const popoverDropdownRef = React.createRef();
-  const openDropdownPopover = () => {
-    console.log("hey");
-    createPopper(btnDropdownRef.current, popoverDropdownRef.current, {
-      placement: "bottom-start",
-    });
-    setDropdownPopoverShow(true);
-  };
-  const closeDropdownPopover = () => {
-    setDropdownPopoverShow(false);
-  };
-  return (
-    <>
-      <a
-        className="text-blueGray-500 block py-1 px-3"
-        href="#pablo"
-        ref={btnDropdownRef}
-        onClick={(e) => {
-          e.preventDefault();
-          dropdownPopoverShow ? closeDropdownPopover() : openDropdownPopover();
-        }}
-      >
-        <i className="fas fa-bell"></i>
-      </a>
-      <div
-        ref={popoverDropdownRef}
-        className={
-          (dropdownPopoverShow ? "block " : "hidden ") +
-          "bg-white text-base z-50 float-left py-2 list-none text-left rounded shadow-lg mt-1 min-w-48"
-        }
-      >
-        <a
-          href="#pablo"
-          className={
-            "text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
-          }
-          onClick={(e) => e.preventDefault()}
-        >
-          Action
-        </a>
-        <a
-          href="#pablo"
-          className={
-            "text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
-          }
-          onClick={(e) => e.preventDefault()}
-        >
-          Another action
-        </a>
-        <a
-          href="#pablo"
-          className={
-            "text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
-          }
-          onClick={(e) => e.preventDefault()}
-        >
-          Something else here
-        </a>
-        <div className="h-0 my-2 border border-solid border-blueGray-100" />
-        <a
-          href="#pablo"
-          className={
-            "text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
-          }
-          onClick={(e) => e.preventDefault()}
-        >
-          Seprated link
-        </a>
-      </div>
-    </>
-  );
+const notifications = [
+  { id: 1, type: "song", message: "New song has been added", time: "3:00 AM" },
+  {
+    id: 2,
+    type: "album",
+    message: "New album has been created",
+    time: "6:00 PM",
+  },
+  {
+    id: 3,
+    type: "artist",
+    message: "New artist has been added",
+    time: "2:45 PM",
+  },
+  {
+    id: 4,
+    type: "playlist",
+    message: "A new playlist has been created",
+    time: "9:10 PM",
+  },
+  { id: 5, type: "report", message: "New report from users", time: "11:30 AM" },
+];
+
+const getIcon = (type) => {
+  switch (type) {
+    case "song":
+      return <MusicNoteIcon />;
+    case "album":
+      return <AlbumIcon />;
+    case "playlist":
+      return <PlaylistPlayIcon />;
+    case "report":
+      return <ReportIcon />;
+    default:
+      return <NotificationsIcon />;
+  }
 };
 
-export default NotificationDropdown;
+export default function NotificationDropdown() {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(notifications.length);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleMarkAllRead = () => {
+    setUnreadCount(0);
+    handleClose();
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? "notification-popover" : undefined;
+
+  return (
+    <div>
+      <IconButton aria-describedby={id} onClick={handleClick}>
+        <Badge badgeContent={unreadCount} color="error">
+          <NotificationsIcon />
+        </Badge>
+      </IconButton>
+      <Popover
+        id={id}
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <div className="w-96 ">
+          <div className="p-2 border-b flex justify-between items-center">
+            <Typography variant="h7">Notification</Typography>
+            <Button onClick={handleMarkAllRead} color="primary">
+              Mark all as read
+            </Button>
+          </div>
+          <List>
+            {notifications.map((notification) => (
+              <ListItem key={notification.id} className="hover:bg-gray-100">
+                <ListItemIcon>{getIcon(notification.type)}</ListItemIcon>
+                <ListItemText
+                  primary={notification.message}
+                  secondary={notification.time}
+                />
+              </ListItem>
+            ))}
+          </List>
+          <div className="p-2 border-t">
+            <Button fullWidth color="primary">
+              View all
+            </Button>
+          </div>
+        </div>
+      </Popover>
+    </div>
+  );
+}
