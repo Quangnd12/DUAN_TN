@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useSWR from "swr";
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, IconButton, Menu, MenuItem, CircularProgress, Pagination, Typography, Alert, Stack, Collapse, Box, Avatar, Backdrop,
 } from "@mui/material";
@@ -11,7 +10,6 @@ import {
 } from "@mui/icons-material";
 import { MdEdit, MdDelete } from 'react-icons/md';
 import { getGenres } from "../../../../../../services/genres";
-import { UploadFile } from "../../../../../../config";
 import DeleteGenre from "./delete";
 
 
@@ -84,7 +82,7 @@ const GenreList = () => {
         const letters = '0123456789ABCDEF';
         let color = '#';
         for (let i = 0; i < 6; i++) {
-            color += letters[(name.charCodeAt(i % name.length) + i) % 16]; // Dùng tên của subgenre để tạo màu cố định
+            color += letters[(name.charCodeAt(i % name.length) + i) % 14]; // Dùng tên của subgenre để tạo màu cố định
         }
         return color;
     };
@@ -97,9 +95,9 @@ const GenreList = () => {
     };
     return (
         <div className="p-4">
-            <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+            {/* <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
                 <CircularProgress color="inherit" />
-            </Backdrop>
+            </Backdrop> */}
             <div className="flex justify-between mb-4">
                 <div className="flex-grow">
                     <TextField
@@ -164,8 +162,8 @@ const GenreList = () => {
                             </TableHead>
                             <TableBody>
                                 {Genres.map((genre, index) => (
-                                    <>
-                                        <TableRow key={genre.id} sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}>
+                                    <React.Fragment key={genre.id}>
+                                        <TableRow sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}>
                                             <TableCell>
                                                 <IconButton
                                                     aria-label="expand row"
@@ -176,12 +174,12 @@ const GenreList = () => {
                                                 </IconButton>
                                             </TableCell>
                                             <TableCell>
-                                                {index + 1 }
+                                                {index + 1}
                                             </TableCell>
                                             <TableCell>{genre.name || "No genrename"}</TableCell>
                                             <TableCell>
                                                 {genre.image ? (
-                                                    <img src={`${UploadFile}/${genre.image}`} alt={genre.name || "Avatar"} className="w-10 h-10 rounded-full" />
+                                                    <img src={`${genre.image}`} alt={genre.name} className="w-10 h-10 rounded-md" />
                                                 ) : (
                                                     <Avatar>{getInitials(genre.name)}</Avatar>
                                                 )}
@@ -224,7 +222,7 @@ const GenreList = () => {
                                                         <Typography variant="h6" gutterBottom component="div">
                                                             Additional Information for {genre.name}
                                                         </Typography>
-                                                        <Typography variant="body1">Subcategory:</Typography>
+                                                        <Typography variant="body1" className="pb-2">Subcategory:</Typography>
                                                         {Array.isArray(genre.subgenres) ? (
                                                             <div className="flex flex-wrap">
                                                                 {genre.subgenres.map((subgenre, index) => (
@@ -256,7 +254,7 @@ const GenreList = () => {
                                                 </Collapse>
                                             </TableCell>
                                         </TableRow>
-                                    </>
+                                    </React.Fragment>
                                 ))}
                             </TableBody>
                         </Table>
