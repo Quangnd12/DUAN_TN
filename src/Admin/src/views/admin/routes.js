@@ -29,7 +29,7 @@ const AdminRoutes = (
     <Route path="dashboard" element={<Dashboard />} />
     <Route path="home" element={<Home />} />
     <Route path="settings" element={<Settings />} />
-    <Route path="info" element={<Info />} />
+    <Route path="info/:id" element={<Info />} />
     <Route path="user" element={<Users />} />
     <Route path="song" element={<Songs />} />
     <Route path="song/add" element={<AddSong />} />

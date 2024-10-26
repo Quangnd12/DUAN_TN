@@ -1,26 +1,33 @@
 // src/services/Api_url.jsx
 
-import axios from 'axios';
+import axios from "axios";
 
 // URL cơ bản của API
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+export const API_BASE_URL =
+  process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 // Tạo instance của axios với cấu hình cơ bản
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   withCredentials: true, // Cho phép gửi cookie cùng với mỗi yêu cầu
 });
+
+// Thêm function kiểm tra role
+const checkUserRole = (userData) => {
+  if (!userData || !userData.role) return false;
+  return userData.role === 'admin';
+};
 
 // Interceptor để xử lý request, thêm token nếu có
 api.interceptors.request.use(
   (config) => {
     // Lấy token từ localStorage
-    const accessToken = localStorage.getItem('accessToken');
+    const accessToken = localStorage.getItem("accessToken");
     if (accessToken) {
-      config.headers['Authorization'] = `Bearer ${accessToken}`;
+      config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
     return config;
   },
@@ -40,23 +47,27 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       try {
         // Gọi API làm mới token (có thể bạn cần tạo một endpoint mới cho việc này)
-        const refreshToken = localStorage.getItem('refreshToken');
-        const response = await api.post('/auth/refresh-token', { token: refreshToken });
-        
+    
+        const response = await api.post("/auth/refresh-token");
+        const { accessToken, isRemembered } = response.data;
         // Lưu token mới
-        localStorage.setItem('accessToken', response.data.accessToken);
-        
+        localStorage.setItem("accessToken", accessToken);
+
         // Thêm token mới vào header của request
-        api.defaults.headers['Authorization'] = `Bearer ${response.data.accessToken}`;
-        originalRequest.headers['Authorization'] = `Bearer ${response.data.accessToken}`;
+        api.defaults.headers["Authorization"] = `Bearer ${accessToken}`;
+        originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+
+        // Cập nhật thông tin rememberMe nếu cần
+        if (typeof isRemembered !== "undefined") {
+          localStorage.setItem("rememberMe", isRemembered);
+        }
+
         return api(originalRequest);
       } catch (err) {
         // Nếu không thể làm mới token, quay về trang đăng nhập
-        console.error('Token refresh error:', err);
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        // Chuyển hướng đến trang đăng nhập hoặc thông báo cho người dùng
-        window.location.href = '/login';
+        localStorage.clear();
+     
+        window.location.href = "/auth/login";
         return Promise.reject(err);
       }
     }
@@ -67,23 +78,41 @@ api.interceptors.response.use(
 // API đăng ký người dùng mới
 export const registerUser = async (email, password) => {
   try {
-    const response = await api.post('/auth/register', { email, password });
+    const response = await api.post("/auth/register", { email, password });
+    if (response.data.token) {
+      localStorage.setItem("accessToken", response.data.token);
+    }
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    throw error.response?.data || { message: "Registration failed" };
   }
 };
 
 // API đăng nhập người dùng
-export const loginUser = async (email, password, rememberMe) => {
+export const loginUser = async (email, password, birthday, rememberMe = false, googleToken = null) => {
   try {
-    const response = await api.post('/auth/login', { email, password, rememberMe });
-    // Lưu token vào localStorage sau khi đăng nhập thành công
-    localStorage.setItem('accessToken', response.data.accessToken);
-    localStorage.setItem('refreshToken', response.data.refreshToken);
+    const payload = googleToken 
+      ? { googleToken, rememberMe }
+      : { email, password, rememberMe, birthday };
+      
+    const response = await api.post('/auth/login', payload);
+    
+    // Kiểm tra role
+    if (!checkUserRole(response.data.user)) {
+      throw new Error("Bạn không có quyền truy cập vào trang quản trị");
+    }
+
+    // Lưu thông tin đăng nhập nếu là admin
+    if (response.data.token) {
+      localStorage.setItem('accessToken', response.data.token);
+      localStorage.setItem('rememberMe', rememberMe);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('lastLoginTime', Date.now().toString());
+    }
+
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    throw error.response?.data || { message: error.message || 'Login failed' };
   }
 };
 
@@ -108,71 +137,108 @@ export const getUserById = async (userId) => {
 };
 
 // API lấy tất cả thông tin người dùng với tùy chọn giới hạn và phân trang
-export const getAllUsers = async (page = 1, limit = 5, searchTerm = '') => { 
-  try { 
-    const response = await api.get('/admin/users', { 
-      params: { page, limit, searchTerm } // Truyền searchTerm vào
+export const getAllUsers = async (page = 1, limit = 5, searchTerm = "") => {
+  try {
+    const response = await api.get("/admin/users", {
+      params: { page, limit, searchTerm }, // Truyền searchTerm vào
     });
-    
-    if (!response.data || !response.data.users) { 
-      throw new Error('Invalid response format from server'); 
-    } 
-     
-    return { 
-      users: response.data.users, 
-      currentPage: response.data.currentPage, 
-      totalPages: response.data.totalPages, 
-      totalUsers: response.data.totalUsers 
-    }; 
-  } catch (error) { 
-    console.error("Error fetching users:", error.response?.data || error.message); 
-    throw error.response?.data || { message: 'Failed to fetch users.' }; 
-  } 
-};
 
+    if (!response.data || !response.data.users) {
+      throw new Error("Invalid response format from server");
+    }
+
+    return {
+      users: response.data.users,
+      currentPage: response.data.currentPage,
+      totalPages: response.data.totalPages,
+      totalUsers: response.data.totalUsers,
+    };
+  } catch (error) {
+    console.error(
+      "Error fetching users:",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || { message: "Failed to fetch users." };
+  }
+};
 
 // API đăng xuất người dùng
 export const logoutUser = async () => {
   try {
-    const response = await api.post('/auth/logout');
-    // Xóa token khỏi localStorage khi đăng xuất
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    return response.data;
+    await api.post('/auth/logout');
+    localStorage.clear();
+    sessionStorage.clear();
+
+    return { message: 'Logged out successfully' };
   } catch (error) {
-    console.error("Logout error:", error.response?.data || error.message);
-    throw error.response?.data || { message: 'Logout failed.' };
+    localStorage.clear();
+    sessionStorage.clear();
+    throw error.response?.data || { message: 'Logout failed' };
   }
 };
 
 // API quên mật khẩu
-export const forgotPassword = async (email) => {
+export const forgotPassword = async (email, isAdmin = false) => {
   try {
-    const response = await api.post('/auth/forgotPassword', { email });
+    const response = await api.post("/auth/forgotPassword", { email, isAdmin });
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || 'Failed to send email');
+    throw error.response?.data || { message: 'Failed to send reset password email' };
   }
 };
 
 // API đặt lại mật khẩu
 export const resetPassword = async (token, newPassword) => {
   try {
-    const response = await api.patch(`/auth/resetPassword/${token}`, { password: newPassword });
+    const response = await api.patch(`/auth/resetPassword/${token}`, {
+      password: newPassword,
+    });
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    throw error.response?.data || { message: 'Password reset failed' };
+  }
+};
+
+// API đăng nhập bằng Google
+export const googleSignIn = async (idToken, rememberMe = false) => {
+  try {
+    const response = await api.post('/auth/googleSignIn', { idToken, rememberMe });
+    if (response.data.accessToken) {
+      localStorage.setItem('accessToken', response.data.accessToken);
+      localStorage.setItem('rememberMe', rememberMe);
+      if (response.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+    }
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Google sign-in failed' };
+  }
+};
+
+// API làm mới token
+export const refreshUserToken = async () => {
+  try {
+    const response = await api.post('/auth/refresh-token');
+    const { accessToken, isRemembered } = response.data;
+    localStorage.setItem('accessToken', accessToken);
+    if (typeof isRemembered !== 'undefined') {
+      localStorage.setItem('rememberMe', isRemembered);
+    }
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Token refresh failed' };
   }
 };
 
 // API đăng ký bằng Google
 export const registerWithGoogle = async (idToken) => {
   try {
-    const response = await api.post('/auth/googleSignIn', { idToken });
+    const response = await api.post("/auth/googleSignIn", { idToken });
     // Lưu token vào localStorage sau khi đăng ký thành công bằng Google
-    localStorage.setItem('accessToken', response.data.accessToken);
+    localStorage.setItem("accessToken", response.data.accessToken);
     // localStorage.setItem('refreshToken', response.data.refreshToken);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
+    localStorage.setItem("user", JSON.stringify(response.data.user));
     if (response.data.user) {
       // Đăng nhập hoặc đăng ký thành công
       return response.data;
@@ -180,7 +246,6 @@ export const registerWithGoogle = async (idToken) => {
       // Người dùng chưa đăng ký
       return { needsRegistration: true, email: response.data.email };
     }
-    
   } catch (error) {
     throw error.response.data;
   }
