@@ -6,10 +6,12 @@ import Auth from "./Admin/src/layouts/Auth.js";
 import { Provider } from "react-redux";
 import Store from "./redux/store";
 import PrivateRoute from "./redux/PrivateRoute"; 
+import { PlayerProvider } from "Admin/src/components/audio/playerContext";
 
 const App = () => {
   return (
     <Provider store={Store}>
+       <PlayerProvider>
       <Routes>
         <Route path="/admin/*" element={
             <PrivateRoute>
@@ -20,6 +22,7 @@ const App = () => {
         <Route path="*" element={<Client />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      </PlayerProvider>
     </Provider>
   );
 };

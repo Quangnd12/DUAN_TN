@@ -2,8 +2,9 @@ import axios from "axios";
 import { Cookies } from "react-cookie";
 
 const BASE_URL = "http://localhost:5000";
+const UploadFile="https://storage.googleapis.com/be-musicheals.appspot.com/UploadImage";
 
-const request = async ({
+const ApiConfig = async ({
   method = "GET",
   path = "",
   data = {},
@@ -33,6 +34,5 @@ const request = async ({
   }
 };
 
-
-export default request;
-export { BASE_URL };
+export default ApiConfig;
+export { BASE_URL,UploadFile };

@@ -18,11 +18,13 @@ import Albums from "./album";
 import AddAlbum from "./album/component/add.js";
 import EditAlbum from "./album/component/edit.js";
 import Favorites from "./favorite";
-import FollowList from "./follow";
-import GenreList from "./genre/component/list.js";
 import NotFound from "./notfound/index.js";
 import UnderDevelopment from "./underdev/index.js";
 import Login from "../auth/Login.js";
+import AddGenre from "./genre/component/add.js";
+import EditGenre from "./genre/component/edit.js";
+import Follows from "./follow";
+import Genres from "./genre";
 
 const AdminRoutes = (
   <>
@@ -42,11 +44,12 @@ const AdminRoutes = (
     <Route path="album/add" element={<AddAlbum />} />
     <Route path="album/edit/:id" element={<EditAlbum />} />
     <Route path="favorite" element={<Favorites />} />
-    <Route path="follow" element={<FollowList />} />
-    <Route path="genre" element={<GenreList />} />
-
+    <Route path="follow" element={<Follows />} />
+    <Route path="genre" element={<Genres />} />
+    <Route path="genre/add" element={<AddGenre />} />
+    <Route path="genre/edit/:id" element={<EditGenre />} />
     {/* Thêm routes mới cho các trang đang phát triển */}
-    <Route path="genre" element={<UnderDevelopment />} />
+
     <Route path="playlist" element={<UnderDevelopment />} />
     <Route path="explore" element={<UnderDevelopment />} />
     <Route path="trending" element={<UnderDevelopment />} />

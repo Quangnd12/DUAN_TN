@@ -1,10 +1,23 @@
+import { handleDelete } from "Admin/src/components/notification";
 import React from "react";
 import { MdDelete } from "react-icons/md";
+import { deleteSong } from "../../../../../../services/songs";
 
-const DeleteSong = ({ onClose, songToDelete }) => {
-    const handleConfirmDelete = () => {
-        console.log("Deleting song:", songToDelete);
-        onClose(); // Đóng modal sau khi xóa
+const DeleteSong = ({ onClose, songDelete, onDelete }) => {
+    const handleConfirmDelete = async () => {
+        try {
+            // Gọi API để xóa genre
+            await deleteSong(songDelete.songId);
+            handleDelete();  // Gọi hàm thông báo đã xóa thành công
+
+            // Cập nhật lại state trong component cha để genre bị xóa
+            onDelete(songDelete.songId);
+
+            // Đóng modal sau khi xóa
+            onClose();
+        } catch (error) {
+            console.error("Xóa genre không thành công:", error);
+        }
     };
 
     return (
@@ -12,7 +25,7 @@ const DeleteSong = ({ onClose, songToDelete }) => {
             <div className="relative top-36 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
                 <div className="mt-3 text-center">
                     <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                    <MdDelete className="text-red-600" size={28} />
+                        <MdDelete className="text-red-600" size={28} />
                     </div>
                     <h3 className="text-base leading-6 font-medium text-gray-900 mt-4">
                         Are you sure you want to delete this item?
