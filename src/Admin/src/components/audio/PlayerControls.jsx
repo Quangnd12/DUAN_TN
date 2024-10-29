@@ -116,7 +116,8 @@ const Container = styled.div`
   left: 0;
   background-color: #181818;
   padding: 0.5rem 0;
-  z-index: 1000;
+  z-index: 1100;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 
   .controls {
     display: flex;
@@ -128,8 +129,8 @@ const Container = styled.div`
       display: flex;
       align-items: center;
       position: absolute;
-      left: 717px;
-      top: 18px;
+      left: 50%; 
+      transform: translateX(-50%); 
       gap: 1rem;
 
       .icon {
@@ -158,7 +159,6 @@ const ProgressContainer = styled.div`
   width: 30%;
   padding: 0 1rem;
   justify-content: center;
-
   input[type="range"] {
     flex: 1;
     cursor: pointer;

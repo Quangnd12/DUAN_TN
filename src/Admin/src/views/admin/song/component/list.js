@@ -1,148 +1,159 @@
 import React, { useState, useEffect } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
-import PropTypes from "prop-types";
-import { getSongs, deleteSong } from "../../../../../../services/songs";
-import DropdownMenu from "../../../../components/Dropdowns/dropdownMenu";
+import { useNavigate, useLocation } from "react-router-dom";
+import useSWR from "swr";
+import {
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, IconButton, Menu, MenuItem, CircularProgress, Pagination, Typography, Alert, Stack, Collapse, Box, Avatar, Backdrop,
+} from "@mui/material";
+import {
+  MoreVert as MoreVertIcon,
+  KeyboardArrowDown,
+  KeyboardArrowUp,
+} from "@mui/icons-material";
+import { MdEdit, MdDelete, MdPlayArrow } from 'react-icons/md';
+import { getSongs } from "../../../../../../services/songs";
+
 import DeleteSong from "./delete";
-import PreviewSong from "./preview";
+import { formatDate, formatDuration } from "Admin/src/components/formatDate";
 import PlayerControls from "../../../../components/audio/PlayerControls";
-import { MdMoreVert } from "react-icons/md";
-import { toast } from 'react-toastify';
+import { usePlayerContext } from "Admin/src/components/audio/playerContext";
 
 const SongList = () => {
   const navigate = useNavigate();
-  const [songs, setSongs] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [anchorEl, setAnchorEl] = useState(null); // Quản lý anchorEl cho menu
+  const [selectedSong, setSelectedSong] = useState(null); // Quản lý genre được chọn
+  const [openRow, setOpenRow] = useState({});
+  const [Songs, setSongs] = useState([]);
+  const [songToDelete, setsongToDelete] = useState(null);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
-  const [showFilterMenu, setShowFilterMenu] = useState(false);
-  const [selectedGenres, setSelectedGenres] = useState([]);
-  const [activeDropdown, setActiveDropdown] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [modalState, setModalState] = useState({ show: false, song: null });
-  const [showPreview, setShowPreview] = useState(false);
-  const [selectedSong, setSelectedSong] = useState(null);
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
-  const [selectedRowId, setSelectedRowId] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const songsPerPage = 10;
-  
-  const genres = ["V-Pop", "Pop", "R&B", "Funk", "Rock", "Hip-Hop"];
+  const { selectedPlayer, setSelectedPlayer, isPlayerVisible, setIsPlayerVisible } = usePlayerContext();
+  const [isPlaying, setIsPlaying] = useState(false);
+  const location = useLocation();
+
+
+  const handleRowClick = (song, index) => {
+    setSelectedPlayer(song);
+    setIsPlayerVisible(true);
+  };
 
   useEffect(() => {
-    fetchSongs();
-  }, [currentPage, selectedGenres, searchQuery]);
+    // Khi route thay đổi, ẩn thanh phát nhạc
+    return () => {
+      setIsPlayerVisible(false);
+    };
+  }, [location.pathname, setIsPlayerVisible]);
 
-  const fetchSongs = async () => {
+  useEffect(() => {
+    SongData();
+  }, []);
+
+  const SongData = async () => {
     try {
-      setLoading(true);
-      const response = await getSongs();
-      let filteredSongs = response;
-      
-      if (searchQuery) {
-        filteredSongs = filteredSongs.filter(song => 
-          song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          song.artist.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-      
-      if (selectedGenres.length > 0) {
-        filteredSongs = filteredSongs.filter(song => 
-          selectedGenres.includes(song.category)
-        );
-      }
-      
-      setSongs(filteredSongs);
-    } catch (err) {
-      setError("Failed to fetch songs");
-      toast.error("Failed to load songs");
-    } finally {
-      setLoading(false);
+      const data = await getSongs();
+      setSongs(data);
+    } catch (error) {
+      console.log("Không tìm thấy dữ liệu");
     }
   };
 
-  // Added missing handler functions
-  const handleToggleDropdown = (id) => {
-    setActiveDropdown(activeDropdown === id ? null : id);
-  };
-
-  const handleDropdownClick = (e, id) => {
-    e.stopPropagation();
-    handleToggleDropdown(id);
-  };
-
-  const handleDeleteClick = (songId) => {
-    const song = songs.find(s => s.id === songId);
-    setModalState({ show: true, song });
-  };
-
-  const handleRowClick = (song) => {
-    if (activeDropdown === song.id) {
-      return;
+  const playTrack = (track) => {
+    if (selectedPlayer?.id === track.id) {
+      // Nếu đang phát bài hát này, chỉ cần đổi trạng thái phát tạm dừng
+      setIsPlaying(!isPlaying);
+    } else {
+      // Nếu chọn một bài hát khác, thiết lập bài hát mới
+      setSelectedPlayer(track);
+      setIsPlaying(true); // Bắt đầu phát bài hát
     }
-    setSelectedRowId(song.id);
-    setSelectedPlayer(song);
+  };
+
+  useEffect(() => {
+    if (!isPlaying) {
+      setSelectedPlayer(null);
+    }
+  }, [isPlaying]);
+
+  const handleOpenMenu = (event, song) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedSong(song); // Cập nhật genre được chọn
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+    setSelectedSong(null); // Đóng menu khi không chọn
+  };
+
+
+  const handleDeleteSong = (songId) => {
+    setSongs(prevGenres => prevGenres.filter(song => song.songId !== songId));
+  };
+
+  const handleOpenDeleteModal = (song) => {
+    setsongToDelete(song);
+    setOpenDeleteModal(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setOpenDeleteModal(false);
+    setsongToDelete(null);
+  };
+
+  const toggleRow = (songId) => {
+    setOpenRow((prevState) => ({
+      ...prevState,
+      [songId]: !prevState[songId],
+    }));
+  };
+
+  const getInitials = (username) => {
+    if (!username) return "";
+    const names = username.split(" ");
+    return names.length > 1 ? names[0][0] + names[1][0] : names[0][0];
+  };
+
+  const getColorFromName = (name) => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[(name.charCodeAt(i % name.length) + i) % 14]; // Dùng tên của subgenre để tạo màu cố định
+    }
+    return color;
   };
 
   const handleAddSong = () => {
     navigate("/admin/song/add");
   };
-
-  const handleEditSong = (id) => {
+  const handleEditsong = (id) => {
     navigate(`/admin/song/edit/${id}`);
   };
 
-  const handlePreviewClick = (id) => {
-    const song = songs.find(song => song.id === id);
-    setSelectedSong(song);
-    setShowPreview(true);
-  };
 
-  const handleClosePreview = () => {
-    setShowPreview(false);
-    setSelectedSong(null);
-  };
-
-  const closeModal = () => setModalState({ show: false, song: null });
-
-  const toggleGenre = (genre) => {
-    setSelectedGenres((prevGenres) =>
-      prevGenres.includes(genre)
-        ? prevGenres.filter((g) => g !== genre)
-        : [...prevGenres, genre]
-    );
-  };
-
-  if (loading) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="text-red-500 text-center">{error}</div>;
-  }
 
   return (
-    <div className="bg-white shadow rounded-lg p-4 w-full max-w-full">
-      {/* Header section with search and buttons */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-4">
-        <div className="relative w-full md:w-auto mb-4 md:mb-0">
-          <input
-            type="text"
-            placeholder="Search songs"
-            className="pl-8 pr-4 py-2 border rounded-md bg-gray-200 w-full md:w-64"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+    <div className="p-4">
+      {/* <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <CircularProgress color="inherit" />
+      </Backdrop> */}
+      <div className="flex justify-between mb-4">
+        <div className="flex-grow">
+          <TextField
+            label="Search"
+            variant="outlined"
+
+
+            className="w-64"
+            placeholder="Search..."
           />
-          <i className="fas fa-search absolute left-2.5 top-3 text-gray-400"></i>
         </div>
-        <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2">
+
+        <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2 justify-end">
           <button
             className="bg-blue-500 text-white px-4 py-2 rounded-md w-full md:w-auto"
             onClick={handleAddSong}
           >
             + Add song
           </button>
+
           <div className="relative w-full md:w-auto">
             <button
               className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto"
@@ -150,6 +161,7 @@ const SongList = () => {
             >
               Actions <i className="fas fa-chevron-down ml-2"></i>
             </button>
+
             {showActionMenu && (
               <div className="absolute right-0 mt-2 w-full md:w-48 bg-white rounded-md shadow-lg z-10">
                 <button
@@ -167,120 +179,189 @@ const SongList = () => {
               </div>
             )}
           </div>
-          <div className="relative w-full md:w-auto">
-            <button
-              className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto"
-              onClick={() => setShowFilterMenu(!showFilterMenu)}
-            >
-              Filter <i className="fas fa-chevron-down ml-2"></i>
-            </button>
-            {showFilterMenu && (
-              <div className="absolute right-0 mt-2 w-full md:w-48 bg-white rounded-md shadow-lg z-10">
-                {genres.map((genre) => (
-                  <label
-                    key={genre}
-                    className="flex items-center px-4 py-2 hover:bg-gray-100"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedGenres.includes(genre)}
-                      onChange={() => toggleGenre(genre)}
-                      className="mr-2"
-                    />
-                    {genre}
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
-      {/* Table section */}
-      <table className="w-full table-fixed min-w-full">
-        <thead>
-          <tr className="border-b bg-gray-200">
-            <th className="text-left py-2 px-4 w-1/12">#</th>
-            <th className="text-left py-2 px-4 w-1/2">SONG</th>
-            <th className="text-left py-2 px-4 hidden sm:table-cell">CATEGORY</th>
-            <th className="text-left py-2 px-4 hidden md:table-cell">ARTIST</th>
-            <th className="text-left py-2 px-4 hidden lg:table-cell">ALBUM</th>
-            <th className="text-left py-2 px-4 hidden sm:table-cell">DURATION</th>
-            <th className="text-left py-2 px-4 w-8"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {songs.map((song, index) => (
-            <tr
-              key={song.id}
-              className={`border-b transition duration-200 cursor-pointer ${
-                selectedRowId === song.id ? 'bg-[#e2eaf7]' : 'hover:bg-[#e2eaf7]'
-              }`}
-              onClick={() => handleRowClick(song)}
-            >
-              <td className="py-2 px-4 hidden sm:table-cell">{index + 1}</td>
-              <td className="py-2 px-4 flex items-center">
-                <img
-                  src={song.image || '/placeholder.png'}
-                  alt={song.title}
-                  className="w-8 h-8 sm:w-10 sm:h-10 mr-2 object-cover rounded"
-                />
-                <span className="truncate">{song.title}</span>
-              </td>
-              <td className="py-2 px-4 hidden sm:table-cell">{song.category}</td>
-              <td className="py-2 px-4 hidden md:table-cell">{song.artist}</td>
-              <td className="py-2 px-4 hidden lg:table-cell truncate">{song.album}</td>
-              <td className="py-2 px-4 hidden sm:table-cell">{song.duration}</td>
-              <td className="py-2 px-4 text-right">
-                <button
-                  onClick={(e) => handleDropdownClick(e, song.id)}
-                  className="focus:outline-none"
-                >
-                  <MdMoreVert />
-                </button>
-                <DropdownMenu
-                  isOpen={activeDropdown === song.id}
-                  onToggle={() => handleToggleDropdown(song.id)}
-                  onEdit={() => handleEditSong(song.id)}
-                  onPreview={() => handlePreviewClick(song.id)}
-                  onDelete={() => handleDeleteClick(song.id)}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {Songs?.length > 0 ? (
+        <>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: "#18181b" }}>
+                  <TableCell />
+                  <TableCell sx={{ color: "white" }}>#</TableCell>
+                  <TableCell sx={{ color: "white" }}>Song</TableCell>
+                  <TableCell sx={{ color: "white" }}>Artist</TableCell>
+                  <TableCell sx={{ color: "white" }}>category</TableCell>
+                  <TableCell sx={{ color: "white" }}>Album</TableCell>
+                  <TableCell sx={{ width: "70px", color: "white" }}>Action</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {Songs.map((song, index) => (
+                  <React.Fragment key={song.songId}>
+                    <TableRow sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}
+                    >
+                      <TableCell>
+                        <IconButton
+                          aria-label="expand row"
+                          size="small"
+                          onClick={() => toggleRow(song.songId)}
+                        >
+                          {openRow[song.songId] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                        </IconButton>
+                      </TableCell>
+                      <TableCell>
+                        {index + 1}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <span>
+                            {song.image ? (
+                              <img
+                                src={`${song.image}`}
+                                alt={song.name || "Avatar"}
+                                className="w-10 h-10 rounded-md"
+                              />
+                            ) : (
+                              <Avatar>{getInitials(song.name)}</Avatar>
+                            )}
+                          </span>
+                          <span className="ml-2">
+                            {song.title || "No songname"}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {song.artistIds.map(artist => artist.name).join(', ')}
+                      </TableCell>
+                      <TableCell>{song.genreIds?.name}</TableCell>
+                      <TableCell>
+                        {song.albumIds.map(album => album.name).join(', ')}
+                      </TableCell>
+                      <TableCell>
+                        <IconButton onClick={(event) => handleOpenMenu(event, song)}>
+                          <MoreVertIcon />
+                        </IconButton>
+                        <Menu
+                          anchorEl={anchorEl}
+                          open={Boolean(anchorEl) && selectedSong?.songId === song.songId}
+                          onClose={handleCloseMenu}
 
-      {/* Modals and Player Controls */}
-      {modalState.show && (
-        <DeleteSong
-          onClose={closeModal}
-          songToDelete={modalState.song}
-        />
+                        >
+                          <MenuItem onClick={() => {
+                            handleCloseMenu();
+                            handleEditsong(song.songId);
+                          }
+                          } >
+                            <MdEdit style={{ marginRight: '8px', color: 'blue' }} /> {/* Icon sửa */}
+                            <span style={{ color: 'blue' }}>Edit</span>
+                          </MenuItem>
+                          <MenuItem
+                            onClick={() => {
+                              handleCloseMenu();
+                              handleOpenDeleteModal(song);
+                            }}
+                          >
+                            <MdDelete style={{ marginRight: '8px', color: "red" }} />
+                            <span style={{ color: 'red' }}>Delete</span>
+                          </MenuItem>
+                        </Menu>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
+                        <Collapse in={openRow[song.songId]} timeout="auto" unmountOnExit>
+                          <Box margin={1}>
+                            <Typography variant="h6" gutterBottom component="div">
+                              <div className="flex mr-2">
+                                Additional Information
+                                <button className="bg-icon text-white p-2 rounded-full hover:bg-blue-700 transition ml-3"
+                                  onClick={() => handleRowClick(song)}
+                                >
+                                  <MdPlayArrow size={24} />
+                                </button>
+                              </div>
+
+                            </Typography>
+                            <Typography variant="body1" className="pb-2">Subgenres: </Typography>
+                            {Array.isArray(song.genreIds?.subgenres) ? (
+                              <div className="flex flex-wrap">
+                                {song.genreIds.subgenres.map((subgenre) => (
+                                  <Typography
+                                    key={subgenre.id || subgenre.name}
+                                    variant="body2"
+                                    component="div"
+                                    style={{
+                                      backgroundColor: getColorFromName(subgenre.name),
+                                      color: '#fff',
+                                      padding: '4px 12px',
+                                      marginRight: '8px',
+                                      marginBottom: '4px',
+                                      borderRadius: '16px',
+                                    }}
+                                  >
+                                    {subgenre.name}
+                                  </Typography>
+                                ))}
+                              </div>
+                            ) : (
+                              <Typography variant="body2" component="div">
+                                No subgenres available
+                              </Typography>
+                            )}
+                            <Typography variant="body1" className="pb-2 pt-2">Duration: {formatDuration(song.duration)}</Typography>
+                            <Typography variant="body1" className="pb-2 ">release date: {formatDate(song.releasedate)}</Typography>
+                            <Typography variant="body1" className="pb-2">Play count: {song.playcountId}</Typography>
+                            <Typography variant="body1" className="pb-2">lyrics: {song.lyrics}</Typography>
+                          </Box>
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                  </React.Fragment>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <div className="mt-4 flex justify-end items-center">
+            <Stack spacing={2}>
+              <Pagination
+                // count={data.totalPages || 1} // Tính số trang từ data
+                // page={page}
+                // onChange={handleChangePage}
+                color="primary"
+                variant="outlined"
+                shape="rounded"
+              />
+            </Stack>
+          </div>
+        </>
+      ) : (
+        <Alert severity="warning">No song found matching the search keyword.</Alert>
       )}
-      
-      <PreviewSong
-        showModal={showPreview}
-        onClose={handleClosePreview}
-        song={selectedSong}
-      />
-      
       {selectedPlayer && (
         <PlayerControls
           title={selectedPlayer.title}
-          artist={selectedPlayer.artist}
+          artist={selectedPlayer.artistIds.map(artist => artist.name).join(', ')}
           Image={selectedPlayer.image}
-          next={() => {/* Implement next track */}}
-          prevsong={() => {/* Implement previous track */}}
-          onTrackEnd={() => {/* Handle track end */}}
+          next={() => {/* Implement next track */ }}
+          prevsong={() => {/* Implement previous track */ }}
+          onTrackEnd={() => {/* Handle track end */ }}
+          audioUrl={selectedPlayer.file_song}
+        />
+      )}
+      {/* Modal xóa */}
+      {openDeleteModal && (
+        <DeleteSong
+          onClose={handleCloseDeleteModal}
+          songDelete={songToDelete}
+          onDelete={handleDeleteSong}
         />
       )}
     </div>
   );
 };
 
-SongList.propTypes = {
-  color: PropTypes.oneOf(["light", "dark"]),
-};
-
 export default SongList;
+
