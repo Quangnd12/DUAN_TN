@@ -5,7 +5,7 @@ const getSongs = async () => {
     method: "GET",
     path: "/api/songs",
   });
-  return res.data;
+  return res;
 };
 
 const getSongById = async (id) => {
@@ -13,7 +13,7 @@ const getSongById = async (id) => {
     method: "GET",
     path: `/api/songs/${id}`,
   });
-  return res.data;
+  return res;
 };
 
 const addSong = async (song) => {
@@ -22,7 +22,7 @@ const addSong = async (song) => {
     path: "/api/songs",
     data: song,
   });
-  return res.data;
+  return res;
 };
 
 const deleteSong = async (id) => {
@@ -30,7 +30,7 @@ const deleteSong = async (id) => {
     method: "DELETE",
     path: `/api/songs/${id}`,
   });
-  return res.data;
+  return res;
 };
 
 const updateSong = async (id, song) => {
@@ -39,7 +39,7 @@ const updateSong = async (id, song) => {
     path: `/api/songs/${id}`,
     data: song,
   });
-  return res.data;
+  return res;
 };
 
 export { getSongs, getSongById, addSong, deleteSong, updateSong };

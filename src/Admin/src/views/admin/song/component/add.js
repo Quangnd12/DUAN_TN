@@ -20,58 +20,42 @@ const AddSong = () => {
   const { control, handleSubmit, setValue, watch, clearErrors, getValues, formState: { errors }, trigger, setError } = useForm({
     defaultValues: {
       title: "",
-      artistIds: [],
-      albumIds: [],
-      genreIds: [],
-      playcountId: 0,
+      file_song: null,
+      image: null,
+      artistID: [],
+      albumID: [],
+      genreID: [],
+      listens_count: 0,
       lyrics: "",
-      releasedate: null,
+      releaseDate: null,
       duration: null,
-      is_explicit: false,
-      file_song: null, // Sử dụng file_song
-      image: null,     // Sử dụng image
+      is_explicit: 0,
     }
   });
   const [Artists, setArtists] = useState([]);
   const [Genres, setGenres] = useState([]);
   const [Albums, setAlbums] = useState([]);
-  const [selectedMainGenre, setSelectedMainGenre] = useState(null); // Lưu thể loại chính
-  const [subGenreOptions, setSubGenreOptions] = useState([]); // Lưu thể loại con
-  const [selectedSubGenre, setSelectedSubGenre] = useState(null); //
   const navigate = useNavigate();
   const [coverImagePreview, setCoverImagePreview] = useState(null);
   const [durationSet, setDurationSet] = useState(false);
+  const [coverAudioPreview, setCoverAudioPreview] = useState(null);
   const [lyrics, setLyrics] = useState("");
 
   const handleDrop = useCallback(async (acceptedFiles, name) => {
     const file = acceptedFiles[0];
     if (!file) return;
 
+ 
     if (name === "file_song") {
-      setValue("file_song", file); // Cập nhật giá trị cho file_song
+      setValue("file_song", file); 
       clearErrors("file_song");
-      const audio = new Audio(URL.createObjectURL(file));
+      const audioUrl = URL.createObjectURL(file); 
+      setCoverAudioPreview(audioUrl);
+      const audio = new Audio(audioUrl); 
       audio.onloadedmetadata = () => {
         const durationInSeconds = Math.floor(audio.duration);
         setValue("duration", durationInSeconds, { shouldValidate: true });
       };
-      // try {
-      //   const metadata = await mm.parseBlob(file);
-      //   console.log(metadata);
-
-      //   if (metadata && metadata.common && metadata.common.lyrics) {
-      //     // Lưu lời bài hát vào state và cập nhật input
-      //     const lyricsText = metadata.common.lyrics.map(lyric => lyric.text).join('\n');
-      //     console.log("Lyrics: ", lyricsText);
-      //     setLyrics(lyricsText); // Cập nhật state lyrics
-      //     setValue("lyrics", lyricsText); // Cập nhật giá trị của form
-      //     console.log("Updated form value: ", getValues("lyrics"));
-      //   } else {
-      //     console.log("No lyrics found in the file");
-      //   }
-      // } catch (error) {
-      //   console.error("Error reading metadata:", error);
-      // }
     }
 
     else if (name === "image") {
@@ -115,46 +99,28 @@ const AddSong = () => {
     data();
   }, [])
 
-  useEffect(() => {
-    if (selectedMainGenre) {
-      const mainGenre = Genres.find(genre => genre.id === selectedMainGenre.value);
-      setSubGenreOptions(mainGenre ? mainGenre.subgenres : []);
-    } else {
-      setSubGenreOptions([]);
-    }
-  }, [selectedMainGenre, Genres]);
 
   const onSubmit = async (data) => {
     const valid = await trigger();
-    if (!valid) return; 
+    if (!valid) return;
 
     const formData = new FormData();
     formData.append('title', data.title);
-    const artistValues = data.artistIds.map(artist => ({
-      id: artist.value,
-      name: artist.label,
-    }));
 
-    formData.append('artistIds', JSON.stringify(artistValues)); // Lưu artistIds
-    const albumValues = data.albumIds.map(album => ({
-      id: album.value,
-      name: album.label,
-    }));
+    const artistIDs = data.artistID.map(artist => artist.value);
+    artistIDs.forEach(id => formData.append('artistID[]', id));
 
-    formData.append('albumIds', JSON.stringify(albumValues)); // Lưu albumIds
-    const genreValues = {
-      id: selectedMainGenre ? selectedMainGenre.value : null,
-      name: selectedMainGenre ? selectedMainGenre.label : null,
-      subgenres: selectedSubGenre ? selectedSubGenre.map(sub => ({
-        id: sub.value,
-        name: sub.label,
-      })) : [], // Nếu không có subgenre, trả về mảng rỗng
-    };
-    formData.append('genreIds', JSON.stringify(genreValues));
+    const albumIDs = data.albumID.map(album => album.value);
+    albumIDs.forEach(id => formData.append('albumID[]', id));
 
-    formData.append('playcountId', 0);
-    formData.append('lyrics',data.lyrics);
-    formData.append('releasedate', data.releasedate);
+
+    const genreIDs = data.genreID.map(genre => genre.value);
+    genreIDs.forEach(id => formData.append('genreID[]', id));
+
+    formData.append('listens_count', 0);
+    formData.append('lyrics', data.lyrics);
+    const releaseDateFormatted = new Date(data.releaseDate).toISOString().split('T')[0];
+    formData.append('releaseDate', releaseDateFormatted);
     formData.append('duration', data.duration);
     formData.append('is_explicit', data.is_explicit);
     formData.append('file_song', data.file_song);
@@ -168,16 +134,6 @@ const AddSong = () => {
     }
   };
 
-  const mainGenreOptions = Genres.map(genre => ({
-    value: genre.id,
-    label: genre.name,
-  }));
-
-  // Tạo option cho thể loại con
-  const subGenreOptionsMapped = subGenreOptions.map(subgenre => ({
-    value: subgenre.id,
-    label: subgenre.name,
-  }));
 
   useEffect(() => {
     if (watch("duration") !== null) {
@@ -217,7 +173,7 @@ const AddSong = () => {
             </div>
             <div>
               <Controller
-                name="artistIds"
+                name="artistID"
                 control={control}
                 render={({ field }) => (
                   <SelectField
@@ -234,66 +190,42 @@ const AddSong = () => {
                 )}
                 rules={{ required: "Artist is required" }}
               />
-              {errors.artistIds && <small className="text-red-500 mt-1 ml-2 block">{errors.artistIds.message}</small>}
+              {errors.artistID && <small className="text-red-500 mt-1 ml-2 block">{errors.artistID.message}</small>}
             </div>
             <div>
               <Controller
-                name="genreIds"
+                name="genreID"
                 control={control}
                 render={({ field }) => (
                   <SelectField
                     label="Genre"
-                    id="mainGenre"
-                    options={mainGenreOptions}
-                    value={field.value}
-                    onChange={(selectedOption) => {
-                      field.onChange(selectedOption);
-                      setSelectedMainGenre(selectedOption);
-                      setSelectedSubGenre(null); // Reset thể loại con khi thay đổi thể loại chính
-                    }}
+                    id="genreID"
+                    name="genreID"
+                    options={Genres.map((genre) => ({
+                      value: genre.id,
+                      label: genre.name,
+                    }))}
+                    {...field}
+                    isMulti
                   />
                 )}
                 rules={{ required: "Genre is required" }}
               />
-              {errors.genreIds && (
-                <small className="text-red-500 mt-1 ml-2 block">{errors.genreIds.message}</small>
+              {errors.genreID && (
+                <small className="text-red-500 mt-1 ml-2 block">{errors.genreID.message}</small>
               )}
             </div>
-
-            {selectedMainGenre && (
-              <div>
-                <Controller
-                  name="subGenreId"
-                  control={control}
-                  render={({ field }) => (
-                    <SelectField
-                      label="Subgenres"
-                      id="subGenreId"
-                      options={subGenreOptionsMapped}
-                      value={field.value}
-                      onChange={(selectedOption) => {
-                        field.onChange(selectedOption);
-                        setSelectedSubGenre(selectedOption); // Cập nhật thể loại con đã chọn
-                      }}
-                      isMulti
-                    />
-                  )}
-                  rules={{ required: "Sub-genre is required" }}
-                />
-
-              </div>
-            )}
             <div>
               <Controller
-                name="albumIds"
+                name="albumID"
                 control={control}
                 render={({ field }) => (
                   <SelectField
                     label="Album"
                     id="album"
-                    name="albumIds"
+                    name="albumID"
                     options={Albums.map((album) => ({
-                      value: album.id, // Assuming album has an id property
+                      value: album.id,
                       label: album.title,
                     }))}
                     {...field}
@@ -302,7 +234,7 @@ const AddSong = () => {
                 )}
                 rules={{ required: "Album is required" }}
               />
-              {errors.albumIds && <small className="text-red-500 mt-1 ml-2 block">{errors.albumIds.message}</small>}
+              {errors.albumID && <small className="text-red-500 mt-1 ml-2 block">{errors.albumID.message}</small>}
             </div>
           </div>
         </div>
@@ -312,14 +244,14 @@ const AddSong = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Controller
-                name="releasedate"
+                name="releaseDate"
                 control={control}
                 render={({ field }) => (
                   <DatePickerField
                     label="Release Date"
-                    id="releasedate"
+                    id="releaseDate"
                     selected={field.value}
-                    onChange={(date) => setValue("releasedate", date, { shouldValidate: true })}
+                    onChange={(date) => setValue("releaseDate", date, { shouldValidate: true })}
                   />
                 )}
                 rules={{ required: "Release date is required" }}
@@ -362,12 +294,12 @@ const AddSong = () => {
                     label="Lyric"
                     id="lyrics"
                     {...field} // Truyền tất cả props từ field
-                    // value={lyrics} // Hiển thị lời bài hát từ state
-                    // onChange={(e) => {
-                    //   const value = e.target.value; // Lấy giá trị từ ô input
-                    //   setLyrics(value); // Cập nhật state khi người dùng nhập
-                    //   field.onChange(value); // Cập nhật giá trị của form
-                    // }}
+                  // value={lyrics} // Hiển thị lời bài hát từ state
+                  // onChange={(e) => {
+                  //   const value = e.target.value; // Lấy giá trị từ ô input
+                  //   setLyrics(value); // Cập nhật state khi người dùng nhập
+                  //   field.onChange(value); // Cập nhật giá trị của form
+                  // }}
                   />
                 )}
               />
@@ -411,6 +343,9 @@ const AddSong = () => {
                     <p className="text-center text-green-500 mt-2">
                       Selected file: {watch("file_song")?.name}
                     </p>
+                  )}
+                  {coverAudioPreview && (
+                   <audio controls src={coverAudioPreview} className="mt-2 w-full" />
                   )}
                   {errors.file_song && <small className="text-red-500 mt-2">{errors.file_song.message}</small>}
                 </div>

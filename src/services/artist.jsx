@@ -5,7 +5,7 @@ const getArtists = async () => {
     method: "GET",
     path: "/api/artists",
   });
-  return res.artists;
+  return res;
 };
 
 const getArtistById = async (id) => {
@@ -13,7 +13,7 @@ const getArtistById = async (id) => {
     method: "GET",
     path: `/api/artists/${id}`,
   });
-  return res.artists;
+  return res;
 };
 
 const addArtist = async (Artist) => {
@@ -22,7 +22,7 @@ const addArtist = async (Artist) => {
     path: "/api/artists",
     data: Artist,
   });
-  return res.artists;
+  return res;
 };
 
 const deleteArtist = async (id) => {
@@ -30,7 +30,7 @@ const deleteArtist = async (id) => {
     method: "DELETE",
     path: `/api/artists/${id}`,
   });
-  return res.artists;
+  return res;
 };
 
 const updateArtist = async (id, Artist) => {
@@ -39,7 +39,7 @@ const updateArtist = async (id, Artist) => {
     path: `/api/artists/${id}`,
     data: Artist,
   });
-  return res.artists;
+  return res;
 };
 
 export { getArtists, getArtistById, addArtist, deleteArtist, updateArtist };

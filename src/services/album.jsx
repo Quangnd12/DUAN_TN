@@ -5,7 +5,7 @@ const getAlbums = async () => {
     method: "GET",
     path: "/api/albums",
   });
-  return res.albums;
+  return res;
 };
 
 const getAlbumById = async (id) => {
@@ -13,7 +13,7 @@ const getAlbumById = async (id) => {
     method: "GET",
     path: `/api/albums/${id}`,
   });
-  return res.albums;
+  return res;
 };
 
 const addAlbum = async (Album) => {
@@ -22,7 +22,7 @@ const addAlbum = async (Album) => {
     path: "/api/albums",
     data: Album,
   });
-  return res.albums;
+  return res;
 };
 
 const deleteAlbum = async (id) => {
@@ -30,7 +30,7 @@ const deleteAlbum = async (id) => {
     method: "DELETE",
     path: `/api/albums/${id}`,
   });
-  return res.albums;
+  return res;
 };
 
 const updateAlbum = async (id, Album) => {
@@ -39,7 +39,7 @@ const updateAlbum = async (id, Album) => {
     path: `/api/albums/${id}`,
     data: Album,
   });
-  return res.albums;
+  return res;
 };
 
 export { getAlbums, getAlbumById, addAlbum, deleteAlbum, updateAlbum };

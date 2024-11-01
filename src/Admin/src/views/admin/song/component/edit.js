@@ -8,96 +8,110 @@ import SelectField from "../../../../components/SharedIngredients/SelectField";
 import DatePickerField from "../../../../components/SharedIngredients/DatePickerField";
 import SliderField from "../../../../components/SharedIngredients/SliderField";
 import SwitchField from "../../../../components/SharedIngredients/SwitchField";
+import { getSongById, updateSong } from "../../../../../../services/songs";
+import TextareaField from "Admin/src/components/SharedIngredients/TextareaField";
+import { handleEdit } from "Admin/src/components/notification";
+import { getGenres } from "../../../../../../services/genres";
+import { getArtists } from "../../../../../../services/artist";
+import { getAlbums } from "../../../../../../services/album";
 
 const EditSong = () => {
 
   const { id } = useParams();
 
-  const { control, handleSubmit, setValue, watch, clearErrors, getValues, formState: { errors }, trigger, setError  } = useForm({
+  const { control, handleSubmit, setValue, watch, clearErrors, getValues, formState: { errors }, trigger, setError } = useForm({
     defaultValues: {
       title: "",
-      artist: [],
-      genre: [],
-      album: [],
-      release_date: null,
+      file_song: null,
+      image: null,
+      artistID: [],
+      albumID: [],
+      genreID: [],
+      listens_count: 0,
+      lyrics: "",
+      releaseDate: null,
       duration: null,
-      tempo: 120,
-      popularity: 50,
-      is_explicit: false,
-      audio_file: null,
-      cover_image: null,
+      is_explicit: 0,
     }
   });
 
   const navigate = useNavigate();
   const [coverImagePreview, setCoverImagePreview] = useState(null);
+  const [coverAudioPreview, setCoverAudioPreview] = useState(null);
   const [durationSet, setDurationSet] = useState(false);
-
+  const [Artists, setArtists] = useState([]);
+  const [Genres, setGenres] = useState([]);
+  const [Albums, setAlbums] = useState([]);
 
   useEffect(() => {
-    const songData = {
-      title: "Chúng ta của tương lai",
-      artist: ["Artist 1", "Artist 2"],
-      genre: ["V-POP"],
-      album: ["Sky tour"],
-      release_date: "11/12/2024",
-      duration: null,
-      tempo: 120,
-      popularity: 50,
-      is_explicit: false,
-      audio_file: null,
-      cover_image: "https://th.bing.com/th/id/OIP.5sdXslc5LTHn1l0WpI-n9AHaHa?rs=1&pid=ImgDetMain",
-    };
+    initData();
+  }, []);
 
-    setValue("title", songData.title);
-    setValue("artist", songData.artist.map(a => ({ value: a, label: a })));
-    setValue("genre", songData.genre.map(g => ({ value: g, label: g })));
-    setValue("album", songData.album.map(a => ({ value: a, label: a })));
-    setValue("release_date", new Date(songData.release_date));
-    setValue("duration", songData.duration);
-    setValue("tempo", songData.tempo);
-    setValue("popularity", songData.popularity);
-    setValue("is_explicit", songData.is_explicit);
-    setCoverImagePreview(songData.cover_image);
-  }, [id, setValue]);
+  const initData = async () => {
+    const data = await getSongById(id);
+    setValue("title", data.title);
+    setCoverAudioPreview(data.file_song);
+    setCoverImagePreview(data.image);
+    setValue("lyrics", data.lyrics);
+    setValue("duration", data.duration);
+    setValue("releaseDate", data.releaseDate);
+    setValue("is_explicit", data.is_explicit);
 
-  const handleDrop = useCallback((acceptedFiles, name) => {
+    const genreValues = data.genre.split(',').map(genre => ({ value: genre, label: genre }));
+    setValue("genreID", genreValues);
+
+    const albumValues = data.album.split(',').map(album => ({ value: album, label: album }));
+    setValue("albumID", albumValues);
+
+    const artistValues = data.artist.split(',').map(artist => ({ value: artist, label: artist }));
+    setValue("artistID", artistValues);
+
+    const genre = await getGenres();
+    setGenres(genre);
+    const artist = await getArtists();
+    setArtists(artist);
+    const album = await getAlbums();
+    setAlbums(album);
+
+  };
+
+  const handleDrop = useCallback(async (acceptedFiles, name) => {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    if (name === "audio_file") {
-      setValue("audio_file", file);
-      // Xóa lỗi khi có file
-      clearErrors("audio_file");
-      const audio = new Audio(URL.createObjectURL(file));
+    if (name === "file_song") {
+      setValue("file_song", file); 
+      clearErrors("file_song");
+      const audioUrl = URL.createObjectURL(file); // Tạo URL từ file
+      setCoverAudioPreview(audioUrl); // Lưu URL vào state để hiển thị
+      const audio = new Audio(audioUrl); // Sử dụng URL để tạo đối tượng Audio
       audio.onloadedmetadata = () => {
         const durationInSeconds = Math.floor(audio.duration);
         setValue("duration", durationInSeconds, { shouldValidate: true });
-        setDurationSet(true); // Đặt trạng thái khi nhận được giá trị
       };
-    } else if (name === "cover_image") {
-      setValue("cover_image", file);
+    }
+
+    else if (name === "image") {
+      setValue("image", file); 
       try {
         const objectURL = URL.createObjectURL(file);
         setCoverImagePreview(objectURL);
       } catch (error) {
         console.error("Failed to create object URL:", error);
       }
-      // Xóa lỗi khi có file
-      clearErrors("cover_image");
+      clearErrors("image");
     }
   }, [setValue, clearErrors]);
 
-
   const { getRootProps: getAudioRootProps, getInputProps: getAudioInputProps } =
     useDropzone({
-      onDrop: (files) => handleDrop(files, "audio_file"),
+      onDrop: (files) => handleDrop(files, "file_song"), // Thay đổi thành file_song
       accept: "audio/*",
     });
 
   const { getRootProps: getImageRootProps, getInputProps: getImageInputProps } =
     useDropzone({
-      onDrop: (files) => handleDrop(files, "cover_image"),
+      onDrop: (files) => handleDrop(files, "image"), // Thay đổi thành image
       accept: "image/*",
     });
 
@@ -105,33 +119,42 @@ const EditSong = () => {
     navigate("/admin/song"); // Điều hướng về trang list.js
   };
 
-  const genres = [
-    "pop",
-    "blue",
-    "rock",
-    "jazz",
-    "hip-hop",
-    "classical",
-    "electronic",
-  ];
-  const artists = ["Artist 1", "Artist 2", "Artist 3"];
-  const albums = ["Album 1", "Album 2", "Album 3"];
+
 
   const onSubmit = async (data) => {
     const valid = await trigger();
     if (!valid) return;
-    if (!data.audio_file) {
-      console.log("Audio file is required");
-      setError("audio_file", { type: "manual", message: "Audio file is required" });
-      return;
+
+    const formData = new FormData();
+    formData.append('title', data.title);
+
+    const artistIDs = data.artistID.map(artist => artist.value);
+    artistIDs.forEach(id => formData.append('artistID[]', id));
+
+    const albumIDs = data.albumID.map(album => album.value);
+    albumIDs.forEach(id => formData.append('albumID[]', id));
+
+
+    const genreIDs = data.genreID.map(genre => genre.value);
+    genreIDs.forEach(id => formData.append('genreID[]', id));
+
+    formData.append('listens_count', 0);
+    formData.append('lyrics', data.lyrics);
+    const releaseDateFormatted = new Date(data.releaseDate).toISOString().split('T')[0];
+    formData.append('releaseDate', releaseDateFormatted);
+    formData.append('duration', data.duration);
+    formData.append('is_explicit', data.is_explicit);
+    formData.append('file_song', data.file_song);
+    formData.append('image', data.image);
+    try {
+      await updateSong(id, formData);
+      navigate("/admin/song");
+      handleEdit();
+    } catch (error) {
+      console.error(error);
     }
-    if (!data.cover_image) {
-      console.log("Cover image is required");
-      setError("cover_image", { type: "manual", message: "Cover image is required" });
-      return;
-    }
-    console.log(data);
   };
+
 
   useEffect(() => {
     if (watch("duration") !== null) {
@@ -141,7 +164,7 @@ const EditSong = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" encType="multipart/form-data">
         <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-blue-500">
           <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -171,38 +194,37 @@ const EditSong = () => {
             </div>
             <div>
               <Controller
-                name="artist"
+                name="artistID"
                 control={control}
                 render={({ field }) => (
                   <SelectField
                     label="Artist"
                     id="artist"
-                    name="artist"
-                    options={artists.map((artist) => ({
-                      value: artist,
-                      label: artist,
+                    name="artistIds"
+                    options={Artists.map((artist) => ({
+                      value: artist.id, // Assuming artist has an id property
+                      label: artist.name,
                     }))}
                     {...field}
                     isMulti
-
                   />
                 )}
                 rules={{ required: "Artist is required" }}
               />
-              {errors.artist && <small className="text-red-500 mt-1 ml-2 block">{errors.artist.message}</small>}
+              {errors.artistID && <small className="text-red-500 mt-1 ml-2 block">{errors.artistID.message}</small>}
             </div>
             <div>
               <Controller
-                name="genre"
+                name="genreID"
                 control={control}
                 render={({ field }) => (
                   <SelectField
                     label="Genre"
-                    id="genre"
-                    name="genre"
-                    options={genres.map((genre) => ({
-                      value: genre,
-                      label: genre,
+                    id="genreID"
+                    name="genreID"
+                    options={Genres.map((genre) => ({
+                      value: genre.id,
+                      label: genre.name,
                     }))}
                     {...field}
                     isMulti
@@ -210,20 +232,22 @@ const EditSong = () => {
                 )}
                 rules={{ required: "Genre is required" }}
               />
-              {errors.genre && <small className="text-red-500 mt-1 ml-2 block">{errors.genre.message}</small>}
+              {errors.genreID && (
+                <small className="text-red-500 mt-1 ml-2 block">{errors.genreID.message}</small>
+              )}
             </div>
             <div>
               <Controller
-                name="album"
+                name="albumID"
                 control={control}
                 render={({ field }) => (
                   <SelectField
                     label="Album"
                     id="album"
-                    name="album"
-                    options={albums.map((album) => ({
-                      value: album,
-                      label: album,
+                    name="albumID"
+                    options={Albums.map((album) => ({
+                      value: album.id,
+                      label: album.title,
                     }))}
                     {...field}
                     isMulti
@@ -231,7 +255,7 @@ const EditSong = () => {
                 )}
                 rules={{ required: "Album is required" }}
               />
-              {errors.album && <small className="text-red-500 mt-1 ml-2 block">{errors.album.message}</small>}
+              {errors.albumID && <small className="text-red-500 mt-1 ml-2 block">{errors.albumID.message}</small>}
             </div>
           </div>
         </div>
@@ -241,20 +265,20 @@ const EditSong = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Controller
-                name="release_date"
+                name="releaseDate"
                 control={control}
                 render={({ field }) => (
                   <DatePickerField
                     label="Release Date"
-                    id="release_date"
+                    id="releaseDate"
                     selected={field.value}
-                    onChange={(date) => setValue("release_date", date, { shouldValidate: true })}
+                    onChange={(date) => setValue("releaseDate", date, { shouldValidate: true })}
                   />
                 )}
                 rules={{ required: "Release date is required" }}
               />
 
-              {errors.release_date && <small className="text-red-500 ml-2 block">{errors.release_date.message}</small>}
+              {errors.releasedate && <small className="text-red-500 ml-2 block">{errors.releasedate.message}</small>}
             </div>
             <div>
               <Controller
@@ -268,11 +292,11 @@ const EditSong = () => {
                     {...field}
                     value={field.value || 0}
                     onChange={(value) => {
-                      if (!durationSet || !getValues("audio_file")) {
+                      if (!durationSet || !getValues("file_song")) {
                         setValue("duration", value, { shouldValidate: true });
                       }
                     }}
-                    disabled={durationSet && getValues("audio_file")}
+                    disabled={durationSet && getValues("file_song")}
                   />
                 )}
                 rules={{
@@ -282,37 +306,25 @@ const EditSong = () => {
               />
               {errors.duration && <small className="text-red-500 ml-2 block">{errors.duration.message}</small>}
             </div>
-            <div>
+            <div className="col-span-2">
               <Controller
-                name="tempo"
+                name="lyrics"
                 control={control}
                 render={({ field }) => (
-                  <SliderField
-                    label="Tempo (BPM)"
-                    min={60}
-                    max={200}
-                    {...field}
-                    value={field.value}
-                    onChange={(value) => setValue("tempo", value)}
+                  <TextareaField
+                    label="Lyric"
+                    id="lyrics"
+                    {...field} // Truyền tất cả props từ field
+                  // value={lyrics} // Hiển thị lời bài hát từ state
+                  // onChange={(e) => {
+                  //   const value = e.target.value; // Lấy giá trị từ ô input
+                  //   setLyrics(value); // Cập nhật state khi người dùng nhập
+                  //   field.onChange(value); // Cập nhật giá trị của form
+                  // }}
                   />
                 )}
               />
-            </div>
-            <div>
-              <Controller
-                name="popularity"
-                control={control}
-                render={({ field }) => (
-                  <SliderField
-                    label="Popularity"
-                    min={0}
-                    max={100}
-                    {...field}
-                    value={field.value}
-                    onChange={(value) => setValue("popularity", value)}
-                  />
-                )}
-              />
+              {errors.lyrics && <small className="text-red-500 mt-1 ml-2 block">{errors.lyrics.message}</small>}
             </div>
             <div>
               <Controller
@@ -335,12 +347,12 @@ const EditSong = () => {
           <h2 className="text-xl font-semibold mb-4">Media Upload</h2>
           <div className="grid grid-cols-2 gap-4">
             <Controller
-              name="audio_file"
+              name="file_song"
               control={control}
               render={({ field }) => (
                 <div
                   {...getAudioRootProps()}
-                  className={`w-full p-6 border-2 border-dashed ${errors.audio_file ? 'border-red-600' : 'border-gray-400'} rounded-md cursor-pointer hover:border-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500`}
+                  className={`w-full p-6 border-2 border-dashed ${errors.file_song ? 'border-red-600' : 'border-gray-400'} rounded-md cursor-pointer hover:border-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500`}
                 >
                   <input
                     {...getAudioInputProps()}
@@ -348,31 +360,34 @@ const EditSong = () => {
                   <p className="text-center text-gray-600">
                     Drag & drop an audio file here, or click to select a file
                   </p>
-                  {watch("audio_file") && (
+                  {watch("file_song") && (
                     <p className="text-center text-green-500 mt-2">
-                      Selected file: {watch("audio_file")?.name}
+                      Selected file: {watch("file_song")?.name}
                     </p>
                   )}
-                  {errors.audio_file && <small className="text-red-500 mt-2">{errors.audio_file.message}</small>}
+                  {coverAudioPreview && (
+                   <audio controls src={coverAudioPreview} className="mt-2 w-full" />
+                  )}
+                  {/* {errors.file_song && <small className="text-red-500 mt-2">{errors.file_song.message}</small>} */}
                 </div>
               )}
-              rules={{ required: "Audio file is required" }}
+              // rules={{ required: "Audio file is required" }}
             />
             <Controller
-              name="cover_image"
+              name="image"
               control={control}
               render={({ field }) => (
                 <div
                   {...getImageRootProps()}
-                  className={`w-full p-6 border-2 border-dashed ${errors.cover_image ? 'border-red-600' : 'border-gray-400'} rounded-md cursor-pointer hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500`}
+                  className={`w-full p-6 border-2 border-dashed ${errors.image ? 'border-red-600' : 'border-gray-400'} rounded-md cursor-pointer hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500`}
                 >
                   <input {...getImageInputProps()} />
                   <p className="text-center text-gray-600">
                     Drag & drop an image file here, or click to select a file
                   </p>
-                  {watch("cover_image") && (
+                  {watch("image") && (
                     <p className="text-center text-green-500 mt-2">
-                      Selected file: {watch("cover_image")?.name}
+                      Selected file: {watch("image")?.name}
                     </p>
                   )}
                   {coverImagePreview && (
@@ -384,10 +399,10 @@ const EditSong = () => {
                       />
                     </div>
                   )}
-                  {errors.cover_image && <small className="text-red-500 mt-2">{errors.cover_image.message}</small>}
+                  {/* {errors.image && <small className="text-red-500 mt-2">{errors.image.message}</small>} */}
                 </div>
               )}
-              rules={{ required: "Cover image is required" }}
+              // rules={{ required: "image is required" }}
             />
           </div>
         </div>
@@ -407,8 +422,8 @@ const EditSong = () => {
             Save
           </button>
         </div>
-      </form>
-    </div>
+      </form >
+    </div >
   );
 };
 

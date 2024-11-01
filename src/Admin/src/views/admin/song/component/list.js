@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate,useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import useSWR from "swr";
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, IconButton, Menu, MenuItem, CircularProgress, Pagination, Typography, Alert, Stack, Collapse, Box, Avatar, Backdrop,
@@ -9,7 +9,7 @@ import {
   KeyboardArrowDown,
   KeyboardArrowUp,
 } from "@mui/icons-material";
-import { MdEdit, MdDelete,MdPlayArrow } from 'react-icons/md';
+import { MdEdit, MdDelete, MdPlayArrow } from 'react-icons/md';
 import { getSongs } from "../../../../../../services/songs";
 
 import DeleteSong from "./delete";
@@ -84,8 +84,8 @@ const SongList = () => {
   };
 
 
-  const handleDeleteSong = (songId) => {
-    setSongs(prevGenres => prevGenres.filter(song => song.songId !== songId));
+  const handleDeleteSong = (id) => {
+    setSongs(prevGenres => prevGenres.filter(song => song.id !== id));
   };
 
   const handleOpenDeleteModal = (song) => {
@@ -98,10 +98,10 @@ const SongList = () => {
     setsongToDelete(null);
   };
 
-  const toggleRow = (songId) => {
+  const toggleRow = (id) => {
     setOpenRow((prevState) => ({
       ...prevState,
-      [songId]: !prevState[songId],
+      [id]: !prevState[id],
     }));
   };
 
@@ -192,23 +192,23 @@ const SongList = () => {
                   <TableCell sx={{ color: "white" }}>#</TableCell>
                   <TableCell sx={{ color: "white" }}>Song</TableCell>
                   <TableCell sx={{ color: "white" }}>Artist</TableCell>
-                  <TableCell sx={{ color: "white" }}>category</TableCell>
+                  <TableCell sx={{ color: "white" }}>Country</TableCell>
                   <TableCell sx={{ color: "white" }}>Album</TableCell>
                   <TableCell sx={{ width: "70px", color: "white" }}>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {Songs.map((song, index) => (
-                 <React.Fragment key={song.songId}>
-                    <TableRow  sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}                    
+                  <React.Fragment key={song.id}>
+                    <TableRow sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}
                     >
                       <TableCell>
                         <IconButton
                           aria-label="expand row"
                           size="small"
-                          onClick={() => toggleRow(song.songId)}
+                          onClick={() => toggleRow(song.id)}
                         >
-                          {openRow[song.songId] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                          {openRow[song.id] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
                         </IconButton>
                       </TableCell>
                       <TableCell>
@@ -233,11 +233,11 @@ const SongList = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {song.artistIds.map(artist => artist.name).join(', ')}
+                        {song.artist}
                       </TableCell>
-                      <TableCell>{song.genreIds?.name}</TableCell>
+                      <TableCell>{song.country}</TableCell>
                       <TableCell>
-                        {song.albumIds.map(album => album.name).join(', ')}
+                        {song.album}
                       </TableCell>
                       <TableCell>
                         <IconButton onClick={(event) => handleOpenMenu(event, song)}>
@@ -245,13 +245,13 @@ const SongList = () => {
                         </IconButton>
                         <Menu
                           anchorEl={anchorEl}
-                          open={Boolean(anchorEl) && selectedSong?.songId === song.songId}
+                          open={Boolean(anchorEl) && selectedSong?.id === song.id}
                           onClose={handleCloseMenu}
 
                         >
                           <MenuItem onClick={() => {
                             handleCloseMenu();
-                            handleEditsong(song.songId);
+                            handleEditsong(song.id);
                           }
                           } >
                             <MdEdit style={{ marginRight: '8px', color: 'blue' }} /> {/* Icon sửa */}
@@ -271,54 +271,57 @@ const SongList = () => {
                     </TableRow>
                     <TableRow>
                       <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
-                        <Collapse in={openRow[song.songId]} timeout="auto" unmountOnExit>
+                        <Collapse in={openRow[song.id]} timeout="auto" unmountOnExit>
                           <Box margin={1}>
                             <Typography variant="h6" gutterBottom component="div">
                               <div className="flex mr-2">
                                 Additional Information
                                 <button className="bg-icon text-white p-2 rounded-full hover:bg-blue-700 transition ml-3"
-                                 onClick={() => handleRowClick(song)}
+                                  onClick={() => handleRowClick(song)}
                                 >
-                                  <MdPlayArrow size={24}  />
+                                  <MdPlayArrow size={24} />
                                 </button>
                               </div>
 
                             </Typography>
-                            <Typography variant="body1" className="pb-2">Subgenres: </Typography>
-                            {Array.isArray(song.genreIds?.subgenres) ? (
+                            <Typography variant="body1" className="pb-2">Genres: </Typography>
+                            {typeof song.genre === 'string' && song.genre.trim() !== '' ? (
                               <div className="flex flex-wrap">
-                                {song.genreIds.subgenres.map((subgenre) => (
-                                  <Typography
-                                    key={subgenre.id || subgenre.name}
-                                    variant="body2"
-                                    component="div"
-                                    style={{
-                                      backgroundColor: getColorFromName(subgenre.name),
-                                      color: '#fff',
-                                      padding: '4px 12px',
-                                      marginRight: '8px',
-                                      marginBottom: '4px',
-                                      borderRadius: '16px',
-                                    }}
-                                  >
-                                    {subgenre.name}
-                                  </Typography>
-                                ))}
+                                {song.genre.split(',').map((genreName) => {
+                                  const trimmedName = genreName.trim(); 
+                                  return (
+                                    <Typography
+                                      key={trimmedName} 
+                                      variant="body2"
+                                      component="div"
+                                      style={{
+                                        backgroundColor: getColorFromName(trimmedName),
+                                        color: '#fff',
+                                        padding: '4px 12px',
+                                        marginRight: '8px',
+                                        marginBottom: '4px',
+                                        borderRadius: '16px',
+                                      }}
+                                    >
+                                      {trimmedName} 
+                                    </Typography>
+                                  );
+                                })}
                               </div>
                             ) : (
                               <Typography variant="body2" component="div">
-                                No subgenres available
+                                No genres available
                               </Typography>
                             )}
                             <Typography variant="body1" className="pb-2 pt-2">Duration: {formatDuration(song.duration)}</Typography>
-                            <Typography variant="body1" className="pb-2 ">release date: {formatDate(song.releasedate)}</Typography>
-                            <Typography variant="body1" className="pb-2">Play count: {song.playcountId}</Typography>
+                            <Typography variant="body1" className="pb-2 ">release date: {formatDate(song.releaseDate)}</Typography>
+                            <Typography variant="body1" className="pb-2">Play count: {song.listens_count}</Typography>
                             <Typography variant="body1" className="pb-2">lyrics: {song.lyrics}</Typography>
                           </Box>
                         </Collapse>
                       </TableCell>
                     </TableRow>
-                    </React.Fragment>
+                  </React.Fragment>
                 ))}
               </TableBody>
             </Table>
@@ -343,7 +346,7 @@ const SongList = () => {
       {selectedPlayer && (
         <PlayerControls
           title={selectedPlayer.title}
-          artist={selectedPlayer.artistIds.map(artist => artist.name).join(', ')}
+          artist={selectedPlayer.artistID}
           Image={selectedPlayer.image}
           next={() => {/* Implement next track */ }}
           prevsong={() => {/* Implement previous track */ }}

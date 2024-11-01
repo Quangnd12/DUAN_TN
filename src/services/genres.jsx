@@ -5,7 +5,7 @@ const getGenres = async () => {
     method: "GET",
     path: "/api/genres",
   });
-  return res.data;
+  return res;
 };
 
 const getGenreById = async (id) => {
@@ -13,7 +13,7 @@ const getGenreById = async (id) => {
     method: "GET",
     path: `/api/genres/${id}`,
   });
-  return res.data;
+  return res;
 };
 
 const addGenre = async (genre) => {
@@ -22,7 +22,7 @@ const addGenre = async (genre) => {
     path: "/api/genres",
     data: genre,
   });
-  return res.data;
+  return res;
 };
 
 const deleteGenre = async (id) => {
@@ -30,7 +30,7 @@ const deleteGenre = async (id) => {
     method: "DELETE",
     path: `/api/genres/${id}`,
   });
-  return res.data;
+  return res;
 };
 
 const updateGenre = async (id, genre) => {
@@ -39,7 +39,7 @@ const updateGenre = async (id, genre) => {
     path: `/api/genres/${id}`,
     data: genre,
   });
-  return res.data;
+  return res;
 };
 
 export { getGenres, getGenreById, addGenre, deleteGenre, updateGenre };
