@@ -29,7 +29,17 @@ const SongList = () => {
   const { selectedPlayer, setSelectedPlayer, isPlayerVisible, setIsPlayerVisible } = usePlayerContext();
   const [isPlaying, setIsPlaying] = useState(false);
   const location = useLocation();
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
+  const [expandedLyrics, setExpandedLyrics] = useState({}); // Quản lý trạng thái của lời bài hát
+
+  const handleToggleLyrics = (songId) => {
+    setExpandedLyrics((prev) => ({
+      ...prev,
+      [songId]: !prev[songId], // Đảo ngược trạng thái khi nhấp vào
+    }));
+  };
 
   const handleRowClick = (song, index) => {
     setSelectedPlayer(song);
@@ -43,17 +53,23 @@ const SongList = () => {
     };
   }, [location.pathname, setIsPlayerVisible]);
 
-  useEffect(() => {
-    SongData();
-  }, []);
 
-  const SongData = async () => {
+
+  const SongData = async (page) => {
     try {
-      const data = await getSongs();
+      const data = await getSongs(page); // Gọi hàm với trang hiện tại
       setSongs(data);
+      setTotalPages(data.totalPages);
     } catch (error) {
       console.log("Không tìm thấy dữ liệu");
     }
+  };
+  useEffect(() => {
+    SongData(currentPage); // Lấy bài hát cho trang hiện tại
+  }, [currentPage]); // Gọi lại khi currentPage thay đổi
+
+  const handleChangePage = (event, value) => {
+    setCurrentPage(value);
   };
 
   const playTrack = (track) => {
@@ -75,7 +91,7 @@ const SongList = () => {
 
   const handleOpenMenu = (event, song) => {
     setAnchorEl(event.currentTarget);
-    setSelectedSong(song); // Cập nhật genre được chọn
+    setSelectedSong(song);
   };
 
   const handleCloseMenu = () => {
@@ -288,10 +304,10 @@ const SongList = () => {
                             {typeof song.genre === 'string' && song.genre.trim() !== '' ? (
                               <div className="flex flex-wrap">
                                 {song.genre.split(',').map((genreName) => {
-                                  const trimmedName = genreName.trim(); 
+                                  const trimmedName = genreName.trim();
                                   return (
                                     <Typography
-                                      key={trimmedName} 
+                                      key={trimmedName}
                                       variant="body2"
                                       component="div"
                                       style={{
@@ -303,7 +319,7 @@ const SongList = () => {
                                         borderRadius: '16px',
                                       }}
                                     >
-                                      {trimmedName} 
+                                      {trimmedName}
                                     </Typography>
                                   );
                                 })}
@@ -316,7 +332,17 @@ const SongList = () => {
                             <Typography variant="body1" className="pb-2 pt-2">Duration: {formatDuration(song.duration)}</Typography>
                             <Typography variant="body1" className="pb-2 ">release date: {formatDate(song.releaseDate)}</Typography>
                             <Typography variant="body1" className="pb-2">Play count: {song.listens_count}</Typography>
-                            <Typography variant="body1" className="pb-2">lyrics: {song.lyrics}</Typography>
+                            <Typography variant="body1" className="pb-2">
+                              Lyrics: {expandedLyrics[song.id] ? song.lyrics : `${song.lyrics.substring(0, 100)}...`}
+                              {song.lyrics.length > 100 && (
+                                <span
+                                  onClick={() => handleToggleLyrics(song.id)}
+                                  style={{ color: 'blue', cursor: 'pointer', marginLeft: '4px', fontSize: '16px' }}
+                                >
+                                  {expandedLyrics[song.id] ? ' Show less' : 'Show more'}
+                                </span>
+                              )}
+                            </Typography>
                           </Box>
                         </Collapse>
                       </TableCell>
@@ -330,9 +356,9 @@ const SongList = () => {
           <div className="mt-4 flex justify-end items-center">
             <Stack spacing={2}>
               <Pagination
-                // count={data.totalPages || 1} // Tính số trang từ data
-                // page={page}
-                // onChange={handleChangePage}
+                count={totalPages || 1} // Tính số trang từ data
+                page={currentPage}
+                onChange={handleChangePage}
                 color="primary"
                 variant="outlined"
                 shape="rounded"

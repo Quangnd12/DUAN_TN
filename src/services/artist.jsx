@@ -1,11 +1,11 @@
 import request from "config";
 
-const getArtists = async () => {
+const getArtists = async (page = 1, limit = 10) => {
   const res = await request({
     method: "GET",
-    path: "/api/artists",
+    path: `/api/artists?page=${page}&limit=${limit}`,
   });
-  return res;
+  return res.artists;
 };
 
 const getArtistById = async (id) => {

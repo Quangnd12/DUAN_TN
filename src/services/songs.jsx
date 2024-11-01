@@ -1,11 +1,11 @@
 import request from "config";
 
-const getSongs = async () => {
+const getSongs = async (page = 1, limit = 10) => {
   const res = await request({
     method: "GET",
-    path: "/api/songs",
+    path: `/api/songs?page=${page}&limit=${limit}`,
   });
-  return res;
+  return res.songs;
 };
 
 const getSongById = async (id) => {
@@ -41,5 +41,6 @@ const updateSong = async (id, song) => {
   });
   return res;
 };
+
 
 export { getSongs, getSongById, addSong, deleteSong, updateSong };

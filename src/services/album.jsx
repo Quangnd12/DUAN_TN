@@ -1,12 +1,12 @@
 import request from "config";
 
-const getAlbums = async () => {
-  const res = await request({
-    method: "GET",
-    path: "/api/albums",
-  });
-  return res;
-};
+const getAlbums = async (page = 1, limit = 10) => {
+    const res = await request({
+      method: "GET",
+      path: `/api/albums?page=${page}&limit=${limit}`,
+    });
+    return res.albums;
+  };
 
 const getAlbumById = async (id) => {
   const res = await request({

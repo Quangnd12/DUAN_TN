@@ -1,15 +1,15 @@
-import ApiConfig from "../config";
+import request from "config";
 
-const getGenres = async () => {
-  const res = await ApiConfig({
-    method: "GET",
-    path: "/api/genres",
-  });
-  return res;
-};
+const getGenres = async (page = 1, limit = 10) => {
+    const res = await request({
+      method: "GET",
+      path: `/api/genres?page=${page}&limit=${limit}`,
+    });
+    return res.genres;
+  };
 
 const getGenreById = async (id) => {
-  const res = await ApiConfig({
+  const res = await request({
     method: "GET",
     path: `/api/genres/${id}`,
   });
@@ -17,7 +17,7 @@ const getGenreById = async (id) => {
 };
 
 const addGenre = async (genre) => {
-  const res = await ApiConfig({
+  const res = await request({
     method: "POST",
     path: "/api/genres",
     data: genre,
@@ -26,7 +26,7 @@ const addGenre = async (genre) => {
 };
 
 const deleteGenre = async (id) => {
-  const res = await ApiConfig({
+  const res = await request({
     method: "DELETE",
     path: `/api/genres/${id}`,
   });
@@ -34,7 +34,7 @@ const deleteGenre = async (id) => {
 };
 
 const updateGenre = async (id, genre) => {
-  const res = await ApiConfig({
+  const res = await request({
     method: "PUT",
     path: `/api/genres/${id}`,
     data: genre,

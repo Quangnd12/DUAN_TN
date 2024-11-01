@@ -45,13 +45,13 @@ const AddSong = () => {
     const file = acceptedFiles[0];
     if (!file) return;
 
- 
+
     if (name === "file_song") {
-      setValue("file_song", file); 
+      setValue("file_song", file);
       clearErrors("file_song");
-      const audioUrl = URL.createObjectURL(file); 
+      const audioUrl = URL.createObjectURL(file);
       setCoverAudioPreview(audioUrl);
-      const audio = new Audio(audioUrl); 
+      const audio = new Audio(audioUrl);
       audio.onloadedmetadata = () => {
         const durationInSeconds = Math.floor(audio.duration);
         setValue("duration", durationInSeconds, { shouldValidate: true });
@@ -122,7 +122,7 @@ const AddSong = () => {
     const releaseDateFormatted = new Date(data.releaseDate).toISOString().split('T')[0];
     formData.append('releaseDate', releaseDateFormatted);
     formData.append('duration', data.duration);
-    formData.append('is_explicit', data.is_explicit);
+    formData.append('is_explicit', data.is_explicit ? 1 : 0);
     formData.append('file_song', data.file_song);
     formData.append('image', data.image);
     try {
@@ -285,26 +285,6 @@ const AddSong = () => {
               />
               {errors.duration && <small className="text-red-500 ml-2 block">{errors.duration.message}</small>}
             </div>
-            <div className="col-span-2">
-              <Controller
-                name="lyrics"
-                control={control}
-                render={({ field }) => (
-                  <TextareaField
-                    label="Lyric"
-                    id="lyrics"
-                    {...field} // Truyền tất cả props từ field
-                  // value={lyrics} // Hiển thị lời bài hát từ state
-                  // onChange={(e) => {
-                  //   const value = e.target.value; // Lấy giá trị từ ô input
-                  //   setLyrics(value); // Cập nhật state khi người dùng nhập
-                  //   field.onChange(value); // Cập nhật giá trị của form
-                  // }}
-                  />
-                )}
-              />
-              {/* {errors.lyrics && <small className="text-red-500 mt-1 ml-2 block">{errors.lyrics.message}</small>} */}
-            </div>
             <div>
               <Controller
                 name="is_explicit"
@@ -345,7 +325,7 @@ const AddSong = () => {
                     </p>
                   )}
                   {coverAudioPreview && (
-                   <audio controls src={coverAudioPreview} className="mt-2 w-full" />
+                    <audio controls src={coverAudioPreview} className="mt-2 w-full" />
                   )}
                   {errors.file_song && <small className="text-red-500 mt-2">{errors.file_song.message}</small>}
                 </div>

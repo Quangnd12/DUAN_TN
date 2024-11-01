@@ -80,7 +80,7 @@ const EditSong = () => {
     if (!file) return;
 
     if (name === "file_song") {
-      setValue("file_song", file); 
+      setValue("file_song", file);
       clearErrors("file_song");
       const audioUrl = URL.createObjectURL(file); // Tạo URL từ file
       setCoverAudioPreview(audioUrl); // Lưu URL vào state để hiển thị
@@ -92,7 +92,7 @@ const EditSong = () => {
     }
 
     else if (name === "image") {
-      setValue("image", file); 
+      setValue("image", file);
       try {
         const objectURL = URL.createObjectURL(file);
         setCoverImagePreview(objectURL);
@@ -143,7 +143,7 @@ const EditSong = () => {
     const releaseDateFormatted = new Date(data.releaseDate).toISOString().split('T')[0];
     formData.append('releaseDate', releaseDateFormatted);
     formData.append('duration', data.duration);
-    formData.append('is_explicit', data.is_explicit);
+    formData.append('is_explicit', data.is_explicit ? 1 : 0);
     formData.append('file_song', data.file_song);
     formData.append('image', data.image);
     try {
@@ -305,27 +305,7 @@ const EditSong = () => {
                 }}
               />
               {errors.duration && <small className="text-red-500 ml-2 block">{errors.duration.message}</small>}
-            </div>
-            <div className="col-span-2">
-              <Controller
-                name="lyrics"
-                control={control}
-                render={({ field }) => (
-                  <TextareaField
-                    label="Lyric"
-                    id="lyrics"
-                    {...field} // Truyền tất cả props từ field
-                  // value={lyrics} // Hiển thị lời bài hát từ state
-                  // onChange={(e) => {
-                  //   const value = e.target.value; // Lấy giá trị từ ô input
-                  //   setLyrics(value); // Cập nhật state khi người dùng nhập
-                  //   field.onChange(value); // Cập nhật giá trị của form
-                  // }}
-                  />
-                )}
-              />
-              {errors.lyrics && <small className="text-red-500 mt-1 ml-2 block">{errors.lyrics.message}</small>}
-            </div>
+            </div>          
             <div>
               <Controller
                 name="is_explicit"
@@ -366,12 +346,12 @@ const EditSong = () => {
                     </p>
                   )}
                   {coverAudioPreview && (
-                   <audio controls src={coverAudioPreview} className="mt-2 w-full" />
+                    <audio controls src={coverAudioPreview} className="mt-2 w-full" />
                   )}
                   {/* {errors.file_song && <small className="text-red-500 mt-2">{errors.file_song.message}</small>} */}
                 </div>
               )}
-              // rules={{ required: "Audio file is required" }}
+            // rules={{ required: "Audio file is required" }}
             />
             <Controller
               name="image"
@@ -402,7 +382,7 @@ const EditSong = () => {
                   {/* {errors.image && <small className="text-red-500 mt-2">{errors.image.message}</small>} */}
                 </div>
               )}
-              // rules={{ required: "image is required" }}
+            // rules={{ required: "image is required" }}
             />
           </div>
         </div>
