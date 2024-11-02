@@ -1,4 +1,5 @@
 import React from "react";
+import EventList from "./component/list";
 
 const Events = () => {
     return (
@@ -6,6 +7,7 @@ const Events = () => {
         <div className="flex flex-wrap mt-4">
             <div className="w-full mb-12 px-4">
                {/* {'import component list vào '} */}
+               <EventList></EventList>
             </div>                  
         </div>
     </div>

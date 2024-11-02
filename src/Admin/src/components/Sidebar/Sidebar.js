@@ -41,6 +41,7 @@ import {
   MdAdminPanelSettings,
   MdMusicVideo,
   MdAssessment,
+  MdCelebration ,
   MdAccountCircle,
 } from "react-icons/md";
 
@@ -111,6 +112,7 @@ export default function Sidebar() {
         { to: "/admin/artist", icon: MdMic, label: "Artist" },
         { to: "/admin/album", icon: MdAlbum, label: "Album" },
         { to: "/admin/playlist", icon: MdQueueMusic, label: "Playlist" },
+        { to: "/admin/event", icon: MdCelebration, label: "Event" }, // Cập nhật biểu tượng Event
       ],
     },
     {

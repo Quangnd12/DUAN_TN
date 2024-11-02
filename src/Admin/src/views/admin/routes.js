@@ -20,6 +20,7 @@ import EditAlbum from "./album/component/edit.js";
 import NotFound from "./notfound/index.js";
 import UnderDevelopment from "./underdev/index.js";
 import Login from "../auth/Login.js";
+import Events from "./event";
 
 const AdminRoutes = (
   <>
@@ -38,6 +39,7 @@ const AdminRoutes = (
     <Route path="album" element={<Albums />} />
     <Route path="album/add" element={<AddAlbum />} />
     <Route path="album/edit/:id" element={<EditAlbum />} />
+    <Route path="event" element={<Events />} />
 
     {/* Thêm routes mới cho các trang đang phát triển */}
     <Route path="genre" element={<UnderDevelopment />} />
