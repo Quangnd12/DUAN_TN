@@ -1,8 +1,10 @@
 import React from "react";
 import styled from "styled-components";
+import Marquee from "react-fast-marquee";
 
 
-export default function CurrentTrack({ title,image,artist}) {
+export default function CurrentTrack({ title, image, artist }) {
+  const shouldUseMarquee = title.length > 35;
 
   return (
     <Container>
@@ -11,8 +13,16 @@ export default function CurrentTrack({ title,image,artist}) {
           <img src={image} alt={title} />
         </div>
         <div className="track__info">
-          <h4 className="track__info__track__name">{title}</h4>
-          <h6 className="track__info__track__artists">{artist}</h6>
+          <div style={{ width: '350px' }}>
+            {shouldUseMarquee ? (
+              <Marquee style={{ width: '100%' }} gap={0}>
+                <h4 className="track__info__track__name">{title}</h4>
+              </Marquee>
+            ) : (
+              <h4 className="track__info__track__name">{title}</h4>
+            )}
+          </div>
+          <h6 className="track__info__track__artists whitespace-nowrap overflow-hidden text-ellipsis w-[280px]">{artist}</h6>
         </div>
       </div>
     </Container>

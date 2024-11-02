@@ -18,6 +18,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import { usePlayerContext } from "../audio/playerContext";
 
 import {
   MdDashboard,
@@ -56,6 +57,8 @@ export default function Sidebar() {
   });
 
   const [openCategories, setOpenCategories] = useState({});
+
+  const { isPlayerVisible } = usePlayerContext();
 
   useEffect(() => {
     localStorage.setItem("sidebarOpen", JSON.stringify(open));
@@ -150,7 +153,8 @@ export default function Sidebar() {
   const drawerContent = (
     <Box
       sx={{
-        height: "100%",
+        height: isPlayerVisible ? "calc(100% - 86px)" : "100%",
+        zIndex: 1,
         background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
         overflow: "auto",
         position: "relative",

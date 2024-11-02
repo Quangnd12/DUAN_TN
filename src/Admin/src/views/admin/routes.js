@@ -17,6 +17,7 @@ import EditArtist from "./artist/component/edit.js";
 import Albums from "./album";
 import AddAlbum from "./album/component/add.js";
 import EditAlbum from "./album/component/edit.js";
+import Favorites from "./favorite";
 import NotFound from "./notfound/index.js";
 import UnderDevelopment from "./underdev/index.js";
 import Login from "../auth/Login.js";
@@ -42,7 +43,7 @@ const AdminRoutes = (
     <Route path="event" element={<Events />} />
 
     {/* Thêm routes mới cho các trang đang phát triển */}
-    <Route path="genre" element={<UnderDevelopment />} />
+
     <Route path="playlist" element={<UnderDevelopment />} />
     <Route path="explore" element={<UnderDevelopment />} />
     <Route path="trending" element={<UnderDevelopment />} />
