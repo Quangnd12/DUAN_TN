@@ -6,14 +6,10 @@ import { deleteSong } from "../../../../../../services/songs";
 const DeleteSong = ({ onClose, songDelete, onDelete }) => {
     const handleConfirmDelete = async () => {
         try {
-            // Gọi API để xóa genre
-            await deleteSong(songDelete.songId);
-            handleDelete();  // Gọi hàm thông báo đã xóa thành công
 
-            // Cập nhật lại state trong component cha để genre bị xóa
-            onDelete(songDelete.songId);
-
-            // Đóng modal sau khi xóa
+            await deleteSong(songDelete.id);
+            handleDelete();  
+            onDelete(songDelete.id);
             onClose();
         } catch (error) {
             console.error("Xóa genre không thành công:", error);
