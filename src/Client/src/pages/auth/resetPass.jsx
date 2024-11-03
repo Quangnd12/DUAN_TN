@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import LockResetIcon from "@mui/icons-material/LockReset";
 import TextField from "@mui/material/TextField";
-import { resetPassword } from "../../../../services/Api_url"; // Đảm bảo đường dẫn đúng
+// import { resetPassword } from "../../../../services/Api_url"; // Đảm bảo đường dẫn đúng
 
 const ResetPass = () => {
   const {
@@ -19,15 +19,15 @@ const ResetPass = () => {
   const { token } = useParams();
   const navigate = useNavigate();
 
-  const onSubmit = async (data) => {
-    try {
-      await resetPassword(token, data.password);
-      setResetSuccess(true);
-      setTimeout(() => navigate("/login"), 3000); // Chuyển hướng sau 3 giây
-    } catch (error) {
-      setSubmitError(error.message || "An error occurred. Please try again.");
-    }
-  };
+  // const onSubmit = async (data) => {
+  //   try {
+  //     await resetPassword(token, data.password);
+  //     setResetSuccess(true);
+  //     setTimeout(() => navigate("/login"), 3000); // Chuyển hướng sau 3 giây
+  //   } catch (error) {
+  //     setSubmitError(error.message || "An error occurred. Please try again.");
+  //   }
+  // };
 
   return (
     <HelmetProvider>

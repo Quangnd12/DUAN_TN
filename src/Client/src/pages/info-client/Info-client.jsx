@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom"; // Thêm import này
-import { getUserById, updateUserInfo } from "../../../../services/Api_url";
+// import { getUserById, updateUserInfo } from "../../../../services/Api_url";
 import InfoClientCard from "../../components/cards/Info-clientCard";
 import InfoClientFollowingCard from "../../components/cards/Info-clientFollowingCard";
 import CircularProgress from "@mui/material/CircularProgress";

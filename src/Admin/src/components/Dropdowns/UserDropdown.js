@@ -1,194 +1,103 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { createPopper } from "@popperjs/core";
-import { logoutUser } from "../../../../services/Api_url";
-import CircularProgress from "@mui/material/CircularProgress";
+// src/components/Dropdowns/UserDropdown.js
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Avatar, Button, Menu, MenuItem, Typography, Box, CircularProgress } from "@mui/material";
+import { logout } from "../../../../redux/slice/authSlice";
 
-const Dropdown = ({ buttonContent, dropdownContent }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const buttonRef = useRef(null);
-  const dropdownRef = useRef(null);
-
-  const toggleDropdown = useCallback(() => {
-    setIsOpen((prev) => !prev);
-  }, []);
-
-  const handleClickOutside = useCallback((event) => {
-    if (
-      buttonRef.current &&
-      !buttonRef.current.contains(event.target) &&
-      dropdownRef.current &&
-      !dropdownRef.current.contains(event.target)
-    ) {
-      setIsOpen(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      createPopper(buttonRef.current, dropdownRef.current, {
-        placement: "bottom-start",
-      });
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen, handleClickOutside]);
-
-  return (
-    <div className="relative">
-      <button
-        ref={buttonRef}
-        onClick={toggleDropdown}
-        className="focus:outline-none"
-      >
-        {buttonContent}
-      </button>
-      {isOpen && (
-        <div
-          ref={dropdownRef}
-          className="absolute z-10 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
-        >
-          <div
-            className="py-1"
-            role="menu"
-            aria-orientation="vertical"
-            aria-labelledby="options-menu"
-          >
-            {dropdownContent}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const UserProfile = () => {
+const UserDropdown = ({ user }) => {
   const navigate = useNavigate();
-  const [userData, setUserData] = useState(null);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const dispatch = useDispatch();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      setUserData(user);
+    // Check if we have user data either from props or sessionStorage
+    const storedUser = sessionStorage.getItem("user");
+    if (storedUser || user) {
+      setIsLoading(false);
     }
-    const isLoggedOut = sessionStorage.getItem("isLoggedOut");
-    if (isLoggedOut === "true") {
-      navigate("/auth/login", { replace: true });
-    }
-  }, [navigate]);
+  }, [user]);
 
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-    try {
-      await logoutUser();
-      // Thêm delay để hiển thị loading
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Đặt flag đăng xuất trước khi xóa dữ liệu
-      sessionStorage.setItem("isLoggedOut", "true");
-      localStorage.clear();
-      sessionStorage.removeItem("lastLoginTime");
-
-      // Chuyển hướng về trang login
-      navigate("/auth/login", { replace: true });
-    } catch (error) {
-      console.error("Logout error:", error);
-      // Trong trường hợp lỗi, vẫn xóa dữ liệu và đặt flag
-      sessionStorage.setItem("isLoggedOut", "true");
-      localStorage.clear();
-      sessionStorage.removeItem("lastLoginTime");
-      navigate("/auth/login", { replace: true });
-    } finally {
-      setIsLoggingOut(false);
-    }
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  // Nếu không có userData, hiển thị placeholder hoặc loading
-  if (!userData) {
-    return (
-      <div className="flex items-center py-3">
-        <span className="mr-2">Loading...</span>
-      </div>
-    );
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    handleMenuClose();
+    dispatch(logout());
+    navigate("/auth/login", { replace: true });
+  };
+
+  // Show loading state while checking user data
+  if (isLoading) {
+    return <CircularProgress size={24} />;
+  }
+
+  // Get user data from props or sessionStorage
+  const userData = user || JSON.parse(sessionStorage.getItem("user"));
+
+  // If still no user data after loading, return null
+  if (!userData || !userData.username) {
+    return null;
   }
 
   return (
-    <Dropdown
-      buttonContent={
-        <div className="flex items-center py-3">
-          <span className="mr-2">
-            {userData.displayName || userData.name || userData.username}
-          </span>
-          <img
-            className="h-8 w-8 rounded-full"
-            src={
-              userData.avatar ||
-              userData.picture ||
-              "/images/default-avatar.png"
+    <Box display="flex" alignItems="center">
+      <Button 
+        onClick={handleMenuOpen} 
+        style={{ textTransform: "none" }}
+        className="hover:bg-gray-100 rounded-full p-2"
+      >
+        <Avatar
+          src={userData.avatar || "/images/default-avatar.png"}
+          alt={userData.username}
+          sx={{ 
+            width: 32, 
+            height: 32, 
+            marginRight: 1,
+            border: '2px solid #e5e7eb'
+          }}
+        />
+        <Typography variant="subtitle1" className="text-gray-700">
+          {userData.username}
+        </Typography>
+      </Button>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        PaperProps={{ 
+          sx: { 
+            width: 200,
+            mt: 1,
+            '& .MuiMenuItem-root': {
+              py: 1
             }
-            alt="User avatar"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = "/images/default-avatar.png";
-            }}
-          />
-        </div>
-      }
-      dropdownContent={
-        <>
-          <Link
-            to={`/admin/info/${userData.id}`} // Thay đổi từ :id thành userData._id
-            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:rounded-sm"
-          >
-            Personal information
-          </Link>
-          <a
-            href="http://localhost:3000/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:rounded-sm"
-          >
-            Go to Client Site
-          </a>
-          <Link
-            to="/admin/settings"
-            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:rounded-sm"
-          >
-            Setting
-          </Link>
-          <hr className="my-1" />
-          <button
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 hover:rounded-sm"
-          >
-            {isLoggingOut ? (
-              <div className="flex items-center">
-                <CircularProgress size={16} className="mr-2" />
-                <span>Signing out...</span>
-              </div>
-            ) : (
-              "Sign out"
-            )}
-          </button>
-        </>
-      }
-    />
-  );
-};
-
-const UserDropdown = () => {
-  return (
-    <div className="flex items-center space-x-4">
-      <UserProfile />
-    </div>
+          } 
+        }}
+      >
+        <MenuItem onClick={() => {
+          handleMenuClose();
+          navigate(`/admin/info/${userData.id}`);
+        }}>
+          <Typography>Profile</Typography>
+        </MenuItem>
+        <MenuItem onClick={() => {
+          handleMenuClose();
+          navigate("/admin/settings");
+        }}>
+          <Typography>Settings</Typography>
+        </MenuItem>
+        <MenuItem onClick={handleLogout}>
+          <Typography color="error">Logout</Typography>
+        </MenuItem>
+      </Menu>
+    </Box>
   );
 };
 

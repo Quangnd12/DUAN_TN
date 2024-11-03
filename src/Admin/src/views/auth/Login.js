@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import {
   TextField,
   Button,
@@ -20,9 +21,14 @@ import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import QueueMusicIcon from "@mui/icons-material/QueueMusic";
 import EqualizerIcon from "@mui/icons-material/Equalizer";
 import PeopleIcon from "@mui/icons-material/People";
-import { loginUser, googleSignIn } from "../../../../services/Api_url";
-import { signInWithGoogle } from "../../../../config/firebaseConfig";
+import {
+  useLoginMutation,
+  useGoogleLoginMutation,
+} from "../../../../redux/slice/apiSlice";
+import { setCredentials } from "../../../../redux/slice/authSlice";
 import ForgotPassword from "./Forgot";
+import { signInWithGoogle } from "../../../../config/firebaseConfig";
+import { checkAuth } from "../../../../redux/slice/authSlice";
 
 const Feature = ({ Icon, title, description }) => (
   <Box display="flex" alignItems="center" mb={2}>
@@ -56,6 +62,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const {
     register,
@@ -63,112 +70,79 @@ export default function Login() {
     formState: { errors },
   } = useForm();
 
+  const [login] = useLoginMutation();
+  const [googleLogin] = useGoogleLoginMutation();
+
   useEffect(() => {
     const checkAuthStatus = async () => {
-      try {
-        const accessToken = localStorage.getItem('accessToken');
-        const user = localStorage.getItem('user');
-        const lastLoginTime = sessionStorage.getItem('lastLoginTime');
-        
-        // Nếu có token và user data
-        if (accessToken && user) {
-          const currentTime = Date.now();
-          const sessionTimeout = 24 * 60 * 60 * 1000; // 24 hours
-          
-          // Kiểm tra session time
-          if (lastLoginTime && (currentTime - parseInt(lastLoginTime) < sessionTimeout)) {
-            // Xóa flag isLoggedOut nếu có
-            sessionStorage.removeItem('isLoggedOut');
-            navigate('/admin/dashboard', { replace: true });
-            return;
-          }
+      if (localStorage.getItem("accessToken")) {
+        try {
+          await dispatch(checkAuth()).unwrap();
+          navigate("/admin/dashboard", { replace: true });
+        } catch (error) {
+          console.error("Error verifying auth:", error);
+          // Xử lý lỗi nếu cần
         }
-        
-        // Clear auth data if session expired
-        if (!lastLoginTime) {
-          localStorage.clear();
-          sessionStorage.clear();
-        }
-      } catch (error) {
-        console.error("Auth check error:", error);
-        localStorage.clear();
-        sessionStorage.clear();
       }
     };
-
+    
     checkAuthStatus();
-  }, [navigate]);
+  }, [dispatch, navigate]);
+  
 
-  // Handle normal email/password login
   const onSubmit = async (data) => {
     setLoading(true);
     setError("");
+
     try {
-      const response = await loginUser(
-        data.email,
-        data.password,
-        data.rememberMe
-      );
-  
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await login({
+        email: data.email,
+        password: data.password,
+      }).unwrap();
       
-      if (response.token) {
-        // Xóa flag đăng xuất và set thời gian đăng nhập mới
-        sessionStorage.removeItem('isLoggedOut');
-        sessionStorage.setItem('lastLoginTime', Date.now().toString());
-        
-        // Lưu token và thông tin user
-        localStorage.setItem('accessToken', response.token);
-        if (response.user) {
-          localStorage.setItem('user', JSON.stringify(response.user));
-        }
-        
-        navigate("/admin/dashboard", { replace: true });
+       // Kiểm tra vai trò người dùng
+       if (response.user.role !== 'admin') {
+        setError("You do not have access to the admin site.");
+        return;
       }
+
+      localStorage.setItem("accessToken", response.token);
+      sessionStorage.setItem("user", JSON.stringify(response.user));
+      dispatch(
+        setCredentials({
+          user: response.user,
+          token: response.token,
+        })
+      );
+
+      navigate("/admin/dashboard", { replace: true });
     } catch (err) {
-      const errorMessage = err.message || "Đăng nhập thất bại. Vui lòng thử lại.";
-      setError(errorMessage);
-      // Xóa dữ liệu nếu đăng nhập thất bại
-      localStorage.clear();
-      sessionStorage.clear();
+      setError(err.data?.message || "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle Google Sign In
-   const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = async () => {
     setLoading(true);
     setError("");
+
     try {
       const { user, token: idToken } = await signInWithGoogle();
-      const response = await googleSignIn(idToken, true);
+      const response = await googleLogin(idToken).unwrap();
 
-      if (response.accessToken) {
-        // Xóa flag isLoggedOut nếu tồn tại
-        sessionStorage.removeItem('isLoggedOut');
-        
-        // Set new session data
-        sessionStorage.setItem('lastLoginTime', Date.now().toString());
-        
-        // Store auth data
-        localStorage.setItem("accessToken", response.accessToken);
-        localStorage.setItem("rememberMe", "true");
-        if (response.user) {
-          localStorage.setItem("user", JSON.stringify(response.user));
-        }
-        
-        navigate("/admin/dashboard", { replace: true });
-      }
+      localStorage.setItem("accessToken", response.token);
+      sessionStorage.setItem("user", JSON.stringify(response.user));
+      dispatch(
+        setCredentials({
+          user: response.user,
+          token: response.token,
+        })
+      );
+
+      navigate("/admin/dashboard", { replace: true });
     } catch (err) {
-      const errorMessage = err.response?.data?.errors?.[0]?.msg ||
-        err.message ||
-        "Sign in with Google failed. Please try again.";
-      setError(errorMessage);
-      
-      // Clear auth data on error
-      localStorage.clear();
-      sessionStorage.clear();
+      setError(err.data?.message || "Google sign in failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -213,113 +187,82 @@ export default function Login() {
             description="Manage user accounts and access."
           />
         </Grid>
+
         <Grid item xs={12} md={6}>
-          <Paper
-            elevation={3}
-            sx={{ padding: 4, width: "100%", maxWidth: 600, mx: "auto" }}
-          >
+          <Paper elevation={3} sx={{ padding: 4 }}>
             <Tabs value={tabValue} onChange={handleTabChange} centered>
               <Tab label="Login" />
               <Tab label="Forgot Password" />
             </Tabs>
 
             {error && (
-              <Alert severity="error" sx={{ mt: 2 }}>
+              <Alert severity="error" sx={{ mb: 2 }}>
                 {error}
               </Alert>
             )}
 
             <TabPanel value={tabValue} index={0}>
-              <Typography variant="h5" align="center" gutterBottom>
-                Login
-              </Typography>
               <form onSubmit={handleSubmit(onSubmit)}>
                 <TextField
                   label="Email"
-                  type="email"
-                  placeholder="Please enter email"
                   fullWidth
-                  margin="normal"
-                  {...register("email", {
-                    required: "Email cannot be blank",
-                    pattern: {
-                      value: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
-                      message: "Invalid email",
-                    },
-                  })}
+                  {...register("email", { required: "Email is required" })}
                   error={!!errors.email}
                   helperText={errors.email?.message}
-                  disabled={loading}
+                  sx={{ mb: 2 }}
                 />
                 <TextField
                   label="Password"
-                  placeholder="Please enter your password"
                   type="password"
                   fullWidth
-                  margin="normal"
                   {...register("password", {
-                    required: "Password cannot be blank",
-                    minLength: {
-                      value: 6,
-                      message: "Password must have at least 6 characters",
-                    },
+                    required: "Password is required",
                   })}
                   error={!!errors.password}
                   helperText={errors.password?.message}
-                  disabled={loading}
+                  sx={{ mb: 2 }}
                 />
+
                 <FormControlLabel
                   control={
-                    <Checkbox
-                      {...register("rememberMe")}
-                      color="primary"
-                      disabled={loading}
-                    />
+                    <Checkbox {...register("rememberMe")} color="primary" />
                   }
-                  label="Remember to log in"
+                  label="Remember Me"
                 />
+
                 <Button
                   type="submit"
-                  fullWidth
                   variant="contained"
                   color="primary"
-                  sx={{ mt: 3, mb: 1 }}
+                  fullWidth
                   disabled={loading}
+                  sx={{ mt: 2 }}
                 >
-                  {loading ? (
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <CircularProgress size={24} sx={{ mr: 1 }} />
-                      Signing in...
-                    </Box>
-                  ) : (
-                    "Log in"
-                  )}
+                  {loading ? <CircularProgress size={24} /> : "Login"}
+                </Button>
+
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  fullWidth
+                  onClick={handleGoogleSignIn}
+                  disabled={loading}
+                  startIcon={
+                    <img
+                      src={`/images/logo/Google.png`}
+                      alt="Google Icon"
+                      style={{ width: 20, height: 20 }}
+                    />
+                  }
+                  sx={{ mt: 2 }}
+                >
+                   {loading ? <CircularProgress size={24} /> : "Sign in with Google"}
                 </Button>
               </form>
-
-              <Button
-                onClick={handleGoogleSignIn}
-                disabled={loading}
-                fullWidth
-                variant="outlined"
-                sx={{ mt: 2 }}
-                startIcon={
-                  loading ? (
-                    <CircularProgress size={20} />
-                  ) : (
-                    <img
-                      style={{ width: 20, height: 20 }}
-                      src="/images/logo/Google.png"
-                      alt="Google Logo"
-                    />
-                  )
-                }
-              >
-                {loading ? "Signing in..." : "Sign in with Google"}
-              </Button>
             </TabPanel>
+
             <TabPanel value={tabValue} index={1}>
-              <ForgotPassword setError={setError} />
+              <ForgotPassword />
             </TabPanel>
           </Paper>
         </Grid>

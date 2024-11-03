@@ -12,7 +12,7 @@ import {
   InputAdornment,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { resetPassword } from '../../../../services/Api_url';
+import { useResetPasswordMutation } from '../../../../redux/slice/apiSlice';
 
 export default function Reset() {
   const [newPassword, setNewPassword] = useState('');
@@ -25,6 +25,9 @@ export default function Reset() {
   
   const navigate = useNavigate();
   const { token } = useParams();
+
+  const [resetPassword] = useResetPasswordMutation();
+
 
   useEffect(() => {
     if (!token) {
@@ -62,8 +65,8 @@ export default function Reset() {
 
     try {
       setLoading(true);
-      await resetPassword(token, newPassword);
-      setSuccess('Password has been reset successfully! Redirecting to login...');
+      const response = await resetPassword({ token, newPassword }).unwrap();
+      setSuccess(response.message || 'Password has been reset successfully! Redirecting to login...');
       
       // Clear form
       setNewPassword('');
@@ -74,7 +77,7 @@ export default function Reset() {
         navigate('/auth/login');
       }, 2000);
     } catch (error) {
-      setError(error.message || 'Failed to reset password. Please try again.');
+      setError(error.data?.message || 'Failed to reset password. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import axios from "axios";
-import { API_BASE_URL } from "../../../../services/Api_url";
+// import { API_BASE_URL } from "../../../../services/Api_url";
 import TextField from "@mui/material/TextField";
 import LoginIcon from "@mui/icons-material/Login";
 import { InputAdornment, IconButton } from "@mui/material";
@@ -11,7 +11,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import Checkbox from "@mui/material/Checkbox";
 import { makeStyles } from "@material-ui/styles";
-import { registerWithGoogle } from "../../../../services/Api_url";
+// import { registerWithGoogle } from "../../../../services/Api_url";
 import { signInWithGoogle } from "../../../../config/firebaseConfig";
 
 import "./auth.css";
@@ -57,61 +57,61 @@ const Login = () => {
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = (event) => event.preventDefault();
 
-  const onSubmit = async (data) => {
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/auth/login`,
-        {
-          email: data.email,
-          password: data.password,
-        },
-        {
-          withCredentials: true, // This is important to include cookies
-        }
-      );
+  // const onSubmit = async (data) => {
+  //   try {
+  //     const response = await axios.post(
+  //       `${API_BASE_URL}/auth/login`,
+  //       {
+  //         email: data.email,
+  //         password: data.password,
+  //       },
+  //       {
+  //         withCredentials: true, // This is important to include cookies
+  //       }
+  //     );
 
-      if (response.data.user) {
-        // Store user data in localStorage
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-        // Redirect to home page
-        navigate("/");
-      }
-    } catch (error) {
-      setError(
-        error.response?.data?.message || "An error occurred during login"
-      );
-    }
-  };
+  //     if (response.data.user) {
+  //       // Store user data in localStorage
+  //       localStorage.setItem("user", JSON.stringify(response.data.user));
+  //       // Redirect to home page
+  //       navigate("/");
+  //     }
+  //   } catch (error) {
+  //     setError(
+  //       error.response?.data?.message || "An error occurred during login"
+  //     );
+  //   }
+  // };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      const { user, token } = await signInWithGoogle();
+  // const handleGoogleSignIn = async () => {
+  //   try {
+  //     const { user, token } = await signInWithGoogle();
 
-      // Gửi idToken tới backend để đăng nhập/đăng ký
-      const response = await registerWithGoogle(token);
+  //     // Gửi idToken tới backend để đăng nhập/đăng ký
+  //     const response = await registerWithGoogle(token);
 
-      if (response.user) {
-        // Đăng nhập thành công
-        const userToSave = {
-          id: response.user.id || user.uid,
-          username: response.user.username || user.displayName,
-          email: response.user.email || user.email,
-          avatar: response.user.avatar || user.photoURL,
-        };
+  //     if (response.user) {
+  //       // Đăng nhập thành công
+  //       const userToSave = {
+  //         id: response.user.id || user.uid,
+  //         username: response.user.username || user.displayName,
+  //         email: response.user.email || user.email,
+  //         avatar: response.user.avatar || user.photoURL,
+  //       };
 
-        localStorage.setItem("user", JSON.stringify(userToSave));
-        localStorage.setItem("accessToken", response.accessToken);
-        localStorage.setItem("refreshToken", response.refreshToken);
+  //       localStorage.setItem("user", JSON.stringify(userToSave));
+  //       localStorage.setItem("accessToken", response.accessToken);
+  //       localStorage.setItem("refreshToken", response.refreshToken);
 
-        navigate("/");
-      } else if (response.needsRegistration) {
-        // Người dùng chưa đăng ký, chuyển hướng đến trang đăng ký
-        navigate("/register", { state: { email: user.email } });
-      }
-    } catch (error) {
-      setError(error.message || "An error occurred during Google Sign-In");
-    }
-  };
+  //       navigate("/");
+  //     } else if (response.needsRegistration) {
+  //       // Người dùng chưa đăng ký, chuyển hướng đến trang đăng ký
+  //       navigate("/register", { state: { email: user.email } });
+  //     }
+  //   } catch (error) {
+  //     setError(error.message || "An error occurred during Google Sign-In");
+  //   }
+  // };
 
   return (
     <HelmetProvider>
@@ -132,8 +132,7 @@ const Login = () => {
                     Sign in
                   </h3>
                   {error && <p className="text-red-500 mb-4">{error}</p>}
-                  <form onSubmit={handleSubmit(onSubmit)}>
-                    {/* Email Field */}
+                  {/* <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="relative mb-4">
                       <TextField
                         id="outlined-email"
@@ -153,7 +152,7 @@ const Login = () => {
                               "penis",
                               "dick",
                               "fuck",
-                            ]; // Thay thế bằng các từ ngữ phản cảm thực tế
+                            ]; 
                             for (let word of forbiddenWords) {
                               if (value.includes(word)) {
                                 return "Email contains inappropriate content.";
@@ -175,7 +174,7 @@ const Login = () => {
                       />
                     </div>
 
-                    {/* Password Field */}
+                 
                     <div className="relative mb-4">
                       <TextField
                         id="outlined-password"
@@ -217,7 +216,7 @@ const Login = () => {
                       />
                     </div>
 
-                    {/* Remember me */}
+                
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center">
                         <Checkbox
@@ -225,8 +224,8 @@ const Login = () => {
                           defaultChecked
                           className={classes.root}
                           sx={{
-                            borderRadius: "4px", // Bo góc cho checkbox
-                            padding: "2px", // Thêm khoảng cách để viền rõ hơn
+                            borderRadius: "4px",
+                            padding: "2px",
                           }}
                         />
                         <span className="ml-2 text-white text-sm">
@@ -241,7 +240,6 @@ const Login = () => {
                       </Link>
                     </div>
 
-                    {/* Submit Button */}
                     <button
                       className="w-full py-2 px-4 bg-sky-500 font-semibold text-white rounded-md shadow-md transform transition-transform duration-300 hover:ring-2 hover:ring-white"
                       type="submit"
@@ -249,7 +247,7 @@ const Login = () => {
                       Log in
                       <LoginIcon className="ml-2" />
                     </button>
-                  </form>
+                  </form> */}
                   <div className="flex items-center my-4">
                     <hr className="flex-1 border-t border-gray-300" />
                     <p className="text-gray-500 font-semibold mx-3 mb-0 text-sm">
@@ -260,7 +258,7 @@ const Login = () => {
 
                   <button
                     className="w-full py-2 px-4 bg-black border border-[#6a6a6a] text-white rounded-3xl shadow-md flex items-center justify-center hover:border-white hover:border-[1px] hover:ring-1 hover:ring-white transition-all"
-                    onClick={handleGoogleSignIn}
+                    // onClick={handleGoogleSignIn}
                     type="button"
                   >
                     <img

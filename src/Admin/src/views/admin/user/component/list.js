@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import useSWR from "swr";
 import {
   Table,
   TableBody,
@@ -15,61 +14,71 @@ import {
   CircularProgress,
   Pagination,
   Typography,
-  Alert,
-  Stack,
-  Collapse,
-  Box,
   Avatar,
   Backdrop,
-  Chip
+  Chip,
+  Box,
+  Collapse,
+  FormControl,
+  Select,
+  Stack
 } from "@mui/material";
 import {
   MoreVert as MoreVertIcon,
   KeyboardArrowDown,
   KeyboardArrowUp,
 } from "@mui/icons-material";
-import { getAllUsers } from "../../../../../../services/Api_url";
+import { useGetUsersQuery } from "../../../../../../redux/slice/apiSlice";
 
 const ITEMS_PER_PAGE = 5;
 
-const fetcher = (url, page, limit, searchTerm) =>
-  getAllUsers(page, limit, searchTerm);
-
 const UserList = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  // State for pagination and sorting
   const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [sort, setSort] = useState("createdAt");
+  const [order, setOrder] = useState("desc");
+  
+  // UI states
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [openRow, setOpenRow] = useState({}); // State để quản lý mở/đóng hàng
+  const [openRow, setOpenRow] = useState({});
 
+  // RTK Query hook with pagination params
+  const { data, isLoading, isFetching } = useGetUsersQuery({
+    page,
+    limit: ITEMS_PER_PAGE,
+    search: debouncedSearchTerm,
+    sort,
+    order,
+  });
+
+  // Debounce search term
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-    }, 1000);
+      setPage(1); // Reset to first page on new search
+    }, 500);
 
-    return () => {
-      clearTimeout(handler);
-    };
+    return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  const { data, error, isLoading } = useSWR(
-    ["getAllUsers", page, ITEMS_PER_PAGE, debouncedSearchTerm],
-    () => fetcher("getAllUsers", page, ITEMS_PER_PAGE, debouncedSearchTerm),
-    {
-      revalidateIfStale: false,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    }
-  );
+  // Handlers
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+  };
 
-  const handleChangePage = (event, newPage) => {
+  const handlePageChange = (event, newPage) => {
     setPage(newPage);
   };
 
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-    setPage(1); // Reset page to 1 when searching
+  const handleSortChange = (event) => {
+    setSort(event.target.value);
+  };
+
+  const handleOrderChange = (event) => {
+    setOrder(event.target.value);
   };
 
   const handleOpenMenu = (event, user) => {
@@ -95,169 +104,161 @@ const UserList = () => {
     return names.length > 1 ? names[0][0] + names[1][0] : names[0][0];
   };
 
-  
-
- 
-
-  if (error) {
-    return (
-      <Typography color="error">
-        Error: {error.message || "Failed to fetch users"}
-      </Typography>
-    );
-  }
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   return (
     <div className="p-4">
-       <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={isLoading}
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading || isFetching}
       >
         <CircularProgress color="inherit" />
       </Backdrop>
-      <div className="flex justify-between mb-4">
+
+      {/* Search and Sort Controls */}
+      <div className="flex flex-wrap gap-4 mb-4">
         <TextField
           label="Search"
           variant="outlined"
           value={searchTerm}
           onChange={handleSearch}
           className="w-64"
-          placeholder="Search..."
-          disabled={isLoading} // Disable khi đang tải
+          placeholder="Search by username or email..."
+          disabled={isLoading}
         />
 
-      </div>
-      {data?.users.length > 0 ? (
-        <>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: "#18181b" }}>
-                  {" "}
-                  <TableCell />
-                  <TableCell sx={{color: "white"}}>#</TableCell>
-                  <TableCell sx={{color: "white"}}>Username</TableCell>
-                  <TableCell sx={{color: "white"}}>Avatar</TableCell>
-                  <TableCell sx={{color: "white"}}>Email</TableCell>
-                  <TableCell sx={{color: "white"}}>Role</TableCell>
-                  <TableCell sx={{color: "white"}}>Created At</TableCell>
-                  <TableCell sx={{color: "white"}}>Action</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {data.users.map((user, index) => (
-                  <>
-                    <TableRow
-                      key={user.id}
-                      sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }} // Hiệu ứng hover
-                    >
-                      <TableCell>
-                        <IconButton
-                          aria-label="expand row"
-                          size="small"
-                          onClick={() => toggleRow(user.id)}
-                        >
-                          {openRow[user.id] ? (
-                            <KeyboardArrowUp />
-                          ) : (
-                            <KeyboardArrowDown />
-                          )}
-                        </IconButton>
-                      </TableCell>
-                      <TableCell>
-                        {index + 1 + (page - 1) * ITEMS_PER_PAGE}
-                      </TableCell>
-                      <TableCell>{user.username || "No username"}</TableCell>
-                      <TableCell>
-                        {user.avatar ? (
-                          <img
-                            src={user.avatar}
-                            alt={user.username || "Avatar"}
-                            className="w-10 h-10 rounded-full"
-                          />
-                        ) : (
-                          <Avatar>{getInitials(user.username)}</Avatar> // Hiển thị Letter Avatar
-                        )}
-                      </TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <Chip 
-                          label={user.role}
-                          color={user.role === 'admin' ? 'secondary' : 'primary'}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        {new Date(
-                          user.createdAt._seconds * 1000
-                        ).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <IconButton
-                          onClick={(event) => handleOpenMenu(event, user)}
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell
-                        style={{ paddingBottom: 0, paddingTop: 0 }}
-                        colSpan={8}
-                      >
-                        <Collapse
-                          in={openRow[user.id]}
-                          timeout="auto"
-                          unmountOnExit
-                        >
-                          <Box margin={1}>
-                            <Typography
-                              variant="h6"
-                              gutterBottom
-                              component="div"
-                            >
-                              Additional Information for {user.username}
-                            </Typography>
-                            <Typography variant="body1">
-                              Follows: {user.followsId}
-                            </Typography>
-                            <Typography variant="body1">
-                              Playlists: {user.playlistsId}
-                            </Typography>
-                            {/* Thêm thông tin chi tiết của người dùng */}
-                          </Box>
-                        </Collapse>
-                      </TableCell>
-                    </TableRow>
-                  </>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleCloseMenu}
+        <FormControl variant="outlined" className="w-48">
+          <Select
+            value={sort}
+            onChange={handleSortChange}
+            disabled={isLoading}
+            displayEmpty
           >
-            <MenuItem onClick={handleCloseMenu}>Block</MenuItem>
-          </Menu>
-          <div className="mt-4 flex justify-end items-center">
-            <Stack spacing={2}>
-              <Pagination
-                count={data.totalPages || 1}
-                page={page}
-                onChange={handleChangePage}
-                color="primary"
-                variant="outlined"
-                shape="rounded"
-              />
-            </Stack>
-          </div>
-        </>
-      ) : (
-        <Alert severity="warning">
-          No users found matching the search keyword.
-        </Alert>
+            <MenuItem value="createdAt">Created Date</MenuItem>
+            <MenuItem value="username">Username</MenuItem>
+            <MenuItem value="email">Email</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl variant="outlined" className="w-48">
+          <Select
+            value={order}
+            onChange={handleOrderChange}
+            disabled={isLoading}
+            displayEmpty
+          >
+            <MenuItem value="asc">Ascending</MenuItem>
+            <MenuItem value="desc">Descending</MenuItem>
+          </Select>
+        </FormControl>
+      </div>
+
+      {/* Users Table */}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell />
+              <TableCell>Avatar</TableCell>
+              <TableCell>Username</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Role</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {data?.users?.map((user) => (
+              <React.Fragment key={user.id}>
+                <TableRow>
+                  <TableCell>
+                    <IconButton
+                      size="small"
+                      onClick={() => toggleRow(user.id)}
+                    >
+                      {openRow[user.id] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                    </IconButton>
+                  </TableCell>
+                  <TableCell>
+                    <Avatar src={user.avatar}>{getInitials(user.username)}</Avatar>
+                  </TableCell>
+                  <TableCell>{user.username || "N/A"}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={user.role}
+                      color={user.role === "admin" ? "primary" : "default"}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <IconButton onClick={(e) => handleOpenMenu(e, user)}>
+                      <MoreVertIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                    <Collapse in={openRow[user.id]} timeout="auto" unmountOnExit>
+                      <Box sx={{ margin: 1 }}>
+                        <Typography variant="h6" gutterBottom component="div">
+                          User Details
+                        </Typography>
+                        <Table size="small">
+                          <TableBody>
+                            <TableRow>
+                              <TableCell component="th" scope="row">Birthday</TableCell>
+                              <TableCell>{formatDate(user.birthday)}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell component="th" scope="row">Created At</TableCell>
+                              <TableCell>{formatDate(user.createdAt)}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell component="th" scope="row">Updated At</TableCell>
+                              <TableCell>{formatDate(user.updatedAt)}</TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </Box>
+                    </Collapse>
+                  </TableCell>
+                </TableRow>
+              </React.Fragment>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Pagination */}
+      {data?.pagination && (
+        <div className="flex justify-end items-center mt-4">
+          <Stack spacing={2}>
+          <Pagination
+            count={Math.ceil(data.pagination.total / ITEMS_PER_PAGE)}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+            disabled={isLoading}
+            shape="rounded"
+          />
+           </Stack>
+        </div>
       )}
+
+      {/* Action Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleCloseMenu}
+      >
+        <MenuItem onClick={handleCloseMenu}>Edit</MenuItem>
+        <MenuItem onClick={handleCloseMenu}>Delete</MenuItem>
+      </Menu>
     </div>
   );
 };

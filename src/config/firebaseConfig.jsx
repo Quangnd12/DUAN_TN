@@ -4,13 +4,13 @@ import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyD8N6AGEH5XvsioGCsA2QO5YVud6YPQiQc",
-  authDomain: "be-musicheals.firebaseapp.com",
-  projectId: "be-musicheals",
-  storageBucket: "be-musicheals.appspot.com",
-  messagingSenderId: "722153119739",
-  appId: "1:722153119739:web:4ad4066a946b678391755e",
-  measurementId: "G-EPT96S8L8P"
+  apiKey: "AIzaSyB0wXlo9jYNO8x7llHLqs34_bSSL5ZA5n0",
+  authDomain: "be-musicheals-a6d7a.firebaseapp.com",
+  projectId: "be-musicheals-a6d7a",
+  storageBucket: "be-musicheals-a6d7a.appspot.com",
+  messagingSenderId: "826807083664",
+  appId: "1:826807083664:web:4e3d5191ad8e95f7552e15",
+  measurementId: "G-2C1GXR564F"
 };
 
 // Initialize Firebase

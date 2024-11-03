@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import axios from 'axios';
-import { API_BASE_URL, registerWithGoogle } from '../../../../services/Api_url';
+// import { API_BASE_URL, registerWithGoogle } from '../../../../services/Api_url';
 import TextField from "@mui/material/TextField";
 import LoginIcon from "@mui/icons-material/Login";
 import { InputAdornment, IconButton } from "@mui/material";
@@ -52,53 +52,53 @@ const Register = () => {
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = (event) => event.preventDefault();
 
- const onSubmit = async (data) => {
-    try {
-      const response = await axios.post(`${API_BASE_URL}/auth/register`, {
-        email: data.email,
-        password: data.password
-      }, {
-        withCredentials: true // Điều quan trọng là phải bao gồm cookie
-      });
+//  const onSubmit = async (data) => {
+//     try {
+//       const response = await axios.post(`${API_BASE_URL}/auth/register`, {
+//         email: data.email,
+//         password: data.password
+//       }, {
+//         withCredentials: true // Điều quan trọng là phải bao gồm cookie
+//       });
       
-      if (response.data.user) {
-        // Store user data in localStorage
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        // Redirect to home page
-        navigate('/');
-      }
-    } catch (error) {
-      setError(error.response?.data?.message || "An error occurred during registration");
-    }
-  };
+//       if (response.data.user) {
+//         // Store user data in localStorage
+//         localStorage.setItem('user', JSON.stringify(response.data.user));
+//         // Redirect to home page
+//         navigate('/');
+//       }
+//     } catch (error) {
+//       setError(error.response?.data?.message || "An error occurred during registration");
+//     }
+//   };
 
-const handleGoogleSignUp = async () => {
-  try {
-    const { user, token } = await signInWithGoogle();
+// const handleGoogleSignUp = async () => {
+//   try {
+//     const { user, token } = await signInWithGoogle();
 
-    // Gửi idToken tới backend để đăng ký
-    const response = await registerWithGoogle(token);
+//     // Gửi idToken tới backend để đăng ký
+//     const response = await registerWithGoogle(token);
 
-    if (response.user) {
-      // Đảm bảo rằng response.user có đầy đủ thông tin, bao gồm id
-      const userToSave = {
-        id: response.user.id || user.uid, // Sử dụng id từ response hoặc uid từ Google
-        username: response.user.username || user.displayName,
-        email: response.user.email || user.email,
-        avatar: response.user.avatar || user.photoURL
-      };
+//     if (response.user) {
+//       // Đảm bảo rằng response.user có đầy đủ thông tin, bao gồm id
+//       const userToSave = {
+//         id: response.user.id || user.uid, // Sử dụng id từ response hoặc uid từ Google
+//         username: response.user.username || user.displayName,
+//         email: response.user.email || user.email,
+//         avatar: response.user.avatar || user.photoURL
+//       };
 
-      // Lưu thông tin người dùng vào localStorage
-      localStorage.setItem("user", JSON.stringify(userToSave));
-      localStorage.setItem("accessToken", response.accessToken);
-      localStorage.setItem("refreshToken", response.refreshToken);
+//       // Lưu thông tin người dùng vào localStorage
+//       localStorage.setItem("user", JSON.stringify(userToSave));
+//       localStorage.setItem("accessToken", response.accessToken);
+//       localStorage.setItem("refreshToken", response.refreshToken);
       
-      navigate("/");
-    }
-  } catch (error) {
-    setError(error.message || "An error occurred during Google registration");
-  }
-};
+//       navigate("/");
+//     }
+//   } catch (error) {
+//     setError(error.message || "An error occurred during Google registration");
+//   }
+// };
   
   return (
     <HelmetProvider>

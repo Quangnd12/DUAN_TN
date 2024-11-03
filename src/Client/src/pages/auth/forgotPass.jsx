@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import SendIcon from "@mui/icons-material/Send";
 import TextField from "@mui/material/TextField";
-import { forgotPassword } from "../../../../services/Api_url";
+// import { forgotPassword } from "../../../../services/Api_url";
 
 import "./auth.css";
 
@@ -22,7 +22,7 @@ const ForgotPass = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      await forgotPassword(data.email);
+      // await forgotPassword(data.email);
       setEmailSent(true);
       setSubmitError("");
     } catch (error) {

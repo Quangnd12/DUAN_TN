@@ -1,63 +1,39 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect} from "react";
 import { useParams, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import AdminProfile from "./components/profile";
-import { getUserById } from "../../../../../services/Api_url";
+import { useGetUserQuery } from "../../../../../redux/slice/apiSlice";
 
 export default function Info() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // Lấy id từ URL params
   const { id } = useParams();
+  
+  // Lấy thông tin user đã đăng nhập từ Redux store
+  const authUser = useSelector((state) => state.auth.user);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userData = localStorage.getItem('user');
-        if (userData) {
-          const parsedUser = JSON.parse(userData);
-          
-          if (parsedUser.id === id) {
-            setUser(parsedUser);
-          } else {
-            const response = await getUserById(id);
-            if (response?.data) {
-              setUser(response.data);
-            } else {
-              throw new Error('User data not found');
-            }
-          }
-        } else {
-          const response = await getUserById(id);
-          if (response?.data) {
-            setUser(response.data);
-          } else {
-            throw new Error('User data not found');
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (authUser) {
+      sessionStorage.setItem("user", JSON.stringify(authUser));
+    }
+  }, [authUser]);
 
-    fetchUserData();
-  }, [id]);
+  // Kiểm tra xem id từ URL có khớp với id của user đang đăng nhập không
+  const isOwnProfile = authUser && authUser.id === Number(id);
 
-  
+  // Sử dụng RTK Query để fetch thông tin user dựa trên id
+  const { data: userData, error, isLoading } = useGetUserQuery(id, {
+    // Chỉ fetch nếu có id và id hợp lệ
+    skip: !id || isNaN(Number(id))
+  });
 
-  if (loading) {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (error || !user) {
-    return <Navigate to="/login" replace />;
-  }
-
+  // Truyền dữ liệu user vào AdminProfile
   return (
     <div className="pt-1">
-      <AdminProfile user={user} onUserUpdate={(updatedUser) => setUser(updatedUser)} />
+      <AdminProfile user={isOwnProfile ? authUser : userData} />
     </div>
   );
 }

@@ -1,10 +1,25 @@
 import { configureStore } from "@reduxjs/toolkit";
-import userInformationSlice from "./slice/userInformationSlice";
+import { persistStore, persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage'; 
+import authReducer from "./slice/authSlice";
+import { apiSlice } from "./slice/apiSlice";
 
-export const Store = configureStore({
+const persistConfig = {
+  key: 'auth',  // Chỉ định riêng cho auth
+  storage,
+};
+
+const persistedAuthReducer = persistReducer(persistConfig, authReducer);
+
+const store = configureStore({
   reducer: {
-    userInformation: userInformationSlice,
+    auth: persistedAuthReducer, // Giữ duy nhất persistedReducer cho auth
+    [apiSlice.reducerPath]: apiSlice.reducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(apiSlice.middleware),
 });
 
-export default Store;
+const persistor = persistStore(store);
+
+export { store, persistor };

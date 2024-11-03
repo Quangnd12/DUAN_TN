@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { TextField, Button, Typography, Box, Alert } from '@mui/material';
-import { forgotPassword } from '../../../../services/Api_url';
+import { useForgotPasswordMutation } from '../../../../redux/slice/apiSlice';
 
 export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+
+  const [forgotPassword] = useForgotPasswordMutation();
   
   const {
     register,
@@ -20,11 +22,9 @@ export default function ForgotPassword() {
       setLoading(true);
       setError('');
       setSuccess('');
-      
-      // Call the API to send reset password email
-      await forgotPassword(data.email, true);
-      
-      setSuccess('Password reset link has been sent to your email');
+
+      const response = await forgotPassword(data.email).unwrap();
+        setSuccess(response.message || 'Password reset link has been sent to your email');
       reset(); // Clear the form
     } catch (err) {
       setError(err.message || 'Failed to send reset password email. Please try again.');
