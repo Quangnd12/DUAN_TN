@@ -22,7 +22,13 @@ export default function CurrentTrack({ title, image, artist }) {
               <h4 className="track__info__track__name">{title}</h4>
             )}
           </div>
-          <h6 className="track__info__track__artists whitespace-nowrap overflow-hidden text-ellipsis w-[280px]">{artist}</h6>
+          {shouldUseMarquee ? (
+            <Marquee style={{ width: '100%' }} gap={0}>
+              <h6 className="track__info__track__artists">{artist}</h6>
+            </Marquee>
+          ) : (
+            <h6 className="track__info__track__artists whitespace-nowrap overflow-hidden text-ellipsis w-[280px]">{artist}</h6>
+          )}
         </div>
       </div>
     </Container>

@@ -8,7 +8,6 @@ import SelectField from "../../../../components/SharedIngredients/SelectField";
 import DatePickerField from "../../../../components/SharedIngredients/DatePickerField";
 import SliderField from "../../../../components/SharedIngredients/SliderField";
 import SwitchField from "../../../../components/SharedIngredients/SwitchField";
-import TextareaField from "Admin/src/components/SharedIngredients/TextareaField";
 import { addSong } from "../../../../../../services/songs";
 import { handleAdd } from "Admin/src/components/notification";
 import { getGenres } from "services/genres";
@@ -39,7 +38,6 @@ const AddSong = () => {
   const [coverImagePreview, setCoverImagePreview] = useState(null);
   const [durationSet, setDurationSet] = useState(false);
   const [coverAudioPreview, setCoverAudioPreview] = useState(null);
-  const [lyrics, setLyrics] = useState("");
 
   const handleDrop = useCallback(async (acceptedFiles, name) => {
     const file = acceptedFiles[0];
@@ -88,11 +86,11 @@ const AddSong = () => {
 
   const data = async () => {
     const genre = await getGenres();
-    setGenres(genre);
+    setGenres(genre.genres);
     const artist = await getArtists();
-    setArtists(artist);
+    setArtists(artist.artists);
     const album = await getAlbums();
-    setAlbums(album);
+    setAlbums(album.albums);
   }
 
   useEffect(() => {
@@ -110,9 +108,10 @@ const AddSong = () => {
     const artistIDs = data.artistID.map(artist => artist.value);
     artistIDs.forEach(id => formData.append('artistID[]', id));
 
-    const albumIDs = data.albumID.map(album => album.value);
-    albumIDs.forEach(id => formData.append('albumID[]', id));
-
+    if (data.albumID && data.albumID.length > 0) {
+      const albumIDs = data.albumID.map(album => album.value);
+      albumIDs.forEach(id => formData.append('albumID[]', id));
+    }
 
     const genreIDs = data.genreID.map(genre => genre.value);
     genreIDs.forEach(id => formData.append('genreID[]', id));
@@ -232,9 +231,9 @@ const AddSong = () => {
                     isMulti
                   />
                 )}
-                rules={{ required: "Album is required" }}
+              // rules={{ required: "Album is required" }}
               />
-              {errors.albumID && <small className="text-red-500 mt-1 ml-2 block">{errors.albumID.message}</small>}
+              {/* {errors.albumID && <small className="text-red-500 mt-1 ml-2 block">{errors.albumID.message}</small>} */}
             </div>
           </div>
         </div>

@@ -5,7 +5,7 @@ const getAlbums = async (page = 1, limit = 10) => {
       method: "GET",
       path: `/api/albums?page=${page}&limit=${limit}`,
     });
-    return res.albums;
+    return res;
   };
 
 const getAlbumById = async (id) => {

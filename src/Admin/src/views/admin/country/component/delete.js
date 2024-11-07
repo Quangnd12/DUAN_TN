@@ -1,15 +1,17 @@
 import { handleDelete } from "Admin/src/components/notification";
 import React from "react";
 import { MdDelete } from "react-icons/md";
-import { deleteGenre } from "../../../../../../services/genres";
+import { deleteCountry } from "services/country";
 
-const DeleteGenre = ({ onClose, GenreToDelete, onDelete }) => {
+const DeleteCountry = ({ onClose, CountryDelete, onDelete }) => {
     const handleConfirmDelete = async () => {
         try {
             // Gọi API để xóa genre
-            await deleteGenre(GenreToDelete.id);
-            handleDelete(); 
-            onDelete(GenreToDelete.id);
+            await deleteCountry(CountryDelete.id);
+            handleDelete();  // Gọi hàm thông báo đã xóa thành công
+
+            // Cập nhật lại state trong component cha để genre bị xóa
+            onDelete(CountryDelete.id);
 
             // Đóng modal sau khi xóa
             onClose();
@@ -53,4 +55,4 @@ const DeleteGenre = ({ onClose, GenreToDelete, onDelete }) => {
     );
 };
 
-export default DeleteGenre;
+export default DeleteCountry;

@@ -2,58 +2,53 @@ import React, { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
-
-import InputField from "../../../../components/SharedIngredients/InputField";
 import SelectField from "../../../../components/SharedIngredients/SelectField";
 import { handleEdit } from "../../../../components/notification";
-import TextareaField from "../../../../components/SharedIngredients/TextareaField";
 import { updateGenre, getGenreById } from "../../../../../../services/genres";
+import { getCountry } from "../../../../../../services/country";
 
 const EditGenre = () => {
     const { id } = useParams();
 
-    const { control, handleSubmit, setValue, watch, clearErrors, formState: { errors }, trigger, setError } = useForm({
+    const { control, handleSubmit, setValue, watch, clearErrors, getValues, formState: { errors }, trigger, setError } = useForm({
         defaultValues: {
             name: "",
-            description: "",
+            countryID: null,
             image: null,
-            subgenres: []
         }
     });
 
-    useEffect(() => {
-        initData();
-    }, []);
-
-    const initData = async () => {
-        const data = await getGenreById(id);
-        setValue("name", data.name);
-        setValue("description", data.description);
-        if (Array.isArray(data.subgenres)) {
-            setValue("subgenres", data.subgenres.map(sub => ({ value: sub.name, label: sub.name })));
-        }
-        setValue("image", data.image);
-        if (data.image) {
-            setCoverImagePreview(data.image);  
-        }
-
-    };
-
     const options = [
-        "pop", "R&B", "EDM", "country", "jazz", "blues", "classical",
-        "reggae", "metal", "punk", "folk", "alternative rock", "soul",
-        "disco", "techno", "trap", "dubstep", "indie rock", "k-pop",
-        "funk", "latin", "reggaeton", "world music", "gospel", "ambient",
-        "house", "grunge", "ska", "experimental", "dancehall", "psytrance",
-        "chillwave", "hardcore", "progressive rock", "celtic", "synthwave",
-        "new wave", "glam rock", "kwaito", "bossa nova", "afrobeat", "fado",
-        "bluegrass", "glam metal", "grime",
-        "Nhạc trẻ", "Nhạc trữ tình", "Nhạc bolero"
+        "Pop", "R&B", "EDM", "Country", "Jazz", "Blues", "Classical", "Reggae", "Metal", "Punk",
+        "Folk", "Alternative rock", "Soul", "Disco", "Techno", "Trap", "Dubstep", "Indie rock",
+        "K-pop", "Funk", "Latin", "Reggaeton", "World music", "Gospel", "Ambient", "House",
+        "Grunge", "Ska", "Experimental", "Dancehall", "Psytrance", "Chillwave", "Hardcore",
+        "Progressive rock", "Celtic", "Synthwave", "New wave", "Glam rock", "Kwaito", "Bossa nova",
+        "Afrobeat", "Fado", "Bluegrass", "Glam metal", "Grime", "Nhạc trẻ", "Nhạc trữ tình", "Nhạc bolero", "V-POP", "Rock", "Rap", "J-POP"
     ];
 
+    const OptionGenre = options.sort();
 
     const navigate = useNavigate();
     const [coverImagePreview, setCoverImagePreview] = useState(null);
+    const [Country, setCountry] = useState([]);
+
+    useEffect(() => {
+        Data();
+    }, []);
+
+    const Data = async () => {
+        try {
+            const data = await getCountry();
+            setCountry(data.countries);
+            const DataGenre = await getGenreById(id);
+            setValue('name', { value: DataGenre.name, label: DataGenre.name })
+            setValue('countryID', { value: DataGenre.countryID, label: DataGenre.countryName })
+            setCoverImagePreview(DataGenre.image);
+        } catch (error) {
+            console.log("Không tìm thấy dữ liệu");
+        }
+    };
 
     const handleDrop = useCallback((acceptedFiles, name) => {
         const file = acceptedFiles[0];
@@ -62,18 +57,16 @@ const EditGenre = () => {
             return;
         }
         if (name === "image") {
-            setValue("image", file); // Store the file in the form value
+            setValue("image", file);
             try {
                 const objectURL = URL.createObjectURL(file);
-                setCoverImagePreview(objectURL); // Display the preview
+                setCoverImagePreview(objectURL); 
             } catch (error) {
                 console.error("Failed to create object URL:", error);
             }
-            clearErrors("image"); // Clear any existing image error
+            clearErrors("image"); 
         }
     }, [setValue, clearErrors]);
-
-
 
     const { getRootProps: getImageRootProps, getInputProps: getImageInputProps } =
         useDropzone({
@@ -87,20 +80,15 @@ const EditGenre = () => {
 
     const onSubmit = async (data) => {
         const formData = new FormData();
-        formData.append('name', data.name);
-        formData.append('description', data.description);
-        const subgenresValues = data.subgenres.map((subgenre) => subgenre.value);
-        formData.append('subgenres', subgenresValues);
+        const countryIDValue = typeof data.countryID === 'object' ? data.countryID.value : data.countryID;
+        formData.append('countryID', countryIDValue);
+        const nameValue = typeof data.name === 'object' ? data.name.value : data.name;
+        formData.append('name', nameValue);
         formData.append('image', data.image);
-
-
-        const valid = await trigger();
-        if (!valid) return; 
-        console.log("FormData to send: ", formData);
         try {
             await updateGenre(id, formData);
-            navigate("/admin/genre");  
-            handleEdit();               
+            navigate("/admin/genre");
+            handleEdit();
         } catch (error) {
             console.error(error);
         }
@@ -118,10 +106,14 @@ const EditGenre = () => {
                                 name="name"
                                 control={control}
                                 render={({ field }) => (
-                                    <InputField
+                                    <SelectField
                                         label="Name"
                                         id="name"
                                         name="name"
+                                        options={OptionGenre.map((genre) => ({
+                                            value: genre,
+                                            label: genre,
+                                        }))}
                                         {...field}
                                     />
                                 )}
@@ -139,54 +131,33 @@ const EditGenre = () => {
                         </div>
                         <div>
                             <Controller
-                                name="subgenres"
+                                name="countryID"
                                 control={control}
                                 render={({ field }) => (
                                     <SelectField
-                                        label="Subgenres"
-                                        id="subgenres"
-                                        name="subgenres"
-                                        options={options.map((subgenres) => ({
-                                            value: subgenres,
-                                            label: subgenres,
+                                        label="Country"
+                                        id="countryID"
+                                        name="countryID"
+                                        options={Country.map((country) => ({
+                                            value: country.id,
+                                            label: country.name,
                                         }))}
                                         {...field}
-                                        isMulti
+                                        value={field.value}
                                     />
                                 )}
-                                rules={{ required: "subgenres is required" }}
+                                rules={'Country is required'}
                             />
-                            {errors.subgenres && <small className="text-red-500 mt-1 ml-2 block">{errors.subgenres.message}</small>}
+                            {errors.countryID && <small className="text-red-500 mt-1 ml-2 block">{errors.countryID.message}</small>}
                         </div>
                     </div>
                 </div>
-                <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-green-500">
-                    <h2 className="text-xl font-semibold mb-4">Detailed Information</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                        {/* Description */}
-                        <div className="col-span-2">
-                            <Controller
-                                name="description"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextareaField
-                                        label="Description"
-                                        id="description"
-                                        name="description"
-                                        {...field}
-                                    />
-                                )}
-                                rules={{ required: "Description is required" }}
-                            />
-                            {errors.description && <small className="text-red-500 mt-1 ml-2 block">{errors.description.message}</small>}
-                        </div>
-                    </div>
-                </div>
+
                 <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-red-500">
                     <h2 className="text-xl font-semibold mb-4">Media Upload</h2>
                     <div className="grid grid-cols-1 gap-2">
                         <Controller
-                            name="image"  // Đảm bảo tên trường này khớp với "image" trong onSubmit
+                            name="image"
                             control={control}
                             render={({ field }) => (
                                 <div
@@ -211,10 +182,10 @@ const EditGenre = () => {
                                             />
                                         </div>
                                     )}
-                                    {errors.image && <small className="text-red-500 mt-2">{errors.image.message}</small>}
+                                 
                                 </div>
                             )}
-                            rules={{ required: "Cover image is required" }}
+                          
                         />
                     </div>
                 </div>
