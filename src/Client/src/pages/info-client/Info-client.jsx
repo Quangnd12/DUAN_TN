@@ -1,10 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useParams } from "react-router-dom"; // Thêm import này
-// import { getUserById, updateUserInfo } from "../../../../services/Api_url";
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+
 import InfoClientCard from "../../components/cards/Info-clientCard";
 import InfoClientFollowingCard from "../../components/cards/Info-clientFollowingCard";
 import CircularProgress from "@mui/material/CircularProgress";
 import tb from "../../../public/assets/img/image 27.png";
+import LogoutDialog from "./components/logoutDialog";
+
+import {
+  useUpdateUserMutation,
+  useUploadAvatarMutation,
+} from "../../../../redux/slice/apiSlice";
+import { updateUser, logout } from "../../../../redux/slice/authSlice";
 
 const topTracks = [
   {
@@ -49,25 +57,45 @@ const followingArtists = [
 ];
 
 const InfoClient = () => {
+
+  const navigate = useNavigate();
   const { userId } = useParams();
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [profileImage, setProfileImage] = useState("");
+  const [birthday, setBirthday] = useState("");
   const [name, setName] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const fileInputRef = useRef(null);
 
+  const dispatch = useDispatch();
+  const { user: authUser } = useSelector((state) => state.auth);
+
+  const [updateUserInfo] = useUpdateUserMutation();
+  const [uploadAvatar] = useUploadAvatarMutation();
+  
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const loggedInUser = JSON.parse(localStorage.getItem("user"));
-        const userIdToFetch = userId || loggedInUser.id || loggedInUser.uid;
-        
+        const userDataFromStore = authUser;
+        const userIdToFetch =
+          userId || userDataFromStore.id || userDataFromStore.uid;
+
         if (userIdToFetch) {
-          const userData = await getUserById(userIdToFetch);
-          setUser(userData);
-          setName(userData.username || loggedInUser.displayName || "");
-          setProfileImage(userData.avatar || loggedInUser.photoURL || "/assets/images/default-avatar.jpg");
+          setUser(userDataFromStore);
+          setName(
+            userDataFromStore.username || userDataFromStore.displayName || ""
+          );
+          setBirthday(userDataFromStore.birthday || "");
+          setProfileImage(
+            userDataFromStore.avatar ||
+              userDataFromStore.photoURL ||
+              "/assets/images/default-avatar.jpg"
+          );
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -75,37 +103,69 @@ const InfoClient = () => {
     };
 
     fetchUserData();
-  }, [userId]);
+  }, [userId, authUser]);
 
   const handleImageClick = () => {
     setIsEditing(true);
   };
 
   const handleSave = async () => {
-    setIsUpdating(true); // Bắt đầu loading
+    setIsUpdating(true); // Start loading
     try {
-      const updatedInfo = { username: name };
+      // Create a new object with the updated properties
+      const updatedInfo = {
+        id: user.id,
+        username: name,
+        birthday,
+        avatar: profileImage !== user.avatar ? profileImage : user.avatar,
+      };
       if (profileImage !== user.avatar) {
-        updatedInfo.avatar = profileImage;
+        // Only upload avatar if it has changed
+        await uploadAvatar({
+          id: user.id,
+          file: await fetch(profileImage).then((res) => res.blob()),
+        });
       }
-      await updateUserInfo(userId, updatedInfo);
-      localStorage.setItem("user", JSON.stringify({ ...user, ...updatedInfo }));
-      setUser({ ...user, ...updatedInfo });
+      // Call the update API with the new object
+      const { data: updatedUser } = await updateUserInfo(updatedInfo);
+
+      // Dispatch the update to Redux without modifying the original object directly
+      dispatch(updateUser(updatedUser));
+      // Update local state with the updated user data
+      setUser(updatedUser);
       setIsEditing(false);
+      setLogoutDialogOpen(true); 
     } catch (error) {
       console.error("Error updating user info:", error);
     } finally {
       setTimeout(() => {
-        setIsUpdating(false); // Kết thúc loading
+        setIsUpdating(false); // End loading
       }, 1500);
-      window.location.reload();
     }
+  };
+
+  const handleCloseLogoutDialog = () => {
+    setLogoutDialogOpen(false);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    handleMenuClose();
+    dispatch(logout());
+    navigate("/login", { replace: true });
   };
 
   const handleImageChange = (e) => {
     if (e.target.files[0]) {
       setProfileImage(URL.createObjectURL(e.target.files[0]));
     }
+  };
+
+  const handleBirthdayChange = (e) => {
+    setBirthday(e.target.value);
   };
 
   const handleNameChange = (e) => {
@@ -129,20 +189,24 @@ const InfoClient = () => {
   }
 
   return (
+    <>
     <div className="bg-black text-white w-full h-auto">
       <div className="bg-zinc-800 p-20 rounded-lg">
         <div className="flex items-center flex-col sm:flex-row">
-        <img
+          <img
             className="w-48 h-48 sm:w-56 sm:h-56 border-2 border-gray-300 object-cover mb-4 sm:mb-0 sm:mr-6 cursor-pointer transition-transform duration-300 hover:scale-105"
             src={profileImage}
             alt="User avatar"
             onClick={handleImageClick}
           />
-          <div className="text-center sm:text-left mt-20">
+          <div className="text-center sm:text-left mt-18">
             <p className="text-gray-400 text-base sm:text-lg mb-1">Profile</p>
             <h2 className="text-3xl sm:text-6xl font-bold mb-2">{name}</h2>
             <p className="text-gray-400 text-base sm:text-lg">
               Email: {user.email}
+            </p>
+            <p className="text-gray-400 text-base sm:text-lg">
+              Birthday: {user.birthday}
             </p>
             <p className="text-gray-400 text-base sm:text-lg">
               Following {user.followsId ? user.followsId.length : 0}
@@ -221,6 +285,13 @@ const InfoClient = () => {
                 placeholder="Enter your name"
                 className="bg-zinc-700 text-white p-3 rounded mb-4 border border-gray-600 focus:border-blue-500 transition-colors duration-300"
               />
+              <input
+                type="date"
+                value={birthday}
+                onChange={handleBirthdayChange}
+                placeholder="Enter your birthday"
+                className="bg-zinc-700 text-white p-3 rounded mb-4 border border-gray-600 focus:border-blue-500 transition-colors duration-300"
+              />
               <button
                 onClick={handleSave}
                 className="bg-blue-600 text-white py-3 px-6 rounded hover:bg-blue-700 transition-colors duration-300"
@@ -237,6 +308,12 @@ const InfoClient = () => {
         </div>
       )}
     </div>
+     <LogoutDialog
+     open={logoutDialogOpen}
+     onClose={handleCloseLogoutDialog}
+     onLogout={handleLogout}
+   />
+    </>
   );
 };
 

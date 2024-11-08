@@ -7,7 +7,7 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import data from "../../data/fetchSongData";
-import { usePip } from "../../../../redux/pip";
+import { usePip } from "../../utils/pip";
 
 const PictureInPicturePlayer = () => {
   const [currentSongIndex, setCurrentSongIndex] = useState(0);

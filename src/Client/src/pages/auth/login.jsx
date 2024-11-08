@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from "react-helmet-async";
-import axios from "axios";
-// import { API_BASE_URL } from "../../../../services/Api_url";
+import { signInWithGoogle } from '../../../../config/firebaseConfig';
+import { useLoginMutation, useGoogleLoginMutation } from "../../../../redux/slice/apiSlice";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../../../../redux/slice/authSlice";
+
 import TextField from "@mui/material/TextField";
 import LoginIcon from "@mui/icons-material/Login";
 import { InputAdornment, IconButton } from "@mui/material";
@@ -11,8 +14,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import Checkbox from "@mui/material/Checkbox";
 import { makeStyles } from "@material-ui/styles";
-// import { registerWithGoogle } from "../../../../services/Api_url";
-import { signInWithGoogle } from "../../../../config/firebaseConfig";
+import { toast } from 'react-toastify';
 
 import "./auth.css";
 
@@ -44,6 +46,7 @@ const useStyles = makeStyles({
 const Login = () => {
   const classes = useStyles();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
@@ -54,64 +57,41 @@ const Login = () => {
     formState: { errors },
   } = useForm();
 
+  const [login] = useLoginMutation();
+  const [googleLogin] = useGoogleLoginMutation();
+
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = (event) => event.preventDefault();
 
-  // const onSubmit = async (data) => {
-  //   try {
-  //     const response = await axios.post(
-  //       `${API_BASE_URL}/auth/login`,
-  //       {
-  //         email: data.email,
-  //         password: data.password,
-  //       },
-  //       {
-  //         withCredentials: true, // This is important to include cookies
-  //       }
-  //     );
+  const onSubmit = async (data) => {
+    try {
+      const { data: authData } = await login(data);
+      dispatch(setCredentials({ token: authData.token, user: authData.user, role: authData.user.role }));
+      navigate("/");
+    } catch (error) {
+      setError(error.data.message || "An error occurred during login");
+    }
+  };
 
-  //     if (response.data.user) {
-  //       // Store user data in localStorage
-  //       localStorage.setItem("user", JSON.stringify(response.data.user));
-  //       // Redirect to home page
-  //       navigate("/");
-  //     }
-  //   } catch (error) {
-  //     setError(
-  //       error.response?.data?.message || "An error occurred during login"
-  //     );
-  //   }
-  // };
+  const handleGoogleSignIn = async () => {
+    try {
+      const { user: googleUser, token: googleToken } = await signInWithGoogle();
+      
+      const result = await googleLogin({ idToken: googleToken }).unwrap();
+      
+      // Lưu thông tin user vào Redux store và localStorage
+      dispatch(setCredentials({
+        user: result.user,
+        token: result.token
+      }));
 
-  // const handleGoogleSignIn = async () => {
-  //   try {
-  //     const { user, token } = await signInWithGoogle();
+      toast.success("Sign in to Google successfully!");
+      navigate('/');
+    } catch (error) {
+      toast.error(error.message || "Sign in to Google failed");
+    }
+  };
 
-  //     // Gửi idToken tới backend để đăng nhập/đăng ký
-  //     const response = await registerWithGoogle(token);
-
-  //     if (response.user) {
-  //       // Đăng nhập thành công
-  //       const userToSave = {
-  //         id: response.user.id || user.uid,
-  //         username: response.user.username || user.displayName,
-  //         email: response.user.email || user.email,
-  //         avatar: response.user.avatar || user.photoURL,
-  //       };
-
-  //       localStorage.setItem("user", JSON.stringify(userToSave));
-  //       localStorage.setItem("accessToken", response.accessToken);
-  //       localStorage.setItem("refreshToken", response.refreshToken);
-
-  //       navigate("/");
-  //     } else if (response.needsRegistration) {
-  //       // Người dùng chưa đăng ký, chuyển hướng đến trang đăng ký
-  //       navigate("/register", { state: { email: user.email } });
-  //     }
-  //   } catch (error) {
-  //     setError(error.message || "An error occurred during Google Sign-In");
-  //   }
-  // };
 
   return (
     <HelmetProvider>
@@ -132,7 +112,7 @@ const Login = () => {
                     Sign in
                   </h3>
                   {error && <p className="text-red-500 mb-4">{error}</p>}
-                  {/* <form onSubmit={handleSubmit(onSubmit)}>
+                  <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="relative mb-4">
                       <TextField
                         id="outlined-email"
@@ -247,7 +227,7 @@ const Login = () => {
                       Log in
                       <LoginIcon className="ml-2" />
                     </button>
-                  </form> */}
+                  </form>
                   <div className="flex items-center my-4">
                     <hr className="flex-1 border-t border-gray-300" />
                     <p className="text-gray-500 font-semibold mx-3 mb-0 text-sm">
@@ -258,7 +238,7 @@ const Login = () => {
 
                   <button
                     className="w-full py-2 px-4 bg-black border border-[#6a6a6a] text-white rounded-3xl shadow-md flex items-center justify-center hover:border-white hover:border-[1px] hover:ring-1 hover:ring-white transition-all"
-                    // onClick={handleGoogleSignIn}
+                    onClick={handleGoogleSignIn}
                     type="button"
                   >
                     <img
@@ -268,19 +248,6 @@ const Login = () => {
                     />
                     <span className="flex-1 text-center">
                       Sign in with Google
-                    </span>
-                  </button>
-                  <button
-                    className="w-full py-2 px-4 bg-black border border-[#6a6a6a] text-white rounded-3xl shadow-md flex items-center justify-center mt-2 hover:border-white hover:border-[1px] hover:ring-1 hover:ring-white transition-all"
-                    type="submit"
-                  >
-                    <img
-                      className="w-5 h-5"
-                      src={`/images/logo/Facebook.png`}
-                      alt="Facebook Logo"
-                    />
-                    <span className="flex-1 text-center">
-                      Sign in with Facebook
                     </span>
                   </button>
 

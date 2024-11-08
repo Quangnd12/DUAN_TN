@@ -5,7 +5,7 @@ import authReducer from "./slice/authSlice";
 import { apiSlice } from "./slice/apiSlice";
 
 const persistConfig = {
-  key: 'auth',  // Chỉ định riêng cho auth
+  key: 'auth', 
   storage,
 };
 

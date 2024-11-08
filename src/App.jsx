@@ -41,7 +41,7 @@ const AppContent = () => {
             </PublicRoute>
           }
         />
-        <Route path="/" element={<Client />} />
+        <Route path="*" element={<Client />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </PlayerProvider>

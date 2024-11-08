@@ -1,7 +1,9 @@
-import axios from "axios";
-import { API_BASE_URL } from "../../../../services/Api_url";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../../../redux/slice/authSlice";
+import { useLogoutMutation } from "../../../../redux/slice/apiSlice";
+import { toast } from 'react-toastify';
 import SearchInput from "../searchInput/index";
 
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
@@ -30,11 +32,16 @@ const VisuallyHiddenInput = styled("input")`
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const [canGoBack, setCanGoBack] = useState(false);
+
+  // Lấy thông tin user từ Redux store
+  const { user, isAuthenticated } = useSelector(state => state.auth);
   const [canGoForward, setCanGoForward] = useState(false);
-  const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const [logoutMutation] = useLogoutMutation();
 
   useEffect(() => {
     setCanGoBack(window.history.length > 1);
@@ -42,18 +49,22 @@ const Header = () => {
       window.history.state &&
         window.history.state.idx < window.history.length - 1
     );
+  }, [location]);
 
-    // Kiểm tra xem người dùng đã đăng nhập chưa
-   const loggedInUser = localStorage.getItem("user");
-  if (loggedInUser) {
-    const parsedUser = JSON.parse(loggedInUser);
-    // Đảm bảo rằng user object có id
-    if (!parsedUser.id && parsedUser.uid) {
-      parsedUser.id = parsedUser.uid;
+  // Effect để xử lý khi user thay đổi
+  useEffect(() => {
+    if (user) {
+      // Đảm bảo avatar có giá trị mặc định nếu không có
+      if (!user.avatar) {
+        user.avatar = '/images/default-avatar.png';
+      }
+      
+      // Đảm bảo username có giá trị mặc định nếu không có
+      if (!user.username) {
+        user.username = user.email.split('@')[0];
+      }
     }
-    setUser(parsedUser);
-  }
-}, [location]);
+  }, [user]);
 
   const handleSearch = (query) => {
     if (query) {
@@ -87,42 +98,84 @@ const Header = () => {
   };
 
   const handleLogout = async () => {
- 
     setIsLoggingOut(true);
     try {
-      // Xóa token trước khi gọi API
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-
-      // Gọi API đăng xuất
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      await axios.post(
-        `${API_BASE_URL}/auth/logout`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
-
-      // Xóa thông tin người dùng
-      localStorage.removeItem("user");
-      setUser(null);
-      navigate("/");
+      await logoutMutation().unwrap();
+      dispatch(logout());
+      toast.success('Logged out successfully');
+      navigate('/');
     } catch (error) {
       console.error("Error during logout:", error);
-
-      // Kiểm tra lỗi token
-      if (error.response && error.response.data) {
-        const { tokenExpired } = error.response.data;
-        if (tokenExpired) {
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          navigate("/login");
-        }
-      }
+      toast.error('Failed to logout. Please try again.');
     } finally {
       setIsLoggingOut(false);
+      setMenuOpen(false);
     }
+  };
+
+  // Render user section based on authentication status
+  const renderUserSection = () => {
+    if (isAuthenticated && user) {
+      return (
+        <div className="relative">
+          <div onClick={toggleMenu} className="cursor-pointer flex items-center">
+            <p className="px-4 py-2 text-sm text-white hover:text-gray-300">
+              {user.username || user.email.split('@')[0]}
+            </p>
+            <Avatar
+              alt={user.username || user.email}
+              src={user.avatar || '/images/default-avatar.png'}
+              className="border-2 border-gray-300 hover:border-white"
+            />
+          </div>
+          {menuOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-zinc-800 rounded-md shadow-lg py-1 z-50 border border-gray-700">
+              <button
+                onClick={handleProfileClick}
+                className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-zinc-700"
+              >
+                Profile
+              </button>
+              <hr className="border-gray-700" />
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-zinc-700"
+              >
+                {isLoggingOut ? 'Logging out...' : 'Logout'}
+              </button>
+              <hr className="border-gray-700" />
+              <Button
+                component="label"
+                role={undefined}
+                tabIndex={-1}
+                variant="outlined"
+                color="neutral"
+                startDecorator={<CloudUploadIcon fontSize="small" />}
+                className="block w-full px-4 py-2 text-sm text-white hover:bg-zinc-700"
+              >
+                Upload a file
+                <VisuallyHiddenInput type="file" />
+              </Button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <Link to="/register">
+          <div className="px-4 py-2 rounded-md text-white hover:bg-zinc-800 transition-colors">
+            Sign up
+          </div>
+        </Link>
+        <Link to="/login">
+          <div className="px-4 py-2 rounded-md font-bold bg-white text-black hover:bg-gray-200 transition-colors">
+            Sign in
+          </div>
+        </Link>
+      </>
+    );
   };
 
   return (
@@ -159,83 +212,32 @@ const Header = () => {
               </span>
             </Tooltip>
             <div className="relative left-8">
-              <SearchInput onSearch={handleSearch}></SearchInput>
+              <SearchInput onSearch={handleSearch} />
             </div>
           </div>
 
           <div className="flex gap-2 items-center">
-            <Link to={"/content"}>
-              <Tooltip title="What's news">
-                <div className="relative px-2 py-2 hover:bg-gray-600 rounded-md">
-                  <NotificationsIcon fontSize="large" className="text-white" />
-                  <div className="absolute top-0 right-1">
-                    <CircleIcon fontSize="small" className="text-red-500" />
+            {isAuthenticated && (
+              <Link to="/content">
+                <Tooltip title="What's news">
+                  <div className="relative px-2 py-2 hover:bg-gray-600 rounded-md">
+                    <NotificationsIcon fontSize="large" className="text-white" />
+                    <div className="absolute top-0 right-1">
+                      <CircleIcon fontSize="small" className="text-red-500" />
+                    </div>
                   </div>
-                </div>
-              </Tooltip>
-            </Link>
-            {user ? (
-              <div className="relative">
-                <div onClick={toggleMenu} className="cursor-pointer flex">
-                  <p className="px-4 py-2 text-sm text-white">
-                    {user.username}
-                  </p>
-                  <Avatar
-                    alt={user.username}
-                    src={user.avatar}
-                  />
-                </div>
-                {menuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                    <button
-                      onClick={handleProfileClick}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Profile
-                    </button>
-                    <hr />
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 rounded hover:bg-gray-100"
-                    >
-                      Logout
-                    </button>
-                    <hr />
-                    <Button
-                      component="label"
-                      role={undefined}
-                      tabIndex={-1}
-                      variant="outlined"
-                      color="neutral"
-                      startDecorator={<CloudUploadIcon fontSize="small" />}
-                      className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Upload a file
-                      <VisuallyHiddenInput type="file" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <>
-                <Link to={"/register"}>
-                  <div className="px-4 py-2 rounded-md text-white">Sign up</div>
-                </Link>
-                <Link to={"/login"}>
-                  <div className="px-4 py-2 rounded-md font-bold bg-white text-black">
-                    Sign in
-                  </div>
-                </Link>
-              </>
+                </Tooltip>
+              </Link>
             )}
+            {renderUserSection()}
           </div>
         </div>
       </div>
       {isLoggingOut && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-md shadow-lg flex flex-col items-center">
+          <div className="bg-zinc-800 p-6 rounded-md shadow-lg flex flex-col items-center">
             <CircularProgress size={60} className="mb-4" />
-            <p className="text-lg font-semibold">Logging out...</p>
+            <p className="text-lg font-semibold text-white">Logging out...</p>
           </div>
         </div>
       )}

@@ -54,11 +54,23 @@ export const apiSlice = createApi({
       invalidatesTags: ["User"],
     }),
     googleLogin: builder.mutation({
-      query: (idToken) => ({
+      query: (credentials) => ({
         url: "/auth/login/google",
         method: "POST",
-        body: { idToken },
+        body: credentials, // Send both idToken and isRegistering flag
       }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setCredentials({ 
+            token: data.token,
+            user: data.user,
+            role: data.user.role 
+          }));
+        } catch (error) {
+          console.error("Google login failed:", error);
+        }
+      },
       invalidatesTags: ["User"],
     }),
     logout: builder.mutation({

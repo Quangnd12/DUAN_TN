@@ -1,7 +1,7 @@
 import "./App.css";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { PipProvider } from "../../redux/pip";
+import { PipProvider } from "./utils/pip";
 import SideBar from "./components/sidebar/SideBar.component";
 import HomePage from "./pages/homepage/HomePage";
 import Header from "./components/header/Header";

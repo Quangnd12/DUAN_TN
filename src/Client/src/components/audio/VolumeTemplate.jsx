@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import '../../assets/css/artist/volume.css'; 
-import { FaVolumeUp, FaVolumeMute, FaMicrophoneAlt } from 'react-icons/fa';
-import { MdQueueMusic, MdPictureInPictureAlt } from 'react-icons/md'; 
-import MusicListDrawer from '../aside/MusicListDrawer';
-import { usePip } from '../../../../redux/pip';
-import Drawer from '@mui/material/Drawer';
-import Lyrics from '../../pages/lyrics/lyrics';
+import React, { useState } from "react";
+import "../../assets/css/artist/volume.css";
+import { FaVolumeUp, FaVolumeMute, FaMicrophoneAlt } from "react-icons/fa";
+import { MdQueueMusic, MdPictureInPictureAlt } from "react-icons/md";
+import MusicListDrawer from "../aside/MusicListDrawer";
+import { usePip } from "../../utils/pip";
+import Drawer from "@mui/material/Drawer";
+import Lyrics from "../../pages/lyrics/lyrics";
 
 const Volume = ({ volume, onVolumeChange }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -13,11 +13,11 @@ const Volume = ({ volume, onVolumeChange }) => {
   const { togglePip } = usePip();
 
   const handleVolumeChange = (e) => {
-      onVolumeChange(e);
+    onVolumeChange(e);
   };
 
   const toggleLyricsDrawer = (open) => () => {
-      setIsLyricsOpen(open);
+    setIsLyricsOpen(open);
   };
 
   const handleDrawerOpen = () => {
@@ -30,18 +30,17 @@ const Volume = ({ volume, onVolumeChange }) => {
 
   return (
     <div className="volume-container">
-      <MdPictureInPictureAlt 
-        className="icon-QueueMusic mr-4" 
-        title="Restore" 
+      <MdPictureInPictureAlt
+        className="icon-QueueMusic mr-4"
+        title="Restore"
         onClick={togglePip}
       />
       <FaMicrophoneAlt // Sử dụng FaMicrophone thay cho FaMicrophoneAlt
-        className="icon-microphone mr-4" 
+        className="icon-microphone mr-4"
         title="Mic Karaoke" // Đổi title thành Mic Karaoke
         onClick={toggleLyricsDrawer(true)} // Mở Drawer khi click
       />
-    
-      
+
       {volume === 0 ? (
         <FaVolumeMute className="icon" />
       ) : (
@@ -56,9 +55,12 @@ const Volume = ({ volume, onVolumeChange }) => {
         onChange={handleVolumeChange}
         className="volume-slider"
       />
-      <MdQueueMusic className="icon ml-4" title="Music List" onClick={handleDrawerOpen} />
+      <MdQueueMusic
+        className="icon ml-4"
+        title="Music List"
+        onClick={handleDrawerOpen}
+      />
       <MusicListDrawer open={drawerOpen} onClose={handleDrawerClose} />
-    
 
       {/* Drawer mở từ phía dưới */}
       <Drawer

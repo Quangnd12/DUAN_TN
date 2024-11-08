@@ -128,8 +128,8 @@ export default function Login() {
     setError("");
 
     try {
-      const { user, token: idToken } = await signInWithGoogle();
-      const response = await googleLogin(idToken).unwrap();
+      const { user, token: googleToken } = await signInWithGoogle();
+      const response = await googleLogin({idToken: googleToken}).unwrap();
 
       localStorage.setItem("accessToken", response.token);
       sessionStorage.setItem("user", JSON.stringify(response.user));

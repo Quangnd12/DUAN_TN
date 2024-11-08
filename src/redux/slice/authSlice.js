@@ -2,6 +2,16 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { apiSlice } from "./apiSlice";
 
+// Thêm action mới để lưu thông tin user vào localStorage
+const saveUserToStorage = (user) => {
+  try {
+    localStorage.setItem("user", JSON.stringify(user));
+    sessionStorage.setItem("user", JSON.stringify(user));
+  } catch (error) {
+    console.error("Error saving user to storage:", error);
+  }
+};
+
 const loadUserFromStorage = () => {
   try {
     const user = sessionStorage.getItem("user");
@@ -61,6 +71,7 @@ const authSlice = createSlice({
         state.user = user;
         state.role = user.role;
         sessionStorage.setItem("user", JSON.stringify(user));
+        saveUserToStorage(user);
       }
       if (token) {
         state.token = token;
@@ -77,6 +88,7 @@ const authSlice = createSlice({
       state.role = null;
       state.error = null;
       sessionStorage.removeItem("user");
+      localStorage.removeItem("user");
       localStorage.removeItem("accessToken");
     },
     setError: (state, action) => {
