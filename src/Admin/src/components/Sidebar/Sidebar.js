@@ -43,6 +43,7 @@ import {
   MdMusicVideo,
   MdAssessment,
   MdAccountCircle,
+  MdPublic
 } from "react-icons/md";
 
 export default function Sidebar() {
@@ -127,6 +128,7 @@ export default function Sidebar() {
           icon: MdNewReleases,
           label: "New Releases",
         },
+        { to: "/admin/countries", icon: MdPublic, label: "Country" },
       ],
     },
     {

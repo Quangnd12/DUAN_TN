@@ -43,9 +43,7 @@ const EditSong = () => {
   const [Genres, setGenres] = useState([]);
   const [Albums, setAlbums] = useState([]);
 
-  useEffect(() => {
-    initData();
-  }, []);
+
 
   const initData = async () => {
     const data = await getSongById(id);
@@ -57,24 +55,42 @@ const EditSong = () => {
     setValue("releaseDate", data.releaseDate);
     setValue("is_explicit", data.is_explicit);
 
-    const genreValues = data.genre.split(',').map(genre => ({ value: genre, label: genre }));
+    const genreNames = data.genre.split(', ');
+    const genreIDs = data.genreID.split(', ');
+    const genreValues = genreNames.map((genre, index) => ({
+        value: genreIDs[index],
+        label: genre
+    }));
     setValue("genreID", genreValues);
 
-    const albumValues = data.album.split(',').map(album => ({ value: album, label: album }));
+    const albumNames = (data.album && typeof data.album === 'string') ? data.album.split(', ') : [];
+    const albumIDs = (data.albumID && typeof data.albumID === 'string') ? data.albumID.split(', ') : [];
+    const albumValues = albumNames.map((album, index) => ({
+        value: albumIDs[index],
+        label: album
+    }));
     setValue("albumID", albumValues);
 
-    const artistValues = data.artist.split(',').map(artist => ({ value: artist, label: artist }));
+    const artistNames = data.artist.split(', ');
+    const artistIDs = data.artistID.split(', ');
+    const artistValues = artistNames.map((artist, index) => ({
+        value: artistIDs[index],
+        label: artist
+    }));
     setValue("artistID", artistValues);
 
     const genre = await getGenres();
-    setGenres(genre);
+    setGenres(genre.genres);
     const artist = await getArtists();
-    setArtists(artist);
+    setArtists(artist.artists);
     const album = await getAlbums();
-    setAlbums(album);
+    setAlbums(album.albums);
 
   };
-
+  useEffect(() => {
+    initData();
+  }, []);
+  
   const handleDrop = useCallback(async (acceptedFiles, name) => {
     const file = acceptedFiles[0];
     if (!file) return;
