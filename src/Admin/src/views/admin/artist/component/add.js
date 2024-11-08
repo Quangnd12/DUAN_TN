@@ -1,64 +1,79 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
-
 import InputField from "../../../../components/SharedIngredients/InputField";
 import { handleAdd } from "../../../../components/notification";
-
+import { addArtist, getArtists } from "../../../../../../services/artist"; // Đảm bảo bạn đã import hàm addArtist từ api
 
 const AddArtist = () => {
-  const { control, handleSubmit, setValue, watch, clearErrors, getValues, formState: { errors }, trigger, setError } = useForm({
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    clearErrors,
+    trigger,
+    setError,
+    watch,
+    formState: { errors } // Lấy errors từ formState
+  } = useForm({
     defaultValues: {
       name: "",
-      role: "",
-      cover_image: null,
+      role: "", // Default role
+      avatar: null,
+      biography: "",
     }
   });
 
   const navigate = useNavigate();
-  const [coverImagePreview, setCoverImagePreview] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
 
-  const handleDrop = useCallback((acceptedFiles, name) => {
+  const handleDrop = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
     if (!file) return;
-    if (name === "cover_image") {
-      setValue("cover_image", file);
-      try {
-        const objectURL = URL.createObjectURL(file);
-        setCoverImagePreview(objectURL);
-      } catch (error) {
-        console.error("Failed to create object URL:", error);
-      }
-      clearErrors("cover_image");
-    }
+
+    setValue("avatar", file);
+    const objectURL = URL.createObjectURL(file);
+    setAvatarPreview(objectURL);
+    clearErrors("avatar");
   }, [setValue, clearErrors]);
 
-
-  const { getRootProps: getImageRootProps, getInputProps: getImageInputProps } =
-    useDropzone({
-      onDrop: (files) => handleDrop(files, "cover_image"),
-      accept: "image/*",
-    });
+  const { getRootProps: getAvatarRootProps, getInputProps: getAvatarInputProps } = useDropzone({
+    onDrop: handleDrop,
+    accept: "image/*",
+  });
 
   const handleCancel = () => {
     navigate("/admin/artist");
   };
 
+const onSubmit = async (data) => {
+  const valid = await trigger();
+  if (!valid) return;
 
-  const onSubmit = async (data) => {
-    const valid = await trigger();
-    if (!valid) return;
-    if (!data.cover_image) {
-      console.log("Cover image is required");
-      setError("cover_image", { type: "manual", message: "Cover image is required" });
-      return;
-    }
-    console.log(data);
-    handleAdd();
-  };
+  // Kiểm tra và hiển thị lỗi nếu không có avatar
+  if (!data.avatar) {
+    setError("avatar", { type: "manual", message: "Avatar image is required" });
+    return;
+  }
 
+  try {
+    // Tạo một đối tượng FormData
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("avatar", data.avatar); // Đảm bảo đây là file
+    formData.append("role", data.role);
+    formData.append("biography", data.biography);
 
+    // Gọi hàm addArtist với formData
+    await addArtist(formData);
+    const artists = await getArtists();
+    handleAdd(); // Hiển thị thông báo thành công
+    navigate("/admin/artist"); // Điều hướng về danh sách nghệ sĩ sau khi thêm thành công
+  } catch (error) {
+    console.error("Error adding artist:", error.response ? error.response.data : error.message);
+  }
+};
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
@@ -80,67 +95,104 @@ const AddArtist = () => {
                 )}
                 rules={{
                   validate: (value) => {
-                    if (!value) return "name is required";
-                    if (value.length < 1 || value.length > 100) return "name must be between 1 and 100 characters";
+                    if (!value) return "Name is required";
+                    if (value.length < 1 || value.length > 100) return "Name must be between 1 and 100 characters";
                     const invalidCharacters = /[<>:"/\\|?*]/;
-                    if (invalidCharacters.test(value)) return "name contains invalid characters";
+                    if (invalidCharacters.test(value)) return "Name contains invalid characters";
                     return true;
                   }
                 }}
               />
-              {errors.name && <small className="text-red-500 mt-1 ml-2 block">{errors.name.message}</small>}
             </div>
+
+            {/* Role Select Input */}
             <div>
               <Controller
                 name="role"
                 control={control}
+                rules={{
+                  required: "Please select a role", // Validation rule to ensure role is selected
+                }}
                 render={({ field }) => (
-                  <InputField
-                    label="Role"
-                    id="role"
-                    name="role"
-                    {...field}
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="role">Role</label>
+                    <select
+                      id="role"
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-base focus:ring-blue-500 focus:border-blue-500"
+                      {...field}
+                    >
+                      <option value="">Please select a role</option> {/* Initial empty option */}
+                      <option value="1">Artist</option>
+                      <option value="2">Rapper</option>
+                    </select>
+                    {errors.role && <small className="text-red-500">{errors.role.message}</small>}
+                  </div>
                 )}
-                rules={{ required: "role is required" }}
               />
-              {errors.role && <small className="text-red-500 mt-1 ml-2 block">{errors.role.message}</small>}
             </div>
           </div>
+
+          {/* Biography Input */}
+          <div className="grid grid-cols-1 gap-4 mt-4 w-full max-w-4xl">
+            <div>
+              <Controller
+                name="biography"
+                control={control}
+                render={({ field }) => (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="biography">Biography</label>
+                    <textarea
+                      id="biography"
+                      name="biography"
+                      {...field}
+                      rows={5}
+                      cols={10}
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    {errors.biography && <small className="text-red-500">{errors.biography.message}</small>}
+                  </div>
+                )}
+                rules={{ required: "Biography is required" }}
+              />
+            </div>
+          </div>
+
         </div>
+
+        {/* Avatar Upload Section */}
         <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-red-500">
-          <h2 className="text-xl font-semibold mb-4">Media Upload</h2>
+          <h2 className="text-xl font-semibold mb-4">Avatar Upload</h2>
           <div className="grid grid-cols-1 gap-2">
             <Controller
-              name="cover_image"
+              name="avatar"
               control={control}
               render={({ field }) => (
                 <div
-                  {...getImageRootProps()}
-                  className={`w-full p-6 border-2 border-dashed ${errors.cover_image ? 'border-red-600' : 'border-gray-400'} rounded-md cursor-pointer hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500`}
+                  {...getAvatarRootProps()}
+                  className={`w-full p-6 border-2 border-dashed ${errors.avatar ? 'border-red-600' : 'border-gray-400'} rounded-md cursor-pointer hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500`}
                 >
-                  <input {...getImageInputProps()} />
+                  <input {...getAvatarInputProps()} />
                   <p className="text-center text-gray-600">
-                    Drag & drop an image file here, or click to select a file
+                    Drag & drop an avatar image file here, or click to select a file
                   </p>
-                  {watch("cover_image") && (
+                  {field.value && (
                     <p className="text-center text-green-500 mt-2">
-                      Selected file: {watch("cover_image")?.name}
+                      Selected file: {field.value?.name}
                     </p>
                   )}
-                  {coverImagePreview && (
+                  {avatarPreview && (
                     <div className="mt-4 flex justify-center">
                       <img
-                        src={coverImagePreview}
-                        alt="Cover Preview"
+                        src={avatarPreview}
+                        alt="Avatar Preview"
                         className="w-32 h-32 object-cover rounded-md border-2 border-gray-300"
                       />
                     </div>
                   )}
-                  {errors.cover_image && <small className="text-red-500 mt-2">{errors.cover_image.message}</small>}
+                  {errors.avatar && <small className="text-red-500 mt-2">{errors.avatar.message}</small>}
                 </div>
               )}
-              rules={{ required: "Cover image is required" }}
+              rules={{ required: "Avatar image is required" }}
             />
           </div>
         </div>

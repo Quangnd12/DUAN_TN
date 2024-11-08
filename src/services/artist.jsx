@@ -5,8 +5,13 @@ const getArtists = async (page = 1, limit = 10) => {
     method: "GET",
     path: `/api/artists?page=${page}&limit=${limit}`,
   });
-  return res.artists;
+  // Đảm bảo trả về đối tượng có artists và totalPages
+  return {
+    artists: res.artists || [], // Nếu không có artists, trả về mảng rỗng
+    totalPages: res.totalPages || 0 // Nếu không có totalPages, trả về 0
+  };
 };
+
 
 const getArtistById = async (id) => {
   const res = await request({
@@ -23,6 +28,20 @@ const addArtist = async (Artist) => {
     data: Artist,
   });
   return res;
+};
+
+
+const fetcher = async (page, limit, searchTerm) => {
+  const res = await request({
+    method: "GET",
+    path: searchTerm 
+      ? `/api/artists/search?page=${page}&limit=${limit}&name=${searchTerm}`
+      : `/api/artists?page=${page}&limit=${limit}`, // fallback nếu không có từ khóa tìm kiếm
+  });
+  return {
+    artists: res.artists || [],
+    totalPages: res.totalPages || 0,
+  };
 };
 
 const deleteArtist = async (id) => {
@@ -42,4 +61,5 @@ const updateArtist = async (id, Artist) => {
   return res;
 };
 
-export { getArtists, getArtistById, addArtist, deleteArtist, updateArtist };
+
+export { getArtists, getArtistById, addArtist, deleteArtist, updateArtist, fetcher };

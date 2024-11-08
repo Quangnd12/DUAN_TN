@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import useSWR from "swr";
 import {
   Table,
@@ -25,37 +26,27 @@ import {
 } from "@mui/material";
 import {
   MoreVert as MoreVertIcon,
-  KeyboardArrowDown,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
   KeyboardArrowUp,
+  KeyboardArrowDown,
 } from "@mui/icons-material";
+import { MdEdit, MdDelete } from "react-icons/md";
+import { getArtists, fetcher } from "../../../../../../services/artist"; // Adjust as needed
+import DeleteArtist from "./delete";
 
 const ITEMS_PER_PAGE = 5;
 
-const fetcher = (url, page, limit, searchTerm) => {
-  // Hàm giả để lấy dữ liệu artist. Có thể điều chỉnh lại sau này.
-  return Promise.resolve({
-    artists: [
-      {
-        id: 1,
-        name: "Sơn Tùng",
-        avatar: "https://storage.googleapis.com/be-musicheals.appspot.com/artists/images/moon_knight_e9ea4f9f.png",
-        role: "Singer",
-        biography: "khang123",
-        createdAt: "2024-11-02T08:15:14.000Z",
-      },
-      // Thêm dữ liệu artist ở đây nếu cần
-    ],
-    totalPages: 1,
-  });
-};
-
 const ArtistList = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [page, setPage] = useState(1);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedArtist, setSelectedArtist] = useState(null);
   const [openRow, setOpenRow] = useState({});
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [artistToDelete, setArtistToDelete] = useState(null);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -67,9 +58,9 @@ const ArtistList = () => {
     };
   }, [searchTerm]);
 
-  const { data, error, isLoading } = useSWR(
-    ["getAllArtists", page, ITEMS_PER_PAGE, debouncedSearchTerm],
-    () => fetcher("getAllArtists", page, ITEMS_PER_PAGE, debouncedSearchTerm),
+  const { data, error, isLoading, mutate } = useSWR(
+    ["getArtists", page, ITEMS_PER_PAGE, debouncedSearchTerm],
+    () => fetcher(page, ITEMS_PER_PAGE, debouncedSearchTerm),
     {
       revalidateIfStale: false,
       revalidateOnFocus: false,
@@ -84,11 +75,12 @@ const ArtistList = () => {
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
     setPage(1);
+    mutate(); // Trigger a new data fetch
   };
 
-  const handleOpenMenu = (event, artistItem) => {
+  const handleOpenMenu = (event, artist) => {
     setAnchorEl(event.currentTarget);
-    setSelectedArtist(artistItem);
+    setSelectedArtist(artist);
   };
 
   const handleCloseMenu = () => {
@@ -103,6 +95,26 @@ const ArtistList = () => {
     }));
   };
 
+  const handleAddArtist = () => {
+    navigate("/admin/artist/add");
+  };
+
+  const handleEditArtist = (artistId) => {
+    navigate(`/admin/artist/edit/${artistId}`);
+    handleCloseMenu();
+  };
+
+  const handleDeleteClick = (artist) => {
+    setArtistToDelete(artist);
+    setShowDeleteModal(true);
+    handleCloseMenu();
+  };
+
+  const handleDeleteSuccess = () => {
+    setShowDeleteModal(false);
+    mutate(); // Refreshes the list after deletion
+  };
+
   if (error) {
     return (
       <Typography color="error">
@@ -114,11 +126,13 @@ const ArtistList = () => {
   return (
     <div className="p-4">
       <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={isLoading}
       >
         <CircularProgress color="inherit" />
       </Backdrop>
+
+      {/* Top section with search and action buttons */}
       <div className="flex justify-between mb-4">
         <TextField
           label="Search"
@@ -129,7 +143,16 @@ const ArtistList = () => {
           placeholder="Search..."
           disabled={isLoading}
         />
+        <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2 justify-end">
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-md w-full md:w-auto"
+            onClick={handleAddArtist}
+          >
+            + Add Artist
+          </button>
+        </div>
       </div>
+
       {data?.artists.length > 0 ? (
         <>
           <TableContainer component={Paper}>
@@ -146,22 +169,15 @@ const ArtistList = () => {
               </TableHead>
               <TableBody>
                 {data.artists.map((artistItem) => (
-                  <>
-                    <TableRow
-                      key={artistItem.id}
-                      sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}
-                    >
+                  <React.Fragment key={artistItem.id}>
+                    <TableRow sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}>
                       <TableCell>
                         <IconButton
                           aria-label="expand row"
                           size="small"
                           onClick={() => toggleRow(artistItem.id)}
                         >
-                          {openRow[artistItem.id] ? (
-                            <KeyboardArrowUp />
-                          ) : (
-                            <KeyboardArrowDown />
-                          )}
+                          {openRow[artistItem.id] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
                         </IconButton>
                       </TableCell>
                       <TableCell>{artistItem.id}</TableCell>
@@ -170,66 +186,57 @@ const ArtistList = () => {
                       </TableCell>
                       <TableCell>{artistItem.name || "No name"}</TableCell>
                       <TableCell>
-                        <Chip label={artistItem.role} color="primary" />
+                        <Chip
+                          label={artistItem.role === 1 ? "Artist" : artistItem.role === 2 ? "Rapper" : "Unknown"}
+                          color="primary"
+                        />
                       </TableCell>
                       <TableCell>
-                        <IconButton
-                          onClick={(event) => handleOpenMenu(event, artistItem)}
-                        >
+                        <IconButton onClick={(event) => handleOpenMenu(event, artistItem)}>
                           <MoreVertIcon />
                         </IconButton>
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell
-                        style={{ paddingBottom: 0, paddingTop: 0 }}
-                        colSpan={6}
-                      >
-                        <Collapse
-                          in={openRow[artistItem.id]}
-                          timeout="auto"
-                          unmountOnExit
-                        >
+                      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                        <Collapse in={openRow[artistItem.id]} timeout="auto" unmountOnExit>
                           <Box margin={1}>
                             <Typography variant="h6" gutterBottom component="div">
                               Biography: {artistItem.biography}
-                              <br />
-                              Created At: {new Date(artistItem.createdAt).toLocaleDateString()}
                             </Typography>
                           </Box>
                         </Collapse>
                       </TableCell>
                     </TableRow>
-                  </>
+                  </React.Fragment>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleCloseMenu}
-          >
-            <MenuItem onClick={handleCloseMenu}>Edit</MenuItem>
-            <MenuItem onClick={handleCloseMenu}>Delete</MenuItem>
+
+          <Menu anchorEl={anchorEl} open={Boolean(anchorEl) && selectedArtist !== null} onClose={handleCloseMenu}>
+            <MenuItem onClick={() => handleEditArtist(selectedArtist.id)} sx={{ color: "blue" }}>
+              <MdEdit className="mr-1" /> Edit
+            </MenuItem>
+            <MenuItem onClick={() => handleDeleteClick(selectedArtist)} sx={{ color: "red" }}>
+              <MdDelete className="mr-1" /> Delete
+            </MenuItem>
           </Menu>
-          <div className="mt-4 flex justify-end items-center">
-            <Stack spacing={2}>
-              <Pagination
-                count={data.totalPages || 1}
-                page={page}
-                onChange={handleChangePage}
-                color="primary"
-                variant="outlined"
-                shape="rounded"
-              />
-            </Stack>
-          </div>
+
+          <Stack spacing={2} direction="row" alignItems="center" justifyContent="flex-end" sx={{ marginTop: 2 }}>
+            <Pagination count={data?.totalPages} page={page} onChange={handleChangePage} color="primary" shape="rounded" />
+          </Stack>
         </>
       ) : (
-        <Alert severity="warning">
-          No artists found matching the search keyword.
-        </Alert>
+        <Alert severity="info">No artists found.</Alert>
+      )}
+
+      {showDeleteModal && (
+        <DeleteArtist
+          artistToDelete={artistToDelete}
+          onClose={() => setShowDeleteModal(false)}
+          onDeleteSuccess={handleDeleteSuccess}
+        />
       )}
     </div>
   );
