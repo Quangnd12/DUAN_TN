@@ -10,7 +10,7 @@ import {
   KeyboardArrowUp,
 } from "@mui/icons-material";
 import { MdEdit, MdDelete, MdPlayArrow } from 'react-icons/md';
-import { getSongs } from "../../../../../../services/songs";
+import { getSongs } from "../../../../../../services/songs.jsx";
 
 import DeleteSong from "./delete";
 import { formatDate, formatDuration } from "Admin/src/components/formatDate";
