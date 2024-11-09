@@ -1,26 +1,47 @@
 import request from "config";
 
-const getAlbums = async (page = 1, limit = 10) => {
-    const res = await request({
-      method: "GET",
-      path: `/api/albums?page=${page}&limit=${limit}`,
-    });
-    return res;
-  };
+const getAlbums = async (page, limit, countryID, searchTitle) => { // Đổi tên param thành searchTitle
+  let path = '/api/albums';
+  
+  let query = [];
+  if (page && limit) {
+    query.push(`page=${page}`);
+    query.push(`limit=${limit}`);
+  }
 
-const getAlbumById = async (id) => {
+  if (countryID && countryID.length > 0) {
+    query.push(`countryIDs=${JSON.stringify(countryID)}`);
+  }
+
+  // Sửa tên param thành searchTitle để match với API
+  if (searchTitle) {
+    query.push(`searchTitle=${encodeURIComponent(searchTitle)}`); // Đổi thành searchTitle
+  }
+
+  if (query.length > 0) {
+    path += `?${query.join('&')}`;
+  }
+
   const res = await request({
     method: "GET",
+    path: path,
+  });
+
+  return res;
+};
+const getAlbumById = async (id) => {
+  const res = await request({
+    method: "GET", 
     path: `/api/albums/${id}`,
   });
   return res;
 };
 
-const addAlbum = async (Album) => {
+const addAlbum = async (album) => {
   const res = await request({
     method: "POST",
     path: "/api/albums",
-    data: Album,
+    data: album,
   });
   return res;
 };
@@ -33,11 +54,11 @@ const deleteAlbum = async (id) => {
   return res;
 };
 
-const updateAlbum = async (id, Album) => {
+const updateAlbum = async (id, album) => {
   const res = await request({
-    method: "PUT",
+    method: "PUT", 
     path: `/api/albums/${id}`,
-    data: Album,
+    data: album,
   });
   return res;
 };
