@@ -2,40 +2,50 @@ import React, { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
-
-import InputField from "../../../../components/SharedIngredients/InputField";
 import SelectField from "../../../../components/SharedIngredients/SelectField";
 import { handleAdd } from "../../../../components/notification";
-import TextareaField from "../../../../components/SharedIngredients/TextareaField";
-import { addGenre } from "../../../../../../services/genres"
+import { addGenre } from "../../../../../../services/genres";
+import { getCountry } from "../../../../../../services/country";
 
 const AddGenre = () => {
     const { control, handleSubmit, setValue, watch, clearErrors, getValues, formState: { errors }, trigger, setError } = useForm({
         defaultValues: {
             name: "",
-            description: "",
+            countryID: null,
             image: null,
-            subgenres: []
         }
     });
 
-
     const options = [
-        "pop", "R&B", "EDM", "country", "jazz", "blues", "classical",
-        "reggae", "metal", "punk", "folk", "alternative rock", "soul",
-        "disco", "techno", "trap", "dubstep", "indie rock", "k-pop",
-        "funk", "latin", "reggaeton", "world music", "gospel", "ambient",
-        "house", "grunge", "ska", "experimental", "dancehall", "psytrance",
-        "chillwave", "hardcore", "progressive rock", "celtic", "synthwave",
-        "new wave", "glam rock", "kwaito", "bossa nova", "afrobeat", "fado",
-        "bluegrass", "glam metal", "grime",
-        "Nhạc trẻ","Nhạc trữ tình","Nhạc bolero"
+        "Pop", "R&B", "EDM", "Country", "Jazz", "Blues", "Classical", "Reggae", "Metal", "Punk",
+        "Folk", "Alternative rock", "Soul", "Disco", "Techno", "Trap", "Dubstep", "Indie rock",
+        "K-pop", "Funk", "Latin", "Reggaeton", "World music", "Gospel", "Ambient", "House",
+        "Grunge", "Ska", "Experimental", "Dancehall", "Psytrance", "Chillwave", "Hardcore",
+        "Progressive rock", "Celtic", "Synthwave", "New wave", "Glam rock", "Kwaito", "Bossa nova",
+        "Afrobeat", "Fado", "Bluegrass", "Glam metal", "Grime", "Nhạc trẻ", "Nhạc trữ tình", "Nhạc bolero", "V-POP", "Rock", "Rap", "J-POP"
     ];
 
+    const OptionGenre = options.sort();
 
     const navigate = useNavigate();
     const [coverImagePreview, setCoverImagePreview] = useState(null);
+    const [Country, setCountry] = useState([]);
 
+   
+
+    const CountryData = async () => {
+        try {
+            const data = await getCountry();
+            setCountry(data.countries);
+        } catch (error) {
+            console.log("Không tìm thấy dữ liệu");
+        }
+    };
+
+ useEffect(() => {
+        CountryData();
+    }, []);
+    
     const handleDrop = useCallback((acceptedFiles, name) => {
         const file = acceptedFiles[0];
         if (!file) {
@@ -68,12 +78,13 @@ const AddGenre = () => {
 
     const onSubmit = async (data) => {
         const formData = new FormData();
-        formData.append('name', data.name);
-        formData.append('description', data.description);
-        const subgenresValues = data.subgenres.map((subgenre) => subgenre.value);
-        formData.append('subgenres', subgenresValues);
+        const countryIDValue = typeof data.countryID === 'object' ? data.countryID.value : data.countryID;
+        formData.append('countryID', countryIDValue);
+        const nameValue = typeof data.name === 'object' ? data.name.value : data.name;
+        formData.append('name', nameValue);       
+
         if (data.image) {
-            formData.append('image', data.image); // Thêm ảnh vào FormData
+            formData.append('image', data.image); 
 
         } else {
             console.log("image is required");
@@ -82,12 +93,12 @@ const AddGenre = () => {
         }
 
         const valid = await trigger();
-        if (!valid) return; // Nếu form không hợp lệ, không gửi
+        if (!valid) return; 
         console.log("FormData to send: ", formData);
         try {
             await addGenre(formData);
-            navigate("/admin/genre");  
-            handleAdd();              
+            navigate("/admin/genre");
+            handleAdd();
         } catch (error) {
             console.error(error);
         }
@@ -106,10 +117,14 @@ const AddGenre = () => {
                                 name="name"
                                 control={control}
                                 render={({ field }) => (
-                                    <InputField
+                                    <SelectField
                                         label="Name"
                                         id="name"
                                         name="name"
+                                        options={OptionGenre.map((genre) => ({
+                                            value: genre,
+                                            label: genre,
+                                        }))}
                                         {...field}
                                     />
                                 )}
@@ -127,54 +142,32 @@ const AddGenre = () => {
                         </div>
                         <div>
                             <Controller
-                                name="subgenres"
+                                name="countryID"
                                 control={control}
                                 render={({ field }) => (
                                     <SelectField
-                                        label="Subgenres"
-                                        id="subgenres"
-                                        name="subgenres"
-                                        options={options.map((subgenres) => ({
-                                            value: subgenres,
-                                            label: subgenres,
+                                        label="Country"
+                                        id="countryID"
+                                        name="countryID"
+                                        options={Country.map((country) => ({
+                                            value: country.id,
+                                            label: country.name,
                                         }))}
                                         {...field}
-                                        isMulti
                                     />
                                 )}
-                                rules={{ required: "subgenres is required" }}
+                                rules={'Country is required'}
                             />
-                            {errors.subgenres && <small className="text-red-500 mt-1 ml-2 block">{errors.subgenres.message}</small>}
+                            {errors.countryID && <small className="text-red-500 mt-1 ml-2 block">{errors.countryID.message}</small>}
                         </div>
                     </div>
                 </div>
-                <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-green-500">
-                    <h2 className="text-xl font-semibold mb-4">Detailed Information</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                        {/* Description */}
-                        <div className="col-span-2">
-                            <Controller
-                                name="description"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextareaField
-                                        label="Description"
-                                        id="description"
-                                        name="description"
-                                        {...field}
-                                    />
-                                )}
-                                rules={{ required: "Description is required" }}
-                            />
-                            {errors.description && <small className="text-red-500 mt-1 ml-2 block">{errors.description.message}</small>}
-                        </div>
-                    </div>
-                </div>
+
                 <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-red-500">
                     <h2 className="text-xl font-semibold mb-4">Media Upload</h2>
                     <div className="grid grid-cols-1 gap-2">
                         <Controller
-                            name="image"  // Đảm bảo tên trường này khớp với "image" trong onSubmit
+                            name="image"
                             control={control}
                             render={({ field }) => (
                                 <div

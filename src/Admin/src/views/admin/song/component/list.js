@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef,useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import useSWR from "swr";
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, IconButton, Menu, MenuItem, CircularProgress, Pagination, Typography, Alert, Stack, Collapse, Box, Avatar, Backdrop,
 } from "@mui/material";
@@ -16,6 +15,9 @@ import DeleteSong from "./delete";
 import { formatDate, formatDuration } from "Admin/src/components/formatDate";
 import PlayerControls from "../../../../components/audio/PlayerControls";
 import { usePlayerContext } from "Admin/src/components/audio/playerContext";
+import { getGenres } from "services/genres";
+import RangeSliderField from "Admin/src/components/SharedIngredients/RangeSliderField";
+import debounce from "lodash.debounce";
 
 const SongList = () => {
   const navigate = useNavigate();
@@ -31,13 +33,25 @@ const SongList = () => {
   const location = useLocation();
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [Genres, setGenres] = useState([]);
+  const [limit, setLimit] = useState(5);
+  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [searchName, setSearchName] = useState('');
+  const [minDuration, setMinDuration] = useState(180);
+  const [maxDuration, setMaxDuration] = useState(300);
+  const [minListen, setMinListen] = useState(0);
+  const [maxListen, setMaxListen] = useState(100000);
 
-  const [expandedLyrics, setExpandedLyrics] = useState({}); // Quản lý trạng thái của lời bài hát
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const filterMenuRef = useRef(null);
+
+
+  const [expandedLyrics, setExpandedLyrics] = useState({});
 
   const handleToggleLyrics = (songId) => {
     setExpandedLyrics((prev) => ({
       ...prev,
-      [songId]: !prev[songId], // Đảo ngược trạng thái khi nhấp vào
+      [songId]: !prev[songId],
     }));
   };
 
@@ -47,7 +61,6 @@ const SongList = () => {
   };
 
   useEffect(() => {
-    // Khi route thay đổi, ẩn thanh phát nhạc
     return () => {
       setIsPlayerVisible(false);
     };
@@ -55,31 +68,76 @@ const SongList = () => {
 
 
 
-  const SongData = async (page) => {
+  const SongData = async (page = 1, limit = 5, search = '', genres = [], minDuration = 0, maxDuration = 0, minListensCount = 0,maxListensCount=0) => {
     try {
-      const data = await getSongs(page); // Gọi hàm với trang hiện tại
-      setSongs(data);
+      const data = await getSongs(page, limit, search, genres, minDuration, maxDuration, minListensCount,maxListensCount);
+      setSongs(data.songs);
       setTotalPages(data.totalPages);
     } catch (error) {
       console.log("Không tìm thấy dữ liệu");
     }
   };
+
+
+ 
+
   useEffect(() => {
-    SongData(currentPage); // Lấy bài hát cho trang hiện tại
-  }, [currentPage]); // Gọi lại khi currentPage thay đổi
+    SongData(currentPage, limit, searchName, selectedGenres, minDuration, maxDuration, minListen, maxListen);
+  
+  }, [currentPage, limit, searchName, selectedGenres, minDuration, maxDuration, minListen, maxListen]);
+
 
   const handleChangePage = (event, value) => {
     setCurrentPage(value);
   };
 
+  const handleLimitChange = (event) => {
+    setLimit(parseInt(event.target.value));
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchName(e.target.value);
+  };
+
+  const handleFilterChange = (event, genreID) => {
+    const checked = event.target.checked;
+    if (checked) {
+      setSelectedGenres(prev => [...prev, genreID]);
+    } else {
+      setSelectedGenres(prev => prev.filter(id => id !== genreID));
+    }
+  };
+
+  const filterGenresWithSongs = (genres, songs) => {
+    return genres.filter(genre =>
+      songs.some(song => song.genre === genre.name)
+    );
+  };
+
+  const GenreData = async () => {
+    try {
+      const GenreData = await getGenres();  
+      const SongData = await getSongs();  
+      const filtered = filterGenresWithSongs(GenreData.genres, SongData.songs);
+      setGenres(filtered);  
+    } catch (error) {
+      console.log("Có lỗi khi lấy dữ liệu:", error);
+    }
+  };
+
+
+  useEffect(() => {
+    GenreData();
+  }, []);
+
   const playTrack = (track) => {
     if (selectedPlayer?.id === track.id) {
-      // Nếu đang phát bài hát này, chỉ cần đổi trạng thái phát tạm dừng
       setIsPlaying(!isPlaying);
     } else {
-      // Nếu chọn một bài hát khác, thiết lập bài hát mới
+
       setSelectedPlayer(track);
-      setIsPlaying(true); // Bắt đầu phát bài hát
+      setIsPlaying(true); 
     }
   };
 
@@ -143,7 +201,33 @@ const SongList = () => {
     navigate(`/admin/song/edit/${id}`);
   };
 
+  const handleDurationChange = (newValue) => {
+    const [min, max] = newValue;
+    setMinDuration(min); // Cập nhật giá trị minDuration
+    setMaxDuration(max); // Cập nhật giá trị maxDuration
 
+
+  };
+
+
+  const handleListenChange = (newValue) => {
+    const [min, max] = newValue;
+    setMinListen(min); // Cập nhật giá trị minDuration
+    setMaxListen(max); // Cập nhật giá trị maxDuration
+  };
+
+   const handleClickOutside = (event) => {
+        if (filterMenuRef.current && !filterMenuRef.current.contains(event.target)) {
+          setShowFilterMenu(false);
+        }
+      };
+    
+      useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside); 
+        return () => {
+          document.removeEventListener('mousedown', handleClickOutside); 
+        };
+      }, []);
 
   return (
     <div className="p-4">
@@ -155,8 +239,8 @@ const SongList = () => {
           <TextField
             label="Search"
             variant="outlined"
-
-
+            value={searchName}
+            onChange={handleSearchChange}
             className="w-64"
             placeholder="Search..."
           />
@@ -169,7 +253,56 @@ const SongList = () => {
           >
             + Add song
           </button>
+          <div className="relative w-full md:w-auto">
+            <button
+              className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto"
+              onClick={() => setShowFilterMenu(prev => !prev)}
+            >
+              Filter <i className="fas fa-chevron-down ml-2"></i>
+            </button>
+            {showFilterMenu && (
+              <div ref={filterMenuRef} className="absolute right-0 mt-2 w-full md:w-96 bg-white rounded-md shadow-lg z-100">
+                <div className="px-4 py-2">
+                  <h4 className="font-medium text-gray-700 text-sm mb-2">Genres</h4>
+                  {Genres.map((genre, index) => (
+                    <label
+                      key={index}
+                      className="flex items-center px-4 py-2 hover:bg-gray-100"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedGenres.includes(genre.id)}
+                        onChange={(e) => handleFilterChange(e, genre.id)}
+                        className="mr-2"
+                      />
+                      {genre.name}
+                    </label>
+                  ))}
+                </div>
+                <div className="px-4 py-2 w-[370px]">
+                  <RangeSliderField
+                    label="Duration (Seconds)"
+                    min={180}
+                    max={300}
+                    value={[minDuration, maxDuration]}
+                    onChange={handleDurationChange}
+                    onAfterChange={handleDurationChange}
+                  />
 
+                </div>
+                <div className="px-4 py-2 w-[370px]">
+                <RangeSliderField
+                    label="Listens"
+                    min={0}
+                    max={100000}
+                    value={[minListen, maxListen]}
+                    onChange={handleListenChange}
+                    onAfterChange={handleListenChange}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
           <div className="relative w-full md:w-auto">
             <button
               className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto"
@@ -250,7 +383,7 @@ const SongList = () => {
                       </TableCell>
                       <TableCell>
                         {song.artist}
-                      </TableCell>
+                      </TableCell >
                       <TableCell>{song.country}</TableCell>
                       <TableCell>
                         {song.album}
@@ -353,17 +486,27 @@ const SongList = () => {
             </Table>
           </TableContainer>
 
-          <div className="mt-4 flex justify-end items-center">
-            <Stack spacing={2}>
-              <Pagination
-                count={totalPages || 1} // Tính số trang từ data
-                page={currentPage}
-                onChange={handleChangePage}
-                color="primary"
-                variant="outlined"
-                shape="rounded"
-              />
-            </Stack>
+          <div className="mt-4 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <label htmlFor="limit">Show items:</label>
+              <select id="limit" value={limit} onChange={handleLimitChange} className="border border-gray-300 rounded p-1">
+                <option value={5}>Show 5</option>
+                <option value={10}>Show 10</option>
+                <option value={15}>Show 15</option>
+              </select>
+            </div>
+            <div>
+              <Stack spacing={2}>
+                <Pagination
+                  count={totalPages || 1}
+                  page={currentPage}
+                  onChange={handleChangePage}
+                  color="primary"
+                  variant="outlined"
+                  shape="rounded"
+                />
+              </Stack>
+            </div>
           </div>
         </>
       ) : (
@@ -372,7 +515,7 @@ const SongList = () => {
       {selectedPlayer && (
         <PlayerControls
           title={selectedPlayer.title}
-          artist={selectedPlayer.artistID}
+          artist={selectedPlayer.artist}
           Image={selectedPlayer.image}
           next={() => {/* Implement next track */ }}
           prevsong={() => {/* Implement previous track */ }}

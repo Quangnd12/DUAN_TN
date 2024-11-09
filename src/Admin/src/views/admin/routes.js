@@ -10,7 +10,6 @@ import Songs from "./song";
 import Users from "./user";
 import AddSong from "./song/component/add";
 import EditSong from "./song/component/edit";
-import PreviewSong from "./song/component/preview.js";
 import Artists from "./artist";
 import AddArtist from "./artist/component/add";
 import EditArtist from "./artist/component/edit.js";
@@ -25,6 +24,9 @@ import AddGenre from "./genre/component/add.js";
 import EditGenre from "./genre/component/edit.js";
 import Follows from "./follow";
 import Genres from "./genre";
+import Countries from "./country/index.js";
+import AddCountry from "./country/component/add.js";
+import EditCountry from "./country/component/edit.js";
 
 const AdminRoutes = (
   <>
@@ -36,7 +38,6 @@ const AdminRoutes = (
     <Route path="song" element={<Songs />} />
     <Route path="song/add" element={<AddSong />} />
     <Route path="song/edit/:id" element={<EditSong />} />
-    <Route path="song/preview/:id" element={<PreviewSong />} />
     <Route path="artist" element={<Artists />} />
     <Route path="artist/add" element={<AddArtist />} />
     <Route path="artist/edit/:id" element={<EditArtist />} />
@@ -52,6 +53,9 @@ const AdminRoutes = (
 
     <Route path="playlist" element={<UnderDevelopment />} />
     <Route path="explore" element={<UnderDevelopment />} />
+    <Route path="countries" element={<Countries />} />
+    <Route path="countries/add" element={<AddCountry />} />
+    <Route path="countries/edit/:id" element={<EditCountry />} />
     <Route path="trending" element={<UnderDevelopment />} />
     <Route path="new-releases" element={<UnderDevelopment />} />
     <Route path="analytics" element={<UnderDevelopment />} />

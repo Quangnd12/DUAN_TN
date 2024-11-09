@@ -5,7 +5,7 @@ const getArtists = async (page = 1, limit = 10) => {
     method: "GET",
     path: `/api/artists?page=${page}&limit=${limit}`,
   });
-  return res.artists;
+  return res;
 };
 
 const getArtistById = async (id) => {
