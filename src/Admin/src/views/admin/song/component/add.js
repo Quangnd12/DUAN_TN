@@ -13,6 +13,7 @@ import { handleAdd } from "Admin/src/components/notification";
 import { getGenres } from "services/genres";
 import { getArtists } from "services/artist";
 import { getAlbums } from "services/album";
+import LoadingSpinner from "Admin/src/components/LoadingSpinner";
 
 
 const AddSong = () => {
@@ -38,6 +39,7 @@ const AddSong = () => {
   const [coverImagePreview, setCoverImagePreview] = useState(null);
   const [durationSet, setDurationSet] = useState(false);
   const [coverAudioPreview, setCoverAudioPreview] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleDrop = useCallback(async (acceptedFiles, name) => {
     const file = acceptedFiles[0];
@@ -52,7 +54,11 @@ const AddSong = () => {
       const audio = new Audio(audioUrl);
       audio.onloadedmetadata = () => {
         const durationInSeconds = Math.floor(audio.duration);
-        setValue("duration", durationInSeconds, { shouldValidate: true });
+        if (durationInSeconds > 0) {
+          setValue("duration", durationInSeconds, { shouldValidate: true });
+        } else {
+          console.error("Audio duration is invalid or cannot be retrieved.");
+        }
       };
     }
 
@@ -101,7 +107,7 @@ const AddSong = () => {
   const onSubmit = async (data) => {
     const valid = await trigger();
     if (!valid) return;
-
+    setLoading(true);
     const formData = new FormData();
     formData.append('title', data.title);
 
@@ -131,6 +137,9 @@ const AddSong = () => {
     } catch (error) {
       console.error(error);
     }
+    finally {
+      setLoading(false);
+    }
   };
 
 
@@ -142,6 +151,7 @@ const AddSong = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+        <LoadingSpinner isLoading={loading} />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" encType="multipart/form-data">
         <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-blue-500">
           <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
@@ -180,7 +190,7 @@ const AddSong = () => {
                     id="artist"
                     name="artistIds"
                     options={Artists.map((artist) => ({
-                      value: artist.id, // Assuming artist has an id property
+                      value: artist.id, 
                       label: artist.name,
                     }))}
                     {...field}
@@ -231,17 +241,14 @@ const AddSong = () => {
                     isMulti
                   />
                 )}
-              // rules={{ required: "Album is required" }}
               />
-              {/* {errors.albumID && <small className="text-red-500 mt-1 ml-2 block">{errors.albumID.message}</small>} */}
             </div>
           </div>
         </div>
-
         <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-green-500">
           <h2 className="text-xl font-semibold mb-4">Detailed Information</h2>
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="grid-cols-2">
               <Controller
                 name="releaseDate"
                 control={control}
@@ -256,34 +263,9 @@ const AddSong = () => {
                 rules={{ required: "Release date is required" }}
               />
 
-              {errors.releasedate && <small className="text-red-500 ml-2 block">{errors.releasedate.message}</small>}
+              {errors.releaseDate && <small className="text-red-500 ml-2 block">{errors.releaseDate.message}</small>}
             </div>
-            <div>
-              <Controller
-                name="duration"
-                control={control}
-                render={({ field }) => (
-                  <SliderField
-                    label="Duration (seconds)"
-                    min={0}
-                    max={600}
-                    {...field}
-                    value={field.value || 0}
-                    onChange={(value) => {
-                      if (!durationSet || !getValues("file_song")) {
-                        setValue("duration", value, { shouldValidate: true });
-                      }
-                    }}
-                    disabled={durationSet && getValues("file_song")}
-                  />
-                )}
-                rules={{
-                  required: "Duration is required",
-                  validate: (value) => value > 0 || "Duration must be greater than 0"
-                }}
-              />
-              {errors.duration && <small className="text-red-500 ml-2 block">{errors.duration.message}</small>}
-            </div>
+           
             <div>
               <Controller
                 name="is_explicit"
@@ -374,10 +356,10 @@ const AddSong = () => {
             Cancel
           </button>
           <button
-            type="submit"
+            type="submit" disabled={loading}
             className="bg-blue-500 text-white py-2 px-4 rounded-lg"
           >
-            Save
+           Save
           </button>
         </div>
       </form >

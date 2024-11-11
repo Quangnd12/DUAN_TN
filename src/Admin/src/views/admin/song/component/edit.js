@@ -9,11 +9,12 @@ import DatePickerField from "../../../../components/SharedIngredients/DatePicker
 import SliderField from "../../../../components/SharedIngredients/SliderField";
 import SwitchField from "../../../../components/SharedIngredients/SwitchField";
 import { getSongById, updateSong } from "../../../../../../services/songs";
-import TextareaField from "Admin/src/components/SharedIngredients/TextareaField";
+import LoadingSpinner from "Admin/src/components/LoadingSpinner";
 import { handleEdit } from "Admin/src/components/notification";
 import { getGenres } from "../../../../../../services/genres";
 import { getArtists } from "../../../../../../services/artist";
 import { getAlbums } from "../../../../../../services/album";
+import TextareaField from "Admin/src/components/SharedIngredients/TextareaField";
 
 const EditSong = () => {
 
@@ -42,7 +43,14 @@ const EditSong = () => {
   const [Artists, setArtists] = useState([]);
   const [Genres, setGenres] = useState([]);
   const [Albums, setAlbums] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [expandedLyrics, setExpandedLyrics] = useState(false);
 
+
+
+  const handleToggleLyrics = () => {
+    setExpandedLyrics((prev) => !prev);
+  };
 
 
   const initData = async () => {
@@ -58,24 +66,24 @@ const EditSong = () => {
     const genreNames = data.genre.split(', ');
     const genreIDs = data.genreID.split(', ');
     const genreValues = genreNames.map((genre, index) => ({
-        value: genreIDs[index],
-        label: genre
+      value: genreIDs[index],
+      label: genre
     }));
     setValue("genreID", genreValues);
 
     const albumNames = (data.album && typeof data.album === 'string') ? data.album.split(', ') : [];
     const albumIDs = (data.albumID && typeof data.albumID === 'string') ? data.albumID.split(', ') : [];
     const albumValues = albumNames.map((album, index) => ({
-        value: albumIDs[index],
-        label: album
+      value: albumIDs[index],
+      label: album
     }));
     setValue("albumID", albumValues);
 
     const artistNames = data.artist.split(', ');
     const artistIDs = data.artistID.split(', ');
     const artistValues = artistNames.map((artist, index) => ({
-        value: artistIDs[index],
-        label: artist
+      value: artistIDs[index],
+      label: artist
     }));
     setValue("artistID", artistValues);
 
@@ -90,7 +98,7 @@ const EditSong = () => {
   useEffect(() => {
     initData();
   }, []);
-  
+
   const handleDrop = useCallback(async (acceptedFiles, name) => {
     const file = acceptedFiles[0];
     if (!file) return;
@@ -104,6 +112,7 @@ const EditSong = () => {
       audio.onloadedmetadata = () => {
         const durationInSeconds = Math.floor(audio.duration);
         setValue("duration", durationInSeconds, { shouldValidate: true });
+        setDurationSet(true);
       };
     }
 
@@ -140,7 +149,7 @@ const EditSong = () => {
   const onSubmit = async (data) => {
     const valid = await trigger();
     if (!valid) return;
-
+    setLoading(true);
     const formData = new FormData();
     formData.append('title', data.title);
 
@@ -169,6 +178,9 @@ const EditSong = () => {
     } catch (error) {
       console.error(error);
     }
+    finally {
+      setLoading(false);
+    }
   };
 
 
@@ -180,6 +192,7 @@ const EditSong = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+      <LoadingSpinner isLoading={loading} />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" encType="multipart/form-data">
         <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-blue-500">
           <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
@@ -269,9 +282,7 @@ const EditSong = () => {
                     isMulti
                   />
                 )}
-                rules={{ required: "Album is required" }}
               />
-              {errors.albumID && <small className="text-red-500 mt-1 ml-2 block">{errors.albumID.message}</small>}
             </div>
           </div>
         </div>
@@ -294,7 +305,7 @@ const EditSong = () => {
                 rules={{ required: "Release date is required" }}
               />
 
-              {errors.releasedate && <small className="text-red-500 ml-2 block">{errors.releasedate.message}</small>}
+              {errors.releaseDate && <small className="text-red-500 ml-2 block">{errors.releaseDate.message}</small>}
             </div>
             <div>
               <Controller
@@ -308,9 +319,7 @@ const EditSong = () => {
                     {...field}
                     value={field.value || 0}
                     onChange={(value) => {
-                      if (!durationSet || !getValues("file_song")) {
-                        setValue("duration", value, { shouldValidate: true });
-                      }
+                      setDurationSet(false)
                     }}
                     disabled={durationSet && getValues("file_song")}
                   />
@@ -321,7 +330,22 @@ const EditSong = () => {
                 }}
               />
               {errors.duration && <small className="text-red-500 ml-2 block">{errors.duration.message}</small>}
-            </div>          
+            </div>           
+            <div className="w-[205px]">
+              <Controller
+                name="listens_count"
+                control={control}
+                render={({ field }) => (
+                  <InputField
+                    label="Listens count"
+                    id="listens_count"
+                    name="listens_count"
+                    {...field}
+                    disabled={true}
+                  />
+                )}
+              />
+            </div>
             <div>
               <Controller
                 name="is_explicit"
@@ -335,7 +359,26 @@ const EditSong = () => {
                   />
                 )}
               />
+            </div>  
+            <div className="col-span-2">
+              <Controller
+              style={{ lineHeight: '1.6', whiteSpace: 'pre-wrap' }}
+                name="lyrics"
+                control={control}
+                render={({ field }) => (
+                  <div>
+                    <TextareaField
+                      label="Lyrics"
+                      id="lyrics"
+                      name="lyrics"
+                      {...field}  
+                      disabled={true}                  
+                    />
+                  </div>
+                )}
+              />
             </div>
+
           </div>
         </div>
 
@@ -364,10 +407,9 @@ const EditSong = () => {
                   {coverAudioPreview && (
                     <audio controls src={coverAudioPreview} className="mt-2 w-full" />
                   )}
-                  {/* {errors.file_song && <small className="text-red-500 mt-2">{errors.file_song.message}</small>} */}
+
                 </div>
               )}
-            // rules={{ required: "Audio file is required" }}
             />
             <Controller
               name="image"
@@ -395,10 +437,9 @@ const EditSong = () => {
                       />
                     </div>
                   )}
-                  {/* {errors.image && <small className="text-red-500 mt-2">{errors.image.message}</small>} */}
+
                 </div>
               )}
-            // rules={{ required: "image is required" }}
             />
           </div>
         </div>

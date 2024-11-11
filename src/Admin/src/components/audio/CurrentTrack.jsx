@@ -10,7 +10,9 @@ export default function CurrentTrack({ title, image, artist }) {
     <Container>
       <div className="track">
         <div className="track__image">
-          <img src={image} alt={title} />
+          <img src={image} alt={title} 
+           onError={(e) => e.target.src = '/images/music.png'}
+          />
         </div>
         <div className="track__info">
           <div style={{ width: '350px' }}>

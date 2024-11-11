@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef,useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, IconButton, Menu, MenuItem, CircularProgress, Pagination, Typography, Alert, Stack, Collapse, Box, Avatar, Backdrop,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, IconButton, Menu, MenuItem, Tooltip, Pagination, Typography, Alert, Stack, Collapse, Box, Avatar, Backdrop,
 } from "@mui/material";
 import {
   MoreVert as MoreVertIcon,
   KeyboardArrowDown,
   KeyboardArrowUp,
 } from "@mui/icons-material";
-import { MdEdit, MdDelete, MdPlayArrow } from 'react-icons/md';
-import { getSongs } from "../../../../../../services/songs.jsx";
+import { MdEdit, MdDelete, MdPlayArrow, MdContentCopy } from 'react-icons/md';
+import { getSongs } from "../../../../../../services/songs";
 
 import DeleteSong from "./delete";
 import { formatDate, formatDuration } from "Admin/src/components/formatDate";
@@ -17,7 +17,8 @@ import PlayerControls from "../../../../components/audio/PlayerControls";
 import { usePlayerContext } from "Admin/src/components/audio/playerContext";
 import { getGenres } from "services/genres";
 import RangeSliderField from "Admin/src/components/SharedIngredients/RangeSliderField";
-import debounce from "lodash.debounce";
+import LoadingSpinner from "Admin/src/components/LoadingSpinner";
+import "../../../../assets/styles/visualizerAdmin.css";
 
 const SongList = () => {
   const navigate = useNavigate();
@@ -27,9 +28,7 @@ const SongList = () => {
   const [Songs, setSongs] = useState([]);
   const [songToDelete, setsongToDelete] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const [showActionMenu, setShowActionMenu] = useState(false);
-  const { selectedPlayer, setSelectedPlayer, isPlayerVisible, setIsPlayerVisible } = usePlayerContext();
-  const [isPlaying, setIsPlaying] = useState(false);
+  const { selectedPlayer, setSelectedPlayer, isPlayerVisible, setIsPlayerVisible, isPlaying, setIsPlaying } = usePlayerContext();
   const location = useLocation();
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,40 +36,21 @@ const SongList = () => {
   const [limit, setLimit] = useState(5);
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [searchName, setSearchName] = useState('');
-  const [minDuration, setMinDuration] = useState(180);
+  const [minDuration, setMinDuration] = useState(60);
   const [maxDuration, setMaxDuration] = useState(300);
   const [minListen, setMinListen] = useState(0);
   const [maxListen, setMaxListen] = useState(100000);
-
+  const [loading, setLoading] = useState(false);
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const filterMenuRef = useRef(null);
+  const [copied, setCopied] = useState(false);
 
 
   const [expandedLyrics, setExpandedLyrics] = useState({});
 
-  const handleToggleLyrics = (songId) => {
-    setExpandedLyrics((prev) => ({
-      ...prev,
-      [songId]: !prev[songId],
-    }));
-  };
-
-  const handleRowClick = (song, index) => {
-    setSelectedPlayer(song);
-    setIsPlayerVisible(true);
-  };
-
-  useEffect(() => {
-    return () => {
-      setIsPlayerVisible(false);
-    };
-  }, [location.pathname, setIsPlayerVisible]);
-
-
-
-  const SongData = async (page = 1, limit = 5, search = '', genres = [], minDuration = 0, maxDuration = 0, minListensCount = 0,maxListensCount=0) => {
+  const SongData = async (page = 1, limit = 5, search = '', genres = [], minDuration = 0, maxDuration = 0, minListensCount = 0, maxListensCount = 0) => {
     try {
-      const data = await getSongs(page, limit, search, genres, minDuration, maxDuration, minListensCount,maxListensCount);
+      const data = await getSongs(page, limit, search, genres, minDuration, maxDuration, minListensCount, maxListensCount);
       setSongs(data.songs);
       setTotalPages(data.totalPages);
     } catch (error) {
@@ -78,13 +58,25 @@ const SongList = () => {
     }
   };
 
+  const useDebouncedValue = (value, delay = 1000) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    useEffect(() => {
+      const timer = setTimeout(() => setDebouncedValue(value), delay);
+      return () => clearTimeout(timer);
+    }, [value, delay]);
+    return debouncedValue;
+  };
 
- 
+  const debouncedSearchName = useDebouncedValue(searchName);
+  const debouncedMinDuration = useDebouncedValue(minDuration);
+  const debouncedMaxDuration = useDebouncedValue(maxDuration);
+  const debouncedMinListen = useDebouncedValue(minListen);
+  const debouncedMaxListen = useDebouncedValue(maxListen);
 
   useEffect(() => {
-    SongData(currentPage, limit, searchName, selectedGenres, minDuration, maxDuration, minListen, maxListen);
-  
-  }, [currentPage, limit, searchName, selectedGenres, minDuration, maxDuration, minListen, maxListen]);
+    SongData(currentPage, limit, debouncedSearchName, selectedGenres, debouncedMinDuration, debouncedMaxDuration, debouncedMinListen, debouncedMaxListen);
+
+  }, [currentPage, limit, debouncedSearchName, selectedGenres, debouncedMinDuration, debouncedMaxDuration, debouncedMinListen, debouncedMaxListen]);
 
 
   const handleChangePage = (event, value) => {
@@ -117,10 +109,10 @@ const SongList = () => {
 
   const GenreData = async () => {
     try {
-      const GenreData = await getGenres();  
-      const SongData = await getSongs();  
+      const GenreData = await getGenres();
+      const SongData = await getSongs();
       const filtered = filterGenresWithSongs(GenreData.genres, SongData.songs);
-      setGenres(filtered);  
+      setGenres(filtered);
     } catch (error) {
       console.log("Có lỗi khi lấy dữ liệu:", error);
     }
@@ -131,22 +123,50 @@ const SongList = () => {
     GenreData();
   }, []);
 
-  const playTrack = (track) => {
-    if (selectedPlayer?.id === track.id) {
+  const handleToggleLyrics = (songId) => {
+    setExpandedLyrics((prev) => ({
+      ...prev,
+      [songId]: !prev[songId],
+    }));
+  };
+
+  const handleRowClick = (song, index) => {
+    if (selectedPlayer?.id === song.id) {
       setIsPlaying(!isPlaying);
     } else {
-
-      setSelectedPlayer(track);
-      setIsPlaying(true); 
+      setSelectedPlayer(song);
+      setIsPlaying(true);
     }
+    setIsPlayerVisible(true);
   };
 
   useEffect(() => {
-    if (!isPlaying) {
+    return () => {
+      setIsPlayerVisible(false);
+      setIsPlaying(false);
       setSelectedPlayer(null);
-    }
-  }, [isPlaying]);
+    };
+  }, [location.pathname]);
 
+// // Hàm chuyển đến bài hát tiếp theo
+// const handleNext= () => {
+//   if (currentSongIndex < Songs.length - 1) {
+//     setCurrentSongIndex(currentSongIndex + 1);
+//     setSelectedPlayer(Songs[currentSongIndex + 1]);
+//     setIsPlaying(true);
+//   }
+// };
+
+// // Hàm quay lại bài hát trước
+// const handlePrev = () => {
+//   if (currentSongIndex > 0) {
+//     setCurrentSongIndex(currentSongIndex - 1);
+//     setSelectedPlayer(Songs[currentSongIndex - 1]);
+//     setIsPlaying(true);
+//   }
+// };
+
+  
   const handleOpenMenu = (event, song) => {
     setAnchorEl(event.currentTarget);
     setSelectedSong(song);
@@ -154,13 +174,22 @@ const SongList = () => {
 
   const handleCloseMenu = () => {
     setAnchorEl(null);
-    setSelectedSong(null); // Đóng menu khi không chọn
+    setSelectedSong(null);
   };
 
 
-  const handleDeleteSong = (id) => {
-    setSongs(prevGenres => prevGenres.filter(song => song.id !== id));
+  const handleDeleteSong = async (id) => {
+    setLoading(true);
+    try {
+      setSongs(prevSongs => prevSongs.filter(song => song.id !== id));
+      setSelectedPlayer(null);
+      setLoading(false);
+    } catch (error) {
+      console.log("Error deleting song", error);
+      setLoading(false);
+    }
   };
+
 
   const handleOpenDeleteModal = (song) => {
     setsongToDelete(song);
@@ -179,17 +208,11 @@ const SongList = () => {
     }));
   };
 
-  const getInitials = (username) => {
-    if (!username) return "";
-    const names = username.split(" ");
-    return names.length > 1 ? names[0][0] + names[1][0] : names[0][0];
-  };
-
   const getColorFromName = (name) => {
     const letters = '0123456789ABCDEF';
     let color = '#';
     for (let i = 0; i < 6; i++) {
-      color += letters[(name.charCodeAt(i % name.length) + i) % 14]; // Dùng tên của subgenre để tạo màu cố định
+      color += letters[(name.charCodeAt(i % name.length) + i) % 14];
     }
     return color;
   };
@@ -203,37 +226,51 @@ const SongList = () => {
 
   const handleDurationChange = (newValue) => {
     const [min, max] = newValue;
-    setMinDuration(min); // Cập nhật giá trị minDuration
-    setMaxDuration(max); // Cập nhật giá trị maxDuration
+    setMinDuration(min);
+    setMaxDuration(max);
 
 
   };
-
 
   const handleListenChange = (newValue) => {
     const [min, max] = newValue;
-    setMinListen(min); // Cập nhật giá trị minDuration
-    setMaxListen(max); // Cập nhật giá trị maxDuration
+    setMinListen(min);
+    setMaxListen(max);
   };
 
-   const handleClickOutside = (event) => {
-        if (filterMenuRef.current && !filterMenuRef.current.contains(event.target)) {
-          setShowFilterMenu(false);
-        }
-      };
-    
-      useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside); 
-        return () => {
-          document.removeEventListener('mousedown', handleClickOutside); 
-        };
-      }, []);
+  const handleClickOutside = (event) => {
+    if (filterMenuRef.current && !filterMenuRef.current.contains(event.target)) {
+      setShowFilterMenu(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleCopy = (lyrics) => {
+    const textarea = document.createElement('textarea');
+    textarea.value = lyrics;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+
+    if (!copied) {
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);  
+    }
+
+  };
 
   return (
     <div className="p-4">
-      {/* <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-        <CircularProgress color="inherit" />
-      </Backdrop> */}
+      <LoadingSpinner isLoading={loading} />
       <div className="flex justify-between mb-4">
         <div className="flex-grow">
           <TextField
@@ -241,7 +278,7 @@ const SongList = () => {
             variant="outlined"
             value={searchName}
             onChange={handleSearchChange}
-            className="w-64"
+            className="w-64 "
             placeholder="Search..."
           />
         </div>
@@ -255,13 +292,13 @@ const SongList = () => {
           </button>
           <div className="relative w-full md:w-auto">
             <button
-              className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto"
+              className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto bg-[#823ad5] text-white"
               onClick={() => setShowFilterMenu(prev => !prev)}
             >
               Filter <i className="fas fa-chevron-down ml-2"></i>
             </button>
             {showFilterMenu && (
-              <div ref={filterMenuRef} className="absolute right-0 mt-2 w-full md:w-96 bg-white rounded-md shadow-lg z-100">
+              <div ref={filterMenuRef} className="absolute right-0 mt-2 w-full md:w-96 bg-white rounded-md shadow-lg z-10">
                 <div className="px-4 py-2">
                   <h4 className="font-medium text-gray-700 text-sm mb-2">Genres</h4>
                   {Genres.map((genre, index) => (
@@ -282,52 +319,26 @@ const SongList = () => {
                 <div className="px-4 py-2 w-[370px]">
                   <RangeSliderField
                     label="Duration (Seconds)"
-                    min={180}
+                    min={60}
                     max={300}
                     value={[minDuration, maxDuration]}
                     onChange={handleDurationChange}
-                    onAfterChange={handleDurationChange}
                   />
 
                 </div>
                 <div className="px-4 py-2 w-[370px]">
-                <RangeSliderField
+                  <RangeSliderField
                     label="Listens"
                     min={0}
                     max={100000}
                     value={[minListen, maxListen]}
                     onChange={handleListenChange}
-                    onAfterChange={handleListenChange}
                   />
                 </div>
               </div>
             )}
           </div>
-          <div className="relative w-full md:w-auto">
-            <button
-              className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto"
-              onClick={() => setShowActionMenu(!showActionMenu)}
-            >
-              Actions <i className="fas fa-chevron-down ml-2"></i>
-            </button>
 
-            {showActionMenu && (
-              <div className="absolute right-0 mt-2 w-full md:w-48 bg-white rounded-md shadow-lg z-10">
-                <button
-                  onClick={() => console.log("Mass edit")}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  Mass edit
-                </button>
-                <button
-                  onClick={() => console.log("Delete all")}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  Delete all
-                </button>
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
@@ -366,15 +377,11 @@ const SongList = () => {
                       <TableCell>
                         <div className="flex items-center">
                           <span>
-                            {song.image ? (
-                              <img
-                                src={`${song.image}`}
-                                alt={song.name || "Avatar"}
-                                className="w-10 h-10 rounded-md"
-                              />
-                            ) : (
-                              <Avatar>{getInitials(song.name)}</Avatar>
-                            )}
+                            <img
+                              src={`${song.image}`}
+                              className="w-10 h-10 rounded-md"
+                              onError={(e) => e.target.src = '/images/music.png'}
+                            />
                           </span>
                           <span className="ml-2">
                             {song.title || "No songname"}
@@ -428,7 +435,16 @@ const SongList = () => {
                                 <button className="bg-icon text-white p-2 rounded-full hover:bg-blue-700 transition ml-3"
                                   onClick={() => handleRowClick(song)}
                                 >
-                                  <MdPlayArrow size={24} />
+                                  {isPlaying && selectedPlayer?.id === song.id ? (
+                                    <div className="visualizer flex items-center">
+                                      <div className="bar"></div>
+                                      <div className="bar"></div>
+                                      <div className="bar"></div>
+                                      <div className="bar"></div>
+                                    </div>
+                                  ) : (
+                                    <MdPlayArrow size={24} />
+                                  )}
                                 </button>
                               </div>
 
@@ -465,17 +481,46 @@ const SongList = () => {
                             <Typography variant="body1" className="pb-2 pt-2">Duration: {formatDuration(song.duration)}</Typography>
                             <Typography variant="body1" className="pb-2 ">release date: {formatDate(song.releaseDate)}</Typography>
                             <Typography variant="body1" className="pb-2">Play count: {song.listens_count}</Typography>
-                            <Typography variant="body1" className="pb-2">
-                              Lyrics: {expandedLyrics[song.id] ? song.lyrics : `${song.lyrics.substring(0, 100)}...`}
-                              {song.lyrics.length > 100 && (
-                                <span
-                                  onClick={() => handleToggleLyrics(song.id)}
-                                  style={{ color: 'blue', cursor: 'pointer', marginLeft: '4px', fontSize: '16px' }}
-                                >
-                                  {expandedLyrics[song.id] ? ' Show less' : 'Show more'}
-                                </span>
-                              )}
-                            </Typography>
+                            <Typography
+  variant="body1"
+  className="pb-2"
+  style={{
+    lineHeight: '1.6',
+    whiteSpace: 'pre-wrap',
+    maxHeight: '200px', // Set a maximum height for the lyrics container
+    overflowY: 'auto',  // Enable vertical scrolling
+  }}
+>
+  Lyrics:
+  <Tooltip title={copied ? 'Copied!' : 'Copy'}>
+    <IconButton onClick={() => handleCopy(song.lyrics)}>
+      <MdContentCopy size={20} />
+    </IconButton>
+  </Tooltip>
+  <br />
+  {expandedLyrics[song.id] ? (
+    song.lyrics
+  ) : (
+    <span>{song.lyrics.substring(0, 50)}...</span>
+  )}
+
+  {song.lyrics.length > 50 && (
+    <span
+      onClick={() => handleToggleLyrics(song.id)}
+      style={{
+        color: '#1a73e8', 
+        cursor: 'pointer',
+        fontSize: '14px',
+        fontWeight: '600',
+        textDecoration: 'underline', 
+      }}
+    >
+      {expandedLyrics[song.id] ? ' Show less' : 'Show more'}
+    </span>
+  )}
+</Typography>
+
+
                           </Box>
                         </Collapse>
                       </TableCell>
@@ -517,10 +562,12 @@ const SongList = () => {
           title={selectedPlayer.title}
           artist={selectedPlayer.artist}
           Image={selectedPlayer.image}
-          next={() => {/* Implement next track */ }}
-          prevsong={() => {/* Implement previous track */ }}
+          next={() => { /* Handle track end */ }}
+          prevsong={() => { /* Handle track end */ }}
           onTrackEnd={() => {/* Handle track end */ }}
           audioUrl={selectedPlayer.file_song}
+          isPlaying={isPlaying}
+          setIsPlaying={setIsPlaying}
         />
       )}
       {/* Modal xóa */}
