@@ -1,7 +1,7 @@
 // src/redux/slice/apiSlice.js
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_BASE_URL } from "../../services/Api_url";
-import setCredentials from "./authSlice"
+import { setCredentials }  from "./authSlice"
 
 export const apiSlice = createApi({
   reducerPath: "api",
@@ -53,6 +53,38 @@ export const apiSlice = createApi({
       },
       invalidatesTags: ["User"],
     }),
+
+    googleRegister: builder.mutation({
+      query: ({ idToken, userData }) => ({
+        url: "/auth/register/google",
+        method: "POST",
+        body: {
+          idToken,
+          userData
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          
+          if (!data.user || !data.token) {
+            throw new Error("Invalid response format");
+          }
+    
+          dispatch(setCredentials({ 
+            user: data.user,
+            token: data.token,
+            role: data.user.role 
+          }));
+        } catch (error) {
+          console.error("Google registration error:", error);
+          // Let the component handle the error
+          throw error;
+        }
+      },
+    }),
+  
+
     googleLogin: builder.mutation({
       query: (credentials) => ({
         url: "/auth/login/google",
@@ -214,6 +246,7 @@ export const apiSlice = createApi({
 export const {
   useLoginMutation,
   useRegisterMutation,
+  useGoogleRegisterMutation,
   useGoogleLoginMutation,
   useLogoutMutation,
   useForgotPasswordMutation,

@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import LockResetIcon from "@mui/icons-material/LockReset";
 import TextField from "@mui/material/TextField";
-// import { resetPassword } from "../../../../services/Api_url"; // Đảm bảo đường dẫn đúng
+import { useResetPasswordMutation } from "../../../../redux/slice/apiSlice";
 
 const ResetPass = () => {
   const {
@@ -18,16 +18,37 @@ const ResetPass = () => {
   const [submitError, setSubmitError] = useState("");
   const { token } = useParams();
   const navigate = useNavigate();
+  const [resetPassword, { isLoading }] = useResetPasswordMutation();
 
-  // const onSubmit = async (data) => {
-  //   try {
-  //     await resetPassword(token, data.password);
-  //     setResetSuccess(true);
-  //     setTimeout(() => navigate("/login"), 3000); // Chuyển hướng sau 3 giây
-  //   } catch (error) {
-  //     setSubmitError(error.message || "An error occurred. Please try again.");
-  //   }
-  // };
+  // Validate token presence
+  useEffect(() => {
+    if (!token) {
+      setSubmitError("Invalid reset link");
+      setTimeout(() => navigate("/login"), 3000);
+    }
+  }, [token, navigate]);
+
+  const onSubmit = async (data) => {
+    try {
+      const result = await resetPassword({
+        token,
+        newPassword: data.password
+      }).unwrap();
+
+      if (result.success) {
+        setResetSuccess(true);
+        setSubmitError("");
+        // Redirect to login after success message
+        setTimeout(() => navigate("/login"), 3000);
+      }
+    } catch (error) {
+      setResetSuccess(false);
+      setSubmitError(
+        error.data?.message || 
+        "An error occurred while resetting your password. Please try again."
+      );
+    }
+  };
 
   return (
     <HelmetProvider>
@@ -48,9 +69,10 @@ const ResetPass = () => {
                     Reset Password
                   </h3>
                   {resetSuccess ? (
-                    <p className="text-green-500 mb-4">
-                      Your password has been reset successfully! Redirecting to login...
-                    </p>
+                    <div className="text-green-500 mb-4">
+                      <p>Your password has been reset successfully!</p>
+                      <p className="text-sm">Redirecting to login page...</p>
+                    </div>
                   ) : (
                     <>
                       {submitError && (
@@ -88,8 +110,8 @@ const ResetPass = () => {
                             {...register("password", {
                               required: "Password is required",
                               minLength: {
-                                value: 8,
-                                message: "Password must be at least 8 characters long",
+                                value: 6,
+                                message: "Password must be at least 6 characters long",
                               },
                             })}
                             error={!!errors.password}
@@ -134,11 +156,12 @@ const ResetPass = () => {
                           />
                         </div>
                         <button
-                          className="w-full py-2 px-4 bg-sky-500 font-bold text-white rounded-md shadow-md transform transition-transform duration-300 hover:ring-2 hover:ring-white"
+                          className="w-full py-2 px-4 bg-sky-500 font-bold text-white rounded-md shadow-md transform transition-transform duration-300 hover:ring-2 hover:ring-white disabled:opacity-50 disabled:cursor-not-allowed"
                           type="submit"
+                          disabled={isLoading}
                         >
-                          Reset Password
-                          <LockResetIcon className="ml-2" />
+                          {isLoading ? "Resetting..." : "Reset Password"}
+                          {!isLoading && <LockResetIcon className="ml-2" />}
                         </button>
                       </form>
                     </>

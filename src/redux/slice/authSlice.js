@@ -2,13 +2,31 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { apiSlice } from "./apiSlice";
 
+// Thêm hàm kiểm tra role và redirect URL
+const checkRoleAccess = (role, pathname) => {
+  // Kiểm tra xem user có được phép truy cập route hiện tại không
+  if (role === "user" && pathname.startsWith("/admin")) {
+    return false;
+  }
+  return true;
+};
+
 // Thêm action mới để lưu thông tin user vào localStorage
-const saveUserToStorage = (user) => {
+const saveUserToStorage = (user, pathname) => {
   try {
+    // Kiểm tra quyền truy cập trước khi lưu
+    if (!checkRoleAccess(user.role, pathname)) {
+      throw new Error("Unauthorized access");
+    }
     localStorage.setItem("user", JSON.stringify(user));
     sessionStorage.setItem("user", JSON.stringify(user));
   } catch (error) {
     console.error("Error saving user to storage:", error);
+    // Xóa thông tin đăng nhập nếu không có quyền truy cập
+    localStorage.removeItem("user");
+    localStorage.removeItem("accessToken");
+    sessionStorage.removeItem("user");
+    throw error;
   }
 };
 
@@ -25,7 +43,7 @@ const loadUserFromStorage = () => {
 // Kiểm tra xác thực của người dùng
 export const checkAuth = createAsyncThunk(
   "auth/checkAuth",
-  async (_, { dispatch, rejectWithValue }) => {
+  async (_, { dispatch, rejectWithValue, getState }) => {
     try {
       const token = localStorage.getItem("accessToken");
       if (!token) {
@@ -33,6 +51,12 @@ export const checkAuth = createAsyncThunk(
       }
 
       const storedUser = loadUserFromStorage();
+      const currentPath = window.location.pathname;
+
+      if (storedUser && !checkRoleAccess(storedUser.role, currentPath)) {
+        throw new Error("Unauthorized access");
+      }
+
       if (storedUser) {
         return { user: storedUser, token };
       }
@@ -40,10 +64,16 @@ export const checkAuth = createAsyncThunk(
       const response = await dispatch(
         apiSlice.endpoints.getUser.initiate("me")
       ).unwrap();
+
+      // Kiểm tra quyền truy cập trước khi lưu user mới
+      if (!checkRoleAccess(response.role, currentPath)) {
+        throw new Error("Unauthorized access");
+      }
       sessionStorage.setItem("user", JSON.stringify(response));
       return { user: response, token };
     } catch (error) {
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
       sessionStorage.removeItem("user");
       return rejectWithValue(error.message);
     }
@@ -67,16 +97,28 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (state, action) => {
       const { user, token } = action.payload;
-      if (user) {
-        state.user = user;
-        state.role = user.role;
-        sessionStorage.setItem("user", JSON.stringify(user));
-        saveUserToStorage(user);
-      }
-      if (token) {
-        state.token = token;
-        state.isAuthenticated = true;
-        localStorage.setItem("accessToken", token);
+      const currentPath = window.location.pathname;
+
+      try {
+        if (user && checkRoleAccess(user.role, currentPath)) {
+          state.user = user;
+          state.role = user.role;
+          saveUserToStorage(user, currentPath);
+        }
+        if (token) {
+          state.token = token;
+          state.isAuthenticated = true;
+          localStorage.setItem("accessToken", token);
+        }
+        state.isLoading = false;
+        state.error = null;
+      } catch (error) {
+        // Reset state nếu không có quyền truy cập
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+        state.role = null;
+        state.error = "Unauthorized access";
       }
       state.isLoading = false;
     },
@@ -97,11 +139,22 @@ const authSlice = createSlice({
     },
     updateUser: (state, action) => {
       if (state.user && action.payload) {
-        state.user = { ...state.user, ...action.payload };
-        state.role = action.payload.role || state.user.role;
+        // Tạo một bản sao của toàn bộ đối tượng state.user và merge với payload
+        state.user = {
+          ...state.user, 
+          ...action.payload
+        };
+    
+        // Nếu có thay đổi role thì cập nhật lại role trong state
+        if (action.payload.role) {
+          state.role = action.payload.role;
+        }
+    
+        // Cập nhật lại sessionStorage
         sessionStorage.setItem("user", JSON.stringify(state.user));
       }
     },
+    
   },
   extraReducers: (builder) => {
     builder
@@ -111,11 +164,23 @@ const authSlice = createSlice({
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
         if (action.payload?.user) {
-          state.isAuthenticated = true;
-          state.user = action.payload.user;
-          state.token = action.payload.token;
-          state.role = action.payload.user.role;
-          sessionStorage.setItem("user", JSON.stringify(action.payload.user));
+          const currentPath = window.location.pathname;
+          if (checkRoleAccess(action.payload.user.role, currentPath)) {
+            state.isAuthenticated = true;
+            state.user = action.payload.user;
+            state.token = action.payload.token;
+            state.role = action.payload.user.role;
+            sessionStorage.setItem("user", JSON.stringify(action.payload.user));
+          } else {
+              // Reset state nếu không có quyền truy cập
+              state.isAuthenticated = false;
+              state.user = null;
+              state.token = null;
+              state.role = null;
+              localStorage.removeItem("accessToken");
+              localStorage.removeItem("user");
+              sessionStorage.removeItem("user");
+          }
         }
         state.isLoading = false;
         state.error = null;
@@ -128,10 +193,12 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.error.message;
         sessionStorage.removeItem("user");
+        localStorage.removeItem("user");
         localStorage.removeItem("accessToken");
       });
   },
 });
 
-export const { setCredentials, logout, setError, updateUser } = authSlice.actions;
+export const { setCredentials, logout, setError, updateUser } =
+  authSlice.actions;
 export default authSlice.reducer;

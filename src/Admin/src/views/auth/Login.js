@@ -61,6 +61,7 @@ export default function Login() {
   const [tabValue, setTabValue] = useState(0);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -98,6 +99,7 @@ export default function Login() {
       const response = await login({
         email: data.email,
         password: data.password,
+        rememberMe,
       }).unwrap();
       
        // Kiểm tra vai trò người dùng
@@ -112,6 +114,7 @@ export default function Login() {
         setCredentials({
           user: response.user,
           token: response.token,
+          rememberMe
         })
       );
 
@@ -225,7 +228,7 @@ export default function Login() {
 
                 <FormControlLabel
                   control={
-                    <Checkbox {...register("rememberMe")} color="primary" />
+                    <Checkbox {...register("rememberMe")} onChange={(e) => setRememberMe(e.target.checked)} color="primary" />
                   }
                   label="Remember Me"
                 />

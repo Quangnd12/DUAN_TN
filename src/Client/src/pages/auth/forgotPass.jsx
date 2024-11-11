@@ -3,8 +3,8 @@ import { useForm } from "react-hook-form";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import SendIcon from "@mui/icons-material/Send";
 import TextField from "@mui/material/TextField";
-// import { forgotPassword } from "../../../../services/Api_url";
-
+import { useForgotPasswordMutation } from "../../../../redux/slice/apiSlice";
+import { useNavigate } from "react-router-dom";
 import "./auth.css";
 
 const ForgotPass = () => {
@@ -16,20 +16,26 @@ const ForgotPass = () => {
 
   const [emailSent, setEmailSent] = useState(false);
   const [submitError, setSubmitError] = useState("");
-
-  const [loading, setLoading] = useState(false);
+  const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
+  const navigate = useNavigate();
 
   const onSubmit = async (data) => {
-    setLoading(true);
     try {
-      // await forgotPassword(data.email);
-      setEmailSent(true);
-      setSubmitError("");
+      const result = await forgotPassword(data.email).unwrap();
+      if (result.success) {
+        setEmailSent(true);
+        setSubmitError("");
+        // Redirect to login after 3 seconds
+        setTimeout(() => {
+          navigate("/login");
+        }, 3000);
+      }
     } catch (error) {
       setEmailSent(false);
-      setSubmitError(error.message || "An error occurred. Please try again.");
-    } finally {
-      setLoading(false);
+      setSubmitError(
+        error.data?.message || 
+        "An error occurred while sending the reset link. Please try again."
+      );
     }
   };
 
@@ -37,10 +43,10 @@ const ForgotPass = () => {
     <HelmetProvider>
       <>
         <Helmet>
-          <title>Forgot</title>
+          <title>Forgot Password</title>
           <meta
             name="description"
-            content="This is the forgot page of our music app."
+            content="Reset your password for our music app."
           />
         </Helmet>
         <section className="h-screen bg-zinc-900 flex items-center justify-center">
@@ -52,26 +58,26 @@ const ForgotPass = () => {
                     Forgot password
                   </h3>
                   <p className="text-gray-500 font-semibold mx-3 text-sm mb-4">
-                    Enter your email address or username, and we'll send you a
-                    link to regain access to your account.
+                    Enter your email address, and we'll send you a link to reset your password.
                   </p>
+                  
                   {emailSent && (
-                    <p className="text-green-500 mb-4">
-                      A recovery link has been sent to your email!
-                    </p>
+                    <div className="text-green-500 mb-4">
+                      <p>Password reset link has been sent to your email!</p>
+                      <p className="text-sm">Redirecting to login page...</p>
+                    </div>
                   )}
 
-                  {!emailSent && submitError && (
+                  {submitError && (
                     <p className="text-red-500 mb-4">{submitError}</p>
                   )}
 
                   <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="relative mb-4">
                       <TextField
-                        label="Email or Username"
+                        label="Email"
                         variant="outlined"
                         fullWidth
-                        multiline
                         InputLabelProps={{
                           style: { color: "white" },
                         }}
@@ -81,24 +87,23 @@ const ForgotPass = () => {
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             "& fieldset": {
-                              borderColor: "white", // Viền trắng mặc định
+                              borderColor: "white",
                             },
                             "&:hover fieldset": {
-                              borderColor: "white", // Viền trắng khi hover
+                              borderColor: "white",
                             },
                             "&.Mui-focused fieldset": {
                               borderColor: "#09A6EF",
                             },
                           },
                           "& .MuiFormHelperText-root": {
-                            color: "white", // Màu chữ helper text
+                            color: "white",
                           },
                         }}
                         {...register("email", {
                           required: "Email is required",
                           pattern: {
-                            value:
-                              /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                            value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
                             message: "Invalid email address",
                           },
                         })}
@@ -107,12 +112,12 @@ const ForgotPass = () => {
                       />
                     </div>
                     <button
-                      className="w-full py-2 px-4 bg-sky-500 font-bold text-white rounded-md shadow-md transform transition-transform duration-300 hover:ring-2 hover:ring-white"
+                      className="w-full py-2 px-4 bg-sky-500 font-bold text-white rounded-md shadow-md transform transition-transform duration-300 hover:ring-2 hover:ring-white disabled:opacity-50 disabled:cursor-not-allowed"
                       type="submit"
-                      disabled={loading} // Disable nút khi đang gửi
+                      disabled={isLoading}
                     >
-                      {loading ? "Sending..." : "Send"}
-                      {!loading && <SendIcon className="ml-2" />}
+                      {isLoading ? "Sending..." : "Send Reset Link"}
+                      {!isLoading && <SendIcon className="ml-2" />}
                     </button>
                   </form>
                 </div>

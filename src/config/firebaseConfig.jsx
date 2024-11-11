@@ -24,20 +24,21 @@ const googleProvider = new GoogleAuthProvider();
 const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
-    
-    // Get the user info and token after successful login
-    const user = result.user;
-    const token = await user.getIdToken();
+    // Lấy idToken
+    const idToken = await result.user.getIdToken(true); // Force refresh token
 
-    // Extract additional user information if needed
+    // Extract user info
     const googleUser = {
-      id: user.uid,
-      name: user.displayName,
-      email: user.email,
-      picture: user.photoURL,
+      id: result.user.uid,
+      name: result.user.displayName,
+      email: result.user.email,
+      picture: result.user.photoURL,
     };
 
-    return { user: googleUser, token }; // Return user info and token
+    return { 
+      user: googleUser,
+      token: idToken // Trả về ID token
+    };
   } catch (error) {
     console.error("Google sign-in error:", error);
     throw new Error("Google sign-in failed. Please try again.");

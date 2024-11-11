@@ -9,7 +9,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { makeStyles } from "@material-ui/styles";
 import { signInWithGoogle } from '../../../../config/firebaseConfig';
-import { useRegisterMutation, useGoogleLoginMutation } from "../../../../redux/slice/apiSlice";
+import { useRegisterMutation, useGoogleRegisterMutation } from "../../../../redux/slice/apiSlice";
 import { setCredentials } from "../../../../redux/slice/authSlice";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify';
@@ -44,7 +44,7 @@ const Register = () => {
   
   // RTK Query mutations
   const [register, { isLoading: isRegistering, error: registerError }] = useRegisterMutation();
-  const [googleLogin, { isLoading: isGoogleLoading }] = useGoogleLoginMutation();
+  const [googleLogin, { isLoading: isGoogleLoading }] = useGoogleRegisterMutation();
 
   const {
     register: registerField,
@@ -64,7 +64,8 @@ const Register = () => {
     try {
       const result = await register({
         email: data.email,
-        password: data.password
+        password: data.password,
+        username: data.username
       }).unwrap();
 
        // Lưu thông tin user vào Redux store và localStorage
@@ -96,20 +97,38 @@ const Register = () => {
   // Handle Google Sign Up
   const handleGoogleSignUp = async () => {
     try {
-      const { user: googleUser, token: googleToken } = await signInWithGoogle();
+      // Get Google credentials
+      const { user: googleUser, token: idToken } = await signInWithGoogle();
       
-      const result = await googleLogin({ idToken: googleToken }).unwrap();
-      
-      // Lưu thông tin user vào Redux store và localStorage
-      dispatch(setCredentials({
-        user: result.user,
-        token: result.token
-      }));
-
-      toast.success("Google registration successful!");
-      navigate('/');
+      // Prepare user data
+      const userData = {
+        username: googleUser.name,
+        email: googleUser.email,
+        avatar: googleUser.picture,
+        role: 'user'
+      };
+  
+      // Call the API
+      const result = await googleLogin({ 
+        idToken,
+        userData
+      }).unwrap();
+  
+      if (result?.user && result?.token) {
+        dispatch(setCredentials({
+          user: result.user,
+          token: result.token,
+          role: result.user.role
+        }));
+  
+        toast.success("Google registration successful!");
+        navigate('/');
+      } else {
+        throw new Error("Invalid response from server");
+      }
     } catch (error) {
-      toast.error(error.message || "Google registration failed");
+      console.error("Google sign up error:", error);
+      toast.error(error?.data?.message || error?.message || "Google registration failed. Please try again.");
     }
   };
 
@@ -138,6 +157,31 @@ const Register = () => {
                 <h3 className="text-2xl font-bold mb-8 text-white">Sign up</h3>
                 
                 <form onSubmit={handleSubmit(onSubmit)}>
+                <div className="relative mb-4">
+                    <TextField
+                      fullWidth
+                      id="username"
+                      label="Username"
+                      variant="outlined"
+                      {...registerField("username", {
+                        required: "Username is required",
+                        minLength: {
+                          value: 3,
+                          message: "Username must be at least 3 characters"
+                        },
+                        pattern: {
+                          value: /^[a-zA-Z0-9_]+$/,
+                          message: "Username can only contain letters, numbers, and underscores"
+                        }
+                      })}
+                      error={!!errors.username}
+                      helperText={errors.username?.message}
+                      InputProps={{
+                        style: { color: "white" }
+                      }}
+                      className={classes.root}
+                    />
+                  </div>
                   {/* Email Field */}
                   <div className="relative mb-4">
                     <TextField

@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../../../redux/slice/authSlice";
 import { useLogoutMutation } from "../../../../redux/slice/apiSlice";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import SearchInput from "../searchInput/index";
 
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
@@ -36,10 +36,16 @@ const Header = () => {
   const [canGoBack, setCanGoBack] = useState(false);
 
   // Lấy thông tin user từ Redux store
-  const { user, isAuthenticated } = useSelector(state => state.auth);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const [canGoForward, setCanGoForward] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // State mới để lưu thông tin hiển thị của user
+  const [displayUser, setDisplayUser] = useState({
+    avatar: "/images/default-avatar.png",
+    username: "",
+  });
 
   const [logoutMutation] = useLogoutMutation();
 
@@ -54,15 +60,11 @@ const Header = () => {
   // Effect để xử lý khi user thay đổi
   useEffect(() => {
     if (user) {
-      // Đảm bảo avatar có giá trị mặc định nếu không có
-      if (!user.avatar) {
-        user.avatar = '/images/default-avatar.png';
-      }
-      
-      // Đảm bảo username có giá trị mặc định nếu không có
-      if (!user.username) {
-        user.username = user.email.split('@')[0];
-      }
+      setDisplayUser({
+        avatar: user.avatar || "/images/default-avatar.png",
+        username:
+          user.username || (user.email ? user.email.split("@")[0] : "User"),
+      });
     }
   }, [user]);
 
@@ -102,11 +104,11 @@ const Header = () => {
     try {
       await logoutMutation().unwrap();
       dispatch(logout());
-      toast.success('Logged out successfully');
-      navigate('/');
+      toast.success("Logged out successfully");
+      navigate("/");
     } catch (error) {
       console.error("Error during logout:", error);
-      toast.error('Failed to logout. Please try again.');
+      toast.error("Failed to logout. Please try again.");
     } finally {
       setIsLoggingOut(false);
       setMenuOpen(false);
@@ -118,13 +120,16 @@ const Header = () => {
     if (isAuthenticated && user) {
       return (
         <div className="relative">
-          <div onClick={toggleMenu} className="cursor-pointer flex items-center">
+          <div
+            onClick={toggleMenu}
+            className="cursor-pointer flex items-center"
+          >
             <p className="px-4 py-2 text-sm text-white hover:text-gray-300">
-              {user.username || user.email.split('@')[0]}
+              {displayUser.username}
             </p>
             <Avatar
-              alt={user.username || user.email}
-              src={user.avatar || '/images/default-avatar.png'}
+              alt={displayUser.username}
+              src={displayUser.avatar}
               className="border-2 border-gray-300 hover:border-white"
             />
           </div>
@@ -141,7 +146,7 @@ const Header = () => {
                 onClick={handleLogout}
                 className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-zinc-700"
               >
-                {isLoggingOut ? 'Logging out...' : 'Logout'}
+                {isLoggingOut ? "Logging out..." : "Logout"}
               </button>
               <hr className="border-gray-700" />
               <Button
@@ -221,7 +226,10 @@ const Header = () => {
               <Link to="/content">
                 <Tooltip title="What's news">
                   <div className="relative px-2 py-2 hover:bg-gray-600 rounded-md">
-                    <NotificationsIcon fontSize="large" className="text-white" />
+                    <NotificationsIcon
+                      fontSize="large"
+                      className="text-white"
+                    />
                     <div className="absolute top-0 right-1">
                       <CircleIcon fontSize="small" className="text-red-500" />
                     </div>

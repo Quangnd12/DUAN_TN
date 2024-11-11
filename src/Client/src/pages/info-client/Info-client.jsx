@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-
 import InfoClientCard from "../../components/cards/Info-clientCard";
 import InfoClientFollowingCard from "../../components/cards/Info-clientFollowingCard";
 import CircularProgress from "@mui/material/CircularProgress";
+import { Alert, Snackbar } from "@mui/material";
 import tb from "../../../public/assets/img/image 27.png";
 import LogoutDialog from "./components/logoutDialog";
 
@@ -24,7 +24,7 @@ const topTracks = [
   },
   {
     id: 2,
-    title: "Tên bài hát 2",
+    title: "Tên bài hát 2", 
     artist: "Tên nghệ sĩ 2",
     duration: "3:45",
     imageUrl: "/assets/images/anh1.jpg",
@@ -32,7 +32,7 @@ const topTracks = [
   {
     id: 3,
     title: "Tên bài hát 3",
-    artist: "Tên nghệ sĩ 3",
+    artist: "Tên nghệ sĩ 3", 
     duration: "5:00",
     imageUrl: "/assets/images/anh1.jpg",
   },
@@ -57,14 +57,17 @@ const followingArtists = [
 ];
 
 const InfoClient = () => {
-
   const navigate = useNavigate();
   const { userId } = useParams();
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState("");
-  const [birthday, setBirthday] = useState("");
-  const [name, setName] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    birthday: "",
+    avatar: ""
+  });
   const [isUpdating, setIsUpdating] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -76,26 +79,28 @@ const InfoClient = () => {
   
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  
+
+  const [validationErrors, setValidationErrors] = useState({
+    username: false,
+    birthday: false
+  });
+  const [showValidationAlert, setShowValidationAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const userDataFromStore = authUser;
-        const userIdToFetch =
-          userId || userDataFromStore.id || userDataFromStore.uid;
+        const userIdToFetch = userId || userDataFromStore.id || userDataFromStore.uid;
 
         if (userIdToFetch) {
           setUser(userDataFromStore);
-          setName(
-            userDataFromStore.username || userDataFromStore.displayName || ""
-          );
-          setBirthday(userDataFromStore.birthday || "");
-          setProfileImage(
-            userDataFromStore.avatar ||
-              userDataFromStore.photoURL ||
-              "/assets/images/default-avatar.jpg"
-          );
+          setFormData({
+            name: userDataFromStore.username || userDataFromStore.displayName || "",
+            birthday: userDataFromStore.birthday || "",
+            avatar: userDataFromStore.avatar || userDataFromStore.photoURL || "/assets/images/default-avatar.jpg"
+          });
+          setPreviewImage(userDataFromStore.avatar || userDataFromStore.photoURL || "/assets/images/default-avatar.jpg");
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -109,39 +114,111 @@ const InfoClient = () => {
     setIsEditing(true);
   };
 
-  const handleSave = async () => {
-    setIsUpdating(true); // Start loading
-    try {
-      // Create a new object with the updated properties
-      const updatedInfo = {
-        id: user.id,
-        username: name,
-        birthday,
-        avatar: profileImage !== user.avatar ? profileImage : user.avatar,
-      };
-      if (profileImage !== user.avatar) {
-        // Only upload avatar if it has changed
-        await uploadAvatar({
-          id: user.id,
-          file: await fetch(profileImage).then((res) => res.blob()),
-        });
-      }
-      // Call the update API with the new object
-      const { data: updatedUser } = await updateUserInfo(updatedInfo);
+  const validateForm = () => {
+    const errors = {
+      username: !formData.name.trim(),
+      birthday: !formData.birthday
+    };
 
-      // Dispatch the update to Redux without modifying the original object directly
-      dispatch(updateUser(updatedUser));
-      // Update local state with the updated user data
-      setUser(updatedUser);
-      setIsEditing(false);
-      setLogoutDialogOpen(true); 
+    setValidationErrors(errors);
+
+    if (errors.username || errors.birthday) {
+      setAlertMessage(
+        `Please fill in the following fields: ${[
+          ...(errors.username ? ['Username'] : []),
+          ...(errors.birthday ? ['Birthday'] : [])
+        ].join(', ')}`
+      );
+      setShowValidationAlert(true);
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSave = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      let updatedFields = {};
+      let newAvatarUrl = formData.avatar;
+
+      // Only include changed fields in the update
+      if (formData.name !== user.username) {
+        updatedFields.username = formData.name;
+      }
+      
+      if (formData.birthday !== user.birthday) {
+        updatedFields.birthday = formData.birthday;
+      }
+
+      // Handle avatar upload if a new file was selected
+      if (selectedFile) {
+        const formDataFile = new FormData();
+        formDataFile.append('avatar', selectedFile);
+        
+        const uploadResponse = await uploadAvatar({
+          id: user.id,
+          file: selectedFile
+        });
+        
+        if (uploadResponse.data?.avatarUrl) {
+          newAvatarUrl = uploadResponse.data.avatarUrl;
+          updatedFields.avatar = newAvatarUrl;
+        }
+      }
+
+      // Only proceed with update if there are changes
+      if (Object.keys(updatedFields).length > 0) {
+        const { data: updatedUser } = await updateUserInfo({
+          id: user.id,
+          ...updatedFields
+        });
+
+        dispatch(updateUser(updatedUser));
+        setUser(updatedUser);
+        setFormData(prev => ({
+          ...prev,
+          avatar: newAvatarUrl
+        }));
+        setIsEditing(false);
+        setLogoutDialogOpen(true);
+      } else {
+        setAlertMessage("No changes were made to update");
+        setShowValidationAlert(true);
+      }
     } catch (error) {
       console.error("Error updating user info:", error);
+      setAlertMessage("An error occurred while updating your profile");
+      setShowValidationAlert(true);
     } finally {
-      setTimeout(() => {
-        setIsUpdating(false); // End loading
-      }, 1500);
+      setIsUpdating(false);
     }
+  };
+
+  const handleCloseValidationAlert = () => {
+    setShowValidationAlert(false);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      // Create a preview URL for the UI
+      const previewUrl = URL.createObjectURL(file);
+      setPreviewImage(previewUrl);
+    }
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleCloseLogoutDialog = () => {
@@ -158,20 +235,6 @@ const InfoClient = () => {
     navigate("/login", { replace: true });
   };
 
-  const handleImageChange = (e) => {
-    if (e.target.files[0]) {
-      setProfileImage(URL.createObjectURL(e.target.files[0]));
-    }
-  };
-
-  const handleBirthdayChange = (e) => {
-    setBirthday(e.target.value);
-  };
-
-  const handleNameChange = (e) => {
-    setName(e.target.value);
-  };
-
   const handleOverlayClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -181,6 +244,9 @@ const InfoClient = () => {
   const handleCloseEditing = (e) => {
     if (e.target.classList.contains("modal-overlay")) {
       setIsEditing(false);
+      // Reset preview if no changes were saved
+      setPreviewImage(formData.avatar);
+      setSelectedFile(null);
     }
   };
 
@@ -190,129 +256,152 @@ const InfoClient = () => {
 
   return (
     <>
-    <div className="bg-black text-white w-full h-auto">
-      <div className="bg-zinc-800 p-20 rounded-lg">
-        <div className="flex items-center flex-col sm:flex-row">
-          <img
-            className="w-48 h-48 sm:w-56 sm:h-56 border-2 border-gray-300 object-cover mb-4 sm:mb-0 sm:mr-6 cursor-pointer transition-transform duration-300 hover:scale-105"
-            src={profileImage}
-            alt="User avatar"
-            onClick={handleImageClick}
-          />
-          <div className="text-center sm:text-left mt-18">
-            <p className="text-gray-400 text-base sm:text-lg mb-1">Profile</p>
-            <h2 className="text-3xl sm:text-6xl font-bold mb-2">{name}</h2>
-            <p className="text-gray-400 text-base sm:text-lg">
-              Email: {user.email}
-            </p>
-            <p className="text-gray-400 text-base sm:text-lg">
-              Birthday: {user.birthday}
-            </p>
-            <p className="text-gray-400 text-base sm:text-lg">
-              Following {user.followsId ? user.followsId.length : 0}
-            </p>
+      <div className="bg-black text-white w-full h-auto">
+        <div className="bg-zinc-800 p-20 rounded-lg">
+          <div className="flex items-center flex-col sm:flex-row">
+            <img
+              className="w-48 h-48 sm:w-56 sm:h-56 border-2 border-gray-300 object-cover mb-4 sm:mb-0 sm:mr-6 cursor-pointer transition-transform duration-300 hover:scale-105"
+              src={formData.avatar}
+              alt="User avatar"
+              onClick={handleImageClick}
+            />
+            <div className="text-center sm:text-left mt-18">
+              <p className="text-gray-400 text-base sm:text-lg mb-1">Profile</p>
+              <h2 className="text-3xl sm:text-6xl font-bold mb-2">{formData.name}</h2>
+              <p className="text-gray-400 text-base sm:text-lg">
+                Email: {user.email}
+              </p>
+              <p className="text-gray-400 text-base sm:text-lg">
+                Birthday: {formData.birthday ? new Date(formData.birthday).toLocaleDateString("en-GB") : "N/A"}
+              </p>
+              <p className="text-gray-400 text-base sm:text-lg">
+                Following {user.followsId ? user.followsId.length : 0}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <br />
-      <div className="mt-8">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-gray-400 font-semibold inline-block ml-2">
-            #<span className="ml-10">Title</span>
-          </span>
-          <img
-            src={tb}
-            alt="Featureimage"
-            className="w-7 h-auto object-cover rounded-lg mr-10"
-          />
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-gray-400 font-semibold inline-block ml-2">
+              #<span className="ml-10">Title</span>
+            </span>
+            <img
+              src={tb}
+              alt="Featureimage"
+              className="w-7 h-auto object-cover rounded-lg mr-10"
+            />
+          </div>
+          <hr className="w-full border-t border-gray-600" />
+          <br />
+          <ul className="grid grid-cols-1 gap-4">
+            {topTracks.map((track, index) => (
+              <InfoClientCard key={index} {...track} />
+            ))}
+          </ul>
         </div>
-        <hr className="w-full border-t border-gray-600" />
-        <br />
-        <ul className="grid grid-cols-1 gap-4">
-          {topTracks.map((track, index) => (
-            <InfoClientCard key={index} {...track} />
-          ))}
-        </ul>
-      </div>
 
-      <div className="mt-8">
-        <h3 className="text-2xl font-bold mb-4 text-left">Following</h3>
-        <div className="flex flex-wrap gap-6">
-          {followingArtists.map((artist, index) => (
-            <InfoClientFollowingCard key={index} {...artist} />
-          ))}
+        <div className="mt-8">
+          <h3 className="text-2xl font-bold mb-4 text-left">Following</h3>
+          <div className="flex flex-wrap gap-6">
+            {followingArtists.map((artist, index) => (
+              <InfoClientFollowingCard key={index} {...artist} />
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Profile editing form */}
-      {isEditing && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 modal-overlay"
-          onClick={handleCloseEditing}
+        {isEditing && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 modal-overlay"
+            onClick={handleCloseEditing}
+          >
+            <div className="bg-zinc-800 p-8 rounded-lg w-full max-w-4xl flex flex-col md:flex-row shadow-lg relative">
+              {isUpdating && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                  <CircularProgress size={50} color="primary" />
+                </div>
+              )}
+              <div className="relative flex flex-col items-center md:w-1/2 mb-4 md:mb-0">
+                <img
+                  className="w-48 h-48 rounded-lg object-cover mb-4 border-4 border-blue-600 mt-5"
+                  src={previewImage}
+                  alt="Profile Preview"
+                />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+                <button
+                  onClick={handleOverlayClick}
+                  className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors duration-300"
+                >
+                  Upload Image
+                </button>
+              </div>
+              <div className="flex flex-col justify-center md:w-1/2 md:pl-6">
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleFormChange}
+                    placeholder="Enter your name"
+                    className={`bg-zinc-700 text-white p-3 rounded w-full border ${
+                      validationErrors.username ? 'border-red-500' : 'border-gray-600'
+                    } focus:border-blue-500 transition-colors duration-300`}
+                  />
+                  {validationErrors.username && (
+                    <p className="text-red-500 text-sm mt-1">Username is required</p>
+                  )}
+                </div>
+                <div className="mb-4">
+                  <input
+                    type="date"
+                    name="birthday"
+                    value={formData.birthday}
+                    onChange={handleFormChange}
+                    className={`bg-zinc-700 text-white p-3 rounded w-full border ${
+                      validationErrors.birthday ? 'border-red-500' : 'border-gray-600'
+                    } focus:border-blue-500 transition-colors duration-300`}
+                  />
+                  {validationErrors.birthday && (
+                    <p className="text-red-500 text-sm mt-1">Birthday is required</p>
+                  )}
+                </div>
+                <button
+                  onClick={handleSave}
+                  className="bg-blue-600 text-white py-3 px-6 rounded hover:bg-blue-700 transition-colors duration-300"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      <LogoutDialog
+        open={logoutDialogOpen}
+        onClose={handleCloseLogoutDialog}
+        onLogout={handleLogout}
+      />
+       <Snackbar
+        open={showValidationAlert}
+        autoHideDuration={6000}
+        onClose={handleCloseValidationAlert}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseValidationAlert}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
         >
-          <div className="bg-zinc-800 p-8 rounded-lg w-full max-w-4xl flex flex-col md:flex-row shadow-lg relative">
-            {isUpdating && (
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
-                <CircularProgress size={50} color="primary" />
-              </div>
-            )}
-            <div className="relative flex flex-col items-center md:w-1/2 mb-4 md:mb-0">
-              <img
-                className="w-48 h-48 rounded-lg object-cover mb-4 border-4 border-blue-600 mt-5"
-                src={profileImage}
-                alt="Profile Preview"
-              />
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-              <div
-                onClick={handleOverlayClick}
-                className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-lg font-semibold cursor-pointer"
-              >
-                <span>Upload file</span>
-              </div>
-            </div>
-            <div className="flex flex-col justify-center md:w-1/2 md:pl-6">
-              <input
-                type="text"
-                value={name}
-                onChange={handleNameChange}
-                placeholder="Enter your name"
-                className="bg-zinc-700 text-white p-3 rounded mb-4 border border-gray-600 focus:border-blue-500 transition-colors duration-300"
-              />
-              <input
-                type="date"
-                value={birthday}
-                onChange={handleBirthdayChange}
-                placeholder="Enter your birthday"
-                className="bg-zinc-700 text-white p-3 rounded mb-4 border border-gray-600 focus:border-blue-500 transition-colors duration-300"
-              />
-              <button
-                onClick={handleSave}
-                className="bg-blue-600 text-white py-3 px-6 rounded hover:bg-blue-700 transition-colors duration-300"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {isUpdating && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
-          <CircularProgress size={50} color="primary" />
-        </div>
-      )}
-    </div>
-     <LogoutDialog
-     open={logoutDialogOpen}
-     onClose={handleCloseLogoutDialog}
-     onLogout={handleLogout}
-   />
+          {alertMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

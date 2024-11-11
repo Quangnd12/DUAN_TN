@@ -9,7 +9,6 @@ import {
   Paper,
   TextField,
   IconButton,
-  Menu,
   MenuItem,
   CircularProgress,
   Pagination,
@@ -21,7 +20,7 @@ import {
   Collapse,
   FormControl,
   Select,
-  Stack
+  Stack,
 } from "@mui/material";
 import {
   MoreVert as MoreVertIcon,
@@ -33,19 +32,16 @@ import { useGetUsersQuery } from "../../../../../../redux/slice/apiSlice";
 const ITEMS_PER_PAGE = 5;
 
 const UserList = () => {
-  // State for pagination and sorting
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [sort, setSort] = useState("createdAt");
   const [order, setOrder] = useState("desc");
-  
-  // UI states
+
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [openRow, setOpenRow] = useState({});
 
-  // RTK Query hook with pagination params
   const { data, isLoading, isFetching } = useGetUsersQuery({
     page,
     limit: ITEMS_PER_PAGE,
@@ -54,17 +50,15 @@ const UserList = () => {
     order,
   });
 
-  // Debounce search term
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-      setPage(1); // Reset to first page on new search
+      setPage(1);
     }, 500);
 
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // Handlers
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -121,7 +115,6 @@ const UserList = () => {
         <CircularProgress color="inherit" />
       </Backdrop>
 
-      {/* Search and Sort Controls */}
       <div className="flex flex-wrap gap-4 mb-4">
         <TextField
           label="Search"
@@ -159,51 +152,59 @@ const UserList = () => {
         </FormControl>
       </div>
 
-      {/* Users Table */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow>
+            <TableRow sx={{ backgroundColor: "#18181b" }}>
+              <TableCell sx={{ color: "white" }}>#</TableCell>
+              <TableCell sx={{ color: "white" }}>Avatar</TableCell>
+              <TableCell sx={{ color: "white" }}>Username</TableCell>
+              <TableCell sx={{ color: "white" }}>Email</TableCell>
+              <TableCell sx={{ color: "white" }}>Role</TableCell>
               <TableCell />
-              <TableCell>Avatar</TableCell>
-              <TableCell>Username</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Role</TableCell>
-              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {data?.users?.map((user) => (
+            {data?.users?.map((user, index) => (
               <React.Fragment key={user.id}>
                 <TableRow>
                   <TableCell>
-                    <IconButton
-                      size="small"
-                      onClick={() => toggleRow(user.id)}
-                    >
-                      {openRow[user.id] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                    </IconButton>
+                    {(page - 1) * ITEMS_PER_PAGE + index + 1}
                   </TableCell>
                   <TableCell>
-                    <Avatar src={user.avatar}>{getInitials(user.username)}</Avatar>
+                    <Avatar src={user.avatar}>
+                      {getInitials(user.username)}
+                    </Avatar>
                   </TableCell>
                   <TableCell>{user.username || "N/A"}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
                     <Chip
+                      sx={{ width: "80px"}}
                       label={user.role}
-                      color={user.role === "admin" ? "primary" : "default"}
+                      color={user.role === "admin" ? "primary" : "success"}
                     />
                   </TableCell>
                   <TableCell>
-                    <IconButton onClick={(e) => handleOpenMenu(e, user)}>
-                      <MoreVertIcon />
+                    <IconButton size="small" onClick={() => toggleRow(user.id)}>
+                      {openRow[user.id] ? (
+                        <KeyboardArrowUp />
+                      ) : (
+                        <KeyboardArrowDown />
+                      )}
                     </IconButton>
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                    <Collapse in={openRow[user.id]} timeout="auto" unmountOnExit>
+                  <TableCell
+                    style={{ paddingBottom: 0, paddingTop: 0 }}
+                    colSpan={6}
+                  >
+                    <Collapse
+                      in={openRow[user.id]}
+                      timeout="auto"
+                      unmountOnExit
+                    >
                       <Box sx={{ margin: 1 }}>
                         <Typography variant="h6" gutterBottom component="div">
                           User Details
@@ -211,16 +212,26 @@ const UserList = () => {
                         <Table size="small">
                           <TableBody>
                             <TableRow>
-                              <TableCell component="th" scope="row">Birthday</TableCell>
+                              <TableCell component="th" scope="row">
+                                Birthday
+                              </TableCell>
                               <TableCell>{formatDate(user.birthday)}</TableCell>
                             </TableRow>
                             <TableRow>
-                              <TableCell component="th" scope="row">Created At</TableCell>
-                              <TableCell>{formatDate(user.createdAt)}</TableCell>
+                              <TableCell component="th" scope="row">
+                                Created At
+                              </TableCell>
+                              <TableCell>
+                                {formatDate(user.createdAt)}
+                              </TableCell>
                             </TableRow>
                             <TableRow>
-                              <TableCell component="th" scope="row">Updated At</TableCell>
-                              <TableCell>{formatDate(user.updatedAt)}</TableCell>
+                              <TableCell component="th" scope="row">
+                                Updated At
+                              </TableCell>
+                              <TableCell>
+                                {formatDate(user.updatedAt)}
+                              </TableCell>
                             </TableRow>
                           </TableBody>
                         </Table>
@@ -234,31 +245,20 @@ const UserList = () => {
         </Table>
       </TableContainer>
 
-      {/* Pagination */}
       {data?.pagination && (
         <div className="flex justify-end items-center mt-4">
           <Stack spacing={2}>
-          <Pagination
-            count={Math.ceil(data.pagination.total / ITEMS_PER_PAGE)}
-            page={page}
-            onChange={handlePageChange}
-            color="primary"
-            disabled={isLoading}
-            shape="rounded"
-          />
-           </Stack>
+            <Pagination
+              count={Math.ceil(data.pagination.total / ITEMS_PER_PAGE)}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              disabled={isLoading}
+              shape="rounded"
+            />
+          </Stack>
         </div>
       )}
-
-      {/* Action Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleCloseMenu}
-      >
-        <MenuItem onClick={handleCloseMenu}>Edit</MenuItem>
-        <MenuItem onClick={handleCloseMenu}>Delete</MenuItem>
-      </Menu>
     </div>
   );
 };
