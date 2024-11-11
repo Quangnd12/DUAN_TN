@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { useDropzone } from "react-dropzone";
@@ -8,7 +8,7 @@ import SelectField from "../../../../components/SharedIngredients/SelectField";
 import DatePickerField from "../../../../components/SharedIngredients/DatePickerField";
 import { addAlbum } from "../../../../../../services/album";
 import { handleAdd } from "Admin/src/components/notification";
-import { getArtists } from "services/artist";
+import { getArtists } from "../../../../../../services/artist";
 
 const AddAlbum = () => {
   const { control, handleSubmit, setValue, watch, clearErrors, formState: { errors } } = useForm({
@@ -19,39 +19,34 @@ const AddAlbum = () => {
       image: null,
     }
   });
-  const [Artists, setArtists] = useState([]);
+
+  const [artists, setArtists] = useState([]);
   const navigate = useNavigate();
   const [coverImagePreview, setCoverImagePreview] = useState(null);
 
-  const handleDrop = useCallback(async (acceptedFiles) => {
+  const handleDrop = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
     if (!file) return;
 
     setValue("image", file);
-    try {
-      const objectURL = URL.createObjectURL(file);
-      setCoverImagePreview(objectURL);
-    } catch (error) {
-      console.error("Failed to create object URL:", error);
-    }
+    setCoverImagePreview(URL.createObjectURL(file));
     clearErrors("image");
   }, [setValue, clearErrors]);
 
-  const { getRootProps: getImageRootProps, getInputProps: getImageInputProps } =
-    useDropzone({
-      onDrop: handleDrop,
-      accept: "image/*",
-    });
+  const { getRootProps: getImageRootProps, getInputProps: getImageInputProps } = useDropzone({
+    onDrop: handleDrop,
+    accept: "image/*",
+  });
 
   const handleCancel = () => {
     navigate("/admin/album");
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchArtists = async () => {
       try {
         const artistData = await getArtists();
-        setArtists(artistData);
+        setArtists(artistData.artists);
       } catch (error) {
         console.error("Error fetching artists:", error);
       }
@@ -61,21 +56,17 @@ const AddAlbum = () => {
 
   const onSubmit = async (data) => {
     const formData = new FormData();
-    formData.append('title', data.title);
-
-    const artistIDs = data.artistID.map(artist => artist.value);
-    artistIDs.forEach(id => formData.append('artistID[]', id));
-
-    const releaseDateFormatted = new Date(data.releaseDate).toISOString().split('T')[0];
-    formData.append('releaseDate', releaseDateFormatted);
-    formData.append('image', data.image);
+    formData.append("title", data.title);
+    data.artistID.map(artist => artist.value).forEach(id => formData.append("artistID[]", id));
+    formData.append("releaseDate", new Date(data.releaseDate).toISOString().split("T")[0]);
+    formData.append("image", data.image);
 
     try {
       await addAlbum(formData);
       navigate("/admin/album");
       handleAdd();
     } catch (error) {
-      console.error(error);
+      console.error("Failed to add album:", error);
     }
   };
 
@@ -89,23 +80,17 @@ const AddAlbum = () => {
               <Controller
                 name="title"
                 control={control}
-                render={({ field }) => (
-                  <InputField
-                    label="Title"
-                    id="title"
-                    name="title"
-                    {...field}
-                  />
-                )}
                 rules={{
                   required: "Title is required",
                   validate: (value) => {
                     if (value.length < 1 || value.length > 100) return "Title must be between 1 and 100 characters";
-                    const invalidCharacters = /[<>:"/\\|?*]/;
-                    if (invalidCharacters.test(value)) return "Title contains invalid characters";
+                    if (/[<>:"/\\|?*]/.test(value)) return "Title contains invalid characters";
                     return true;
                   }
                 }}
+                render={({ field }) => (
+                  <InputField label="Title" id="title" {...field} />
+                )}
               />
               {errors.title && <small className="text-red-500 mt-1 ml-2 block">{errors.title.message}</small>}
             </div>
@@ -113,20 +98,19 @@ const AddAlbum = () => {
               <Controller
                 name="artistID"
                 control={control}
+                rules={{ required: "Artist is required" }}
                 render={({ field }) => (
                   <SelectField
                     label="Artist"
                     id="artist"
-                    name="artistID"
-                    options={Artists.map((artist) => ({
+                    options={artists.map(artist => ({
                       value: artist.id,
                       label: artist.name,
                     }))}
-                    {...field}
                     isMulti
+                    {...field}
                   />
                 )}
-                rules={{ required: "Artist is required" }}
               />
               {errors.artistID && <small className="text-red-500 mt-1 ml-2 block">{errors.artistID.message}</small>}
             </div>
@@ -134,6 +118,7 @@ const AddAlbum = () => {
               <Controller
                 name="releaseDate"
                 control={control}
+                rules={{ required: "Release date is required" }}
                 render={({ field }) => (
                   <DatePickerField
                     label="Release Date"
@@ -142,7 +127,6 @@ const AddAlbum = () => {
                     onChange={(date) => setValue("releaseDate", date, { shouldValidate: true })}
                   />
                 )}
-                rules={{ required: "Release date is required" }}
               />
               {errors.releaseDate && <small className="text-red-500 ml-2 block">{errors.releaseDate.message}</small>}
             </div>
@@ -154,48 +138,32 @@ const AddAlbum = () => {
           <Controller
             name="image"
             control={control}
-            render={({ field }) => (
+            rules={{ required: "Album cover image is required" }}
+            render={() => (
               <div
                 {...getImageRootProps()}
-                className={`w-full p-6 border-2 border-dashed ${errors.image ? 'border-red-600' : 'border-gray-400'} rounded-md cursor-pointer hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500`}
+                className={`w-full p-6 border-2 border-dashed ${errors.image ? "border-red-600" : "border-gray-400"
+                  } rounded-md cursor-pointer hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500`}
               >
                 <input {...getImageInputProps()} />
-                <p className="text-center text-gray-600">
-                  Drag & drop an image file here, or click to select a file
-                </p>
-                {watch("image") && (
-                  <p className="text-center text-green-500 mt-2">
-                    Selected file: {watch("image")?.name}
-                  </p>
-                )}
+                <p className="text-center text-gray-600">Drag & drop an image file here, or click to select a file</p>
+                {watch("image") && <p className="text-center text-green-500 mt-2">Selected file: {watch("image")?.name}</p>}
                 {coverImagePreview && (
                   <div className="mt-4 flex justify-center">
-                    <img
-                      src={coverImagePreview}
-                      alt="Cover Preview"
-                      className="w-32 h-32 object-cover rounded-md border-2 border-gray-300"
-                    />
+                    <img src={coverImagePreview} alt="Cover Preview" className="w-32 h-32 object-cover rounded-md border-2 border-gray-300" />
                   </div>
                 )}
                 {errors.image && <small className="text-red-500 mt-2">{errors.image.message}</small>}
               </div>
             )}
-            rules={{ required: "Album cover image is required" }}
           />
         </div>
 
         <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="bg-gray-500 text-white py-2 px-4 rounded-lg mr-4"
-          >
+          <button type="button" onClick={handleCancel} className="bg-gray-500 text-white py-2 px-4 rounded-lg mr-4">
             Cancel
           </button>
-          <button
-            type="submit"
-            className="bg-blue-500 text-white py-2 px-4 rounded-lg"
-          >
+          <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-lg">
             Save
           </button>
         </div>

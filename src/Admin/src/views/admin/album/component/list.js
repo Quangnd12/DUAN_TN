@@ -1,52 +1,35 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import debounce from "lodash/debounce";
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, IconButton, Menu, MenuItem, Pagination, Typography, Alert, Stack, Collapse, Box, Avatar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TextField,
+  IconButton,
+  Menu,
+  MenuItem,
+  Pagination,
+  Typography,
+  Alert,
+  Stack,
+  Collapse,
+  Box,
+  Avatar,
 } from "@mui/material";
 import {
   MoreVert as MoreVertIcon,
   KeyboardArrowDown,
   KeyboardArrowUp,
 } from "@mui/icons-material";
-import { MdEdit, MdDelete } from 'react-icons/md';
-import { getAlbums, deleteAlbum } from "../../../../../../services/album";
-import { getArtists } from "../../../../../../services/artist";
+import { MdEdit, MdDelete } from "react-icons/md";
+import { getAlbums } from "../../../../../../services/album";
+import DeleteAlbum from "./delete";
 import { formatDate } from "Admin/src/components/formatDate";
-
-const DeleteAlbum = ({ onClose, albumDelete, onDelete }) => {
-  const handleDelete = async () => {
-    try {
-      await deleteAlbum(albumDelete.id);
-      onDelete(albumDelete.id);
-      onClose();
-    } catch (error) {
-      console.error("Error deleting album:", error);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg max-w-sm w-full">
-        <h2 className="text-xl font-bold mb-4">Delete Album</h2>
-        <p className="mb-4">Are you sure you want to delete "{albumDelete.title}"?</p>
-        <div className="flex justify-end space-x-2">
-          <button
-            className="px-4 py-2 bg-gray-200 rounded"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-          <button
-            className="px-4 py-2 bg-red-500 text-white rounded"
-            onClick={handleDelete}
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const AlbumList = () => {
   const navigate = useNavigate();
@@ -54,43 +37,59 @@ const AlbumList = () => {
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [openRow, setOpenRow] = useState({});
   const [albums, setAlbums] = useState([]);
-  const [artists, setArtists] = useState({});
   const [albumToDelete, setAlbumToDelete] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const [showActionMenu, setShowActionMenu] = useState(false);
-  const location = useLocation();
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+  const [searchTitle, setSearchTitle] = useState("");
+  const [showActionMenu, setShowActionMenu] = useState(false);
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const filterMenuRef = useRef(null);
 
-  const fetchAlbums = async (page) => {
-    try {
-      const data = await getAlbums(page);
-      setAlbums(data);
-      setTotalPages(Math.ceil(data.length / 10)); // Assuming 10 items per page
-    } catch (error) {
-      console.log("Could not fetch albums");
-    }
-  };
-  const fetchArtists = async () => {
-    try {
-      const artists = await getArtists();
-      const artistMap = artists.reduce((acc, artist) => {
-        acc[artist.id] = artist.name;
-        return acc;
-      }, {});
-      setArtists(artistMap);
-    } catch (error) {
-      console.log("Could not fetch artists");
-    }
-  };
+  const fetchAlbumData = useCallback(
+    async (page, limit, searchTitle) => {
+      setIsLoading(true);
+      try {
+        const data = await getAlbums(page, limit, [], searchTitle);
+        if (data) {
+          const albumsWithArtists = data.albums.map((album) => ({
+            ...album,
+            artist: Array.isArray(album.artistNames)
+              ? album.artistNames
+              : [album.artistNames],
+          }));
+          setAlbums(albumsWithArtists);
+          setTotalPages(data.totalPages);
+        }
+      } catch (error) {
+        console.error("Error fetching albums:", error);
+        setAlbums([]);
+        setTotalPages(0);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
-    fetchAlbums(currentPage);
-    fetchArtists();
-  }, [currentPage]);
+    fetchAlbumData(currentPage, limit, searchTitle);
+  }, [fetchAlbumData, currentPage, limit, searchTitle]);
+
+  const handleSearchChange = (e) => {
+    setSearchTitle(e.target.value);
+    setCurrentPage(1);
+  };
 
   const handleChangePage = (event, value) => {
     setCurrentPage(value);
+  };
+
+  const handleLimitChange = (event) => {
+    setLimit(parseInt(event.target.value, 10));
+    setCurrentPage(1);
   };
 
   const handleOpenMenu = (event, album) => {
@@ -103,18 +102,24 @@ const AlbumList = () => {
     setSelectedAlbum(null);
   };
 
-  const handleDeleteAlbum = (id) => {
-    setAlbums(prevAlbums => prevAlbums.filter(album => album.id !== id));
+  const handleEditAlbum = (id) => {
+    navigate(`/admin/album/edit/${id}`);
+    handleCloseMenu();
   };
 
   const handleOpenDeleteModal = (album) => {
     setAlbumToDelete(album);
     setOpenDeleteModal(true);
+    handleCloseMenu();
   };
 
   const handleCloseDeleteModal = () => {
-    setOpenDeleteModal(false);
     setAlbumToDelete(null);
+    setOpenDeleteModal(false);
+  };
+
+  const handleAddAlbum = () => {
+    navigate("/admin/album/add");
   };
 
   const toggleRow = (id) => {
@@ -130,13 +135,27 @@ const AlbumList = () => {
     return words.length > 1 ? words[0][0] + words[1][0] : words[0][0];
   };
 
-  const handleAddAlbum = () => {
-    navigate("/admin/album/add");
+  const getColorFromName = (name) => {
+    const letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+      color += letters[(name.charCodeAt(i % name.length) + i) % 14];
+    }
+    return color;
   };
 
-  const handleEditAlbum = (id) => {
-    navigate(`/admin/album/edit/${id}`);
+  const handleClickOutside = (event) => {
+    if (filterMenuRef.current && !filterMenuRef.current.contains(event.target)) {
+      setShowFilterMenu(false);
+    }
   };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="p-4">
@@ -145,8 +164,10 @@ const AlbumList = () => {
           <TextField
             label="Search"
             variant="outlined"
+            value={searchTitle}
+            onChange={handleSearchChange}
             className="w-64"
-            placeholder="Search..."
+            placeholder="Search by album name..."
           />
         </div>
 
@@ -157,7 +178,22 @@ const AlbumList = () => {
           >
             + Add Album
           </button>
-
+          <div className="relative w-full md:w-auto">
+            <button
+              className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto"
+              onClick={() => setShowFilterMenu((prev) => !prev)}
+            >
+              Filter <i className="fas fa-chevron-down ml-2"></i>
+            </button>
+            {showFilterMenu && (
+              <div
+                ref={filterMenuRef}
+                className="absolute right-0 mt-2 w-full md:w-96 bg-white rounded-md shadow-lg z-10"
+              >
+                {/* Add filter options specific to albums here */}
+              </div>
+            )}
+          </div>
           <div className="relative w-full md:w-auto">
             <button
               className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto"
@@ -165,19 +201,12 @@ const AlbumList = () => {
             >
               Actions <i className="fas fa-chevron-down ml-2"></i>
             </button>
-
             {showActionMenu && (
               <div className="absolute right-0 mt-2 w-full md:w-48 bg-white rounded-md shadow-lg z-10">
-                <button
-                  onClick={() => console.log("Mass edit")}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
+                <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                   Mass edit
                 </button>
-                <button
-                  onClick={() => console.log("Delete all")}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
+                <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                   Delete all
                 </button>
               </div>
@@ -186,7 +215,11 @@ const AlbumList = () => {
         </div>
       </div>
 
-      {albums?.length > 0 ? (
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : albums.length === 0 ? (
+        <Alert severity="info">No albums found matching the search criteria.</Alert>
+      ) : (
         <>
           <TableContainer component={Paper}>
             <Table>
@@ -210,29 +243,48 @@ const AlbumList = () => {
                           size="small"
                           onClick={() => toggleRow(album.id)}
                         >
-                          {openRow[album.id] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                          {openRow[album.id] ? (
+                            <KeyboardArrowUp />
+                          ) : (
+                            <KeyboardArrowDown />
+                          )}
                         </IconButton>
                       </TableCell>
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>
                         <div className="flex items-center">
-                          <span>
-                            {album.image ? (
-                              <img
-                                src={`${album.image}`}
-                                alt={album.title || "Album Cover"}
-                                className="w-10 h-10 rounded-md"
-                              />
-                            ) : (
-                              <Avatar>{getInitials(album.title)}</Avatar>
-                            )}
-                          </span>
-                          <span className="ml-2">
-                            {album.title || "Untitled Album"}
-                          </span>
+                          {album.image ? (
+                            <img
+                              src={album.image}
+                              alt={album.title}
+                              className="w-10 h-10 rounded-md"
+                            />
+                          ) : (
+                            <Avatar>{getInitials(album.title)}</Avatar>
+                          )}
+                          <span className="ml-2">{album.title}</span>
                         </div>
                       </TableCell>
-                      <TableCell>{artists[album.artistID] || "Unknown"}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {Array.isArray(album.artist) ? (
+                            album.artist.map((artist, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2 py-1 rounded-full text-sm"
+                                style={{
+                                  backgroundColor: getColorFromName(artist),
+                                  color: "#fff",
+                                }}
+                              >
+                                {artist}
+                              </span>
+                            ))
+                          ) : (
+                            <span>{album.artist}</span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>{formatDate(album.releaseDate)}</TableCell>
                       <TableCell>
                         <IconButton onClick={(event) => handleOpenMenu(event, album)}>
@@ -243,36 +295,48 @@ const AlbumList = () => {
                           open={Boolean(anchorEl) && selectedAlbum?.id === album.id}
                           onClose={handleCloseMenu}
                         >
-                          <MenuItem onClick={() => {
-                            handleCloseMenu();
-                            handleEditAlbum(album.id);
-                          }}>
-                            <MdEdit style={{ marginRight: '8px', color: 'blue' }} />
-                            <span style={{ color: 'blue' }}>Edit</span>
+                          <MenuItem onClick={() => handleEditAlbum(album.id)}>
+                            <MdEdit style={{ marginRight: "8px", color: "blue" }} />
+                            <span style={{ color: "blue" }}>Edit</span>
                           </MenuItem>
-                          <MenuItem
-                            onClick={() => {
-                              handleCloseMenu();
-                              handleOpenDeleteModal(album);
-                            }}
-                          >
-                            <MdDelete style={{ marginRight: '8px', color: "red" }} />
-                            <span style={{ color: 'red' }}>Delete</span>
+                          <MenuItem onClick={() => handleOpenDeleteModal(album)}>
+                            <MdDelete style={{ marginRight: "8px", color: "red" }} />
+                            <span style={{ color: "red" }}>Delete</span>
                           </MenuItem>
                         </Menu>
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
+                      <TableCell
+                        style={{ paddingBottom: 0, paddingTop: 0 }}
+                        colSpan={8}
+                      >
                         <Collapse in={openRow[album.id]} timeout="auto" unmountOnExit>
                           <Box margin={1}>
                             <Typography variant="h6" gutterBottom component="div">
                               Album Details
                             </Typography>
                             <Typography variant="body1" className="pb-2">
-                              Release Date: {formatDate(album.releaseDate)}
+                              Artists:
                             </Typography>
-                            {/* Add more album details here as needed */}
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {Array.isArray(album.artist) ? (
+                                album.artist.map((artist, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="px-3 py-1 rounded-full text-sm"
+                                    style={{
+                                      backgroundColor: getColorFromName(artist),
+                                      color: "#fff",
+                                    }}
+                                  >
+                                    {artist}
+                                  </span>
+                                ))
+                              ) : (
+                                <span>{album.artist}</span>
+                              )}
+                            </div>
                           </Box>
                         </Collapse>
                       </TableCell>
@@ -283,28 +347,44 @@ const AlbumList = () => {
             </Table>
           </TableContainer>
 
-          <div className="mt-4 flex justify-end items-center">
-            <Stack spacing={2}>
-              <Pagination
-                count={totalPages || 1}
-                page={currentPage}
-                onChange={handleChangePage}
-                color="primary"
-                variant="outlined"
-                shape="rounded"
-              />
-            </Stack>
+          <div className="mt-4 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <label htmlFor="limit">Show items:</label>
+              <select
+                id="limit"
+                value={limit}
+                onChange={handleLimitChange}
+                className="border border-gray-300 rounded p-1"
+              >
+                <option value={5}>Show 5</option>
+                <option value={10}>Show 10</option>
+                <option value={15}>Show 15</option>
+              </select>
+            </div>
+            <div>
+              <Stack spacing={2}>
+                <Pagination
+                  count={totalPages || 1}
+                  page={currentPage}
+                  onChange={handleChangePage}
+                  color="primary"
+                  variant="outlined"
+                  shape="rounded"
+                />
+              </Stack>
+            </div>
           </div>
         </>
-      ) : (
-        <Alert severity="warning">No albums found matching the search criteria.</Alert>
       )}
 
       {openDeleteModal && (
         <DeleteAlbum
+          open={openDeleteModal}
           onClose={handleCloseDeleteModal}
-          albumDelete={albumToDelete}
-          onDelete={handleDeleteAlbum}
+          album={albumToDelete}
+          onDelete={() => {
+            fetchAlbumData(currentPage, limit, searchTitle);
+          }}
         />
       )}
     </div>
