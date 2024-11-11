@@ -6,8 +6,7 @@ import { CgPlayTrackNext, CgPlayTrackPrev } from "react-icons/cg";
 import Volume from "./VolumeTemplate";
 import CurrentTrack from "./CurrentTrack";
 
-const PlayerControls = ({ audioUrl, title, artist, Image, onDurationChange,next,prevsong ,onTrackEnd}) => {
-  const [isPlaying, setIsPlaying] = useState(false);
+const PlayerControls = ({ audioUrl, title, artist, Image, onDurationChange,next,prevsong ,onTrackEnd ,isPlaying,setIsPlaying}) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.8);
@@ -21,7 +20,7 @@ const PlayerControls = ({ audioUrl, title, artist, Image, onDurationChange,next,
     } else {
       setIsPlaying(false);
     }
-  }, [audioUrl]);
+  }, [audioUrl,setIsPlaying]);
 
   const handlePlayPause = () => {
     setIsPlaying(prev => !prev);

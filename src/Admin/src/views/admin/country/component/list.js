@@ -23,10 +23,11 @@ const CountryList = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(5);
+    const [searchName, setSearchName] = useState('');
 
-    const CountryData = async (page = 1, limit = 5) => {
+    const CountryData = async (page = 1, limit = 5,searchName='') => {
         try {
-            const data = await getCountry(page, limit);
+            const data = await getCountry(page, limit,searchName);
             setCountry(data.countries);
             setTotalPages(data.totalPages);
         } catch (error) {
@@ -35,12 +36,17 @@ const CountryList = () => {
     };
 
     useEffect(() => {
-        CountryData(currentPage, limit);
-    }, [currentPage, limit]);
+        CountryData(currentPage, limit,searchName);
+    }, [currentPage, limit,searchName]);
 
     const handleChangePage = (event, value) => {
         setCurrentPage(value);
     };
+
+    const handleSearchChange = (e) => {
+        setSearchName(e.target.value);
+    };
+
     const handleLimitChange = (event) => {
         setLimit(parseInt(event.target.value));
         setCurrentPage(1);
@@ -71,9 +77,6 @@ const CountryList = () => {
         setCountryToDelete(null);
     };
 
-
-
-
     const handleAddCountry = () => {
         navigate("/admin/countries/add");
     };
@@ -82,15 +85,14 @@ const CountryList = () => {
     };
     return (
         <div className="p-4">
-            {/* <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-                <CircularProgress color="inherit" />
-            </Backdrop> */}
             <div className="flex justify-between mb-4">
                 <div className="flex-grow">
                     <TextField
                         label="Search"
                         variant="outlined"
                         className="w-64"
+                        value={searchName}
+                        onChange={handleSearchChange}
                         placeholder="Search..."
                     />
                 </div>

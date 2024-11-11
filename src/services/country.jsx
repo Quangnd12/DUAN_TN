@@ -1,10 +1,21 @@
 import request from "config";
 
-const getCountry = async (page, limit) => {
+const getCountry = async (page, limit,searchName) => {
   let path = '/api/countries';
   
+  let query = [];
+
   if (page && limit) {
-    path += `?page=${page}&limit=${limit}`;
+    query.push(`page=${page}`);
+    query.push(`limit=${limit}`);
+  }
+
+  if (searchName) {
+    query.push(`searchName=${encodeURIComponent(searchName)}`);
+  }
+
+  if (query.length > 0) {
+    path += `?${query.join('&')}`;
   }
 
   const res = await request({

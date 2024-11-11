@@ -2,7 +2,7 @@
 
 import React, { forwardRef } from "react";
 
-const InputField = forwardRef(({ label, id, name, value, onChange, required = false }, ref) => (
+const InputField = forwardRef(({ label, id, name, value, onChange, required = false,disabled }, ref) => (
   <div>
     <label
       htmlFor={id}
@@ -17,6 +17,7 @@ const InputField = forwardRef(({ label, id, name, value, onChange, required = fa
       name={name}
       value={value}
       onChange={onChange}
+      disabled={disabled}
       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       required={required}
     />
