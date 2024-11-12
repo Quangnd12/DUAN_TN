@@ -20,25 +20,22 @@ import {
   Stack,
   Collapse,
   Box,
-  Avatar,
   Backdrop,
+  Chip,
+  Avatar,
 } from "@mui/material";
 import {
   MoreVert as MoreVertIcon,
-  KeyboardArrowDown,
-  KeyboardArrowUp,
   Edit as EditIcon,
   Delete as DeleteIcon,
+  KeyboardArrowUp,
+  KeyboardArrowDown,
 } from "@mui/icons-material";
-import AddIcon from "@mui/icons-material/Add";
-import { getArtists } from "../../../../../../services/artists";
-import { handleDelete } from "../../../../components/notification";
+import { MdEdit, MdDelete } from "react-icons/md";
+import { fetcher } from "../../../../../../services/artist"; // Adjust as needed
 import DeleteArtist from "./delete";
 
 const ITEMS_PER_PAGE = 5;
-
-const fetcher = (url, page, limit, searchTerm) =>
-  getArtists(page, limit, searchTerm);
 
 const ArtistList = () => {
   const navigate = useNavigate();
@@ -48,23 +45,24 @@ const ArtistList = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedArtist, setSelectedArtist] = useState(null);
   const [openRow, setOpenRow] = useState({});
-
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [artistToDelete, setArtistToDelete] = useState(null);
 
+  // Debounce search input
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-    }, 1000);
+    }, 500); // Adjust delay as needed
 
     return () => {
       clearTimeout(handler);
     };
   }, [searchTerm]);
 
+  // Fetch data using SWR
   const { data, error, isLoading, mutate } = useSWR(
     ["getArtists", page, ITEMS_PER_PAGE, debouncedSearchTerm],
-    () => fetcher("getArtists", page, ITEMS_PER_PAGE, debouncedSearchTerm),
+    () => fetcher(page, ITEMS_PER_PAGE, debouncedSearchTerm),
     {
       revalidateIfStale: false,
       revalidateOnFocus: false,
@@ -78,7 +76,7 @@ const ArtistList = () => {
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
-    setPage(1); // Reset page to 1 when searching
+    setPage(1);
   };
 
   const handleOpenMenu = (event, artist) => {
@@ -89,17 +87,6 @@ const ArtistList = () => {
   const handleCloseMenu = () => {
     setAnchorEl(null);
     setSelectedArtist(null);
-  };
-
-  const handleDeleteClick = (artist) => {
-    setArtistToDelete(artist);
-    setShowDeleteModal(true);
-    handleCloseMenu();
-  };
-
-  const handleDeleteSuccess = () => {
-    mutate(); // Cập nhật dữ liệu sau khi xóa thành công
-    handleDelete("Artist deleted successfully");
   };
 
   const toggleRow = (artistId) => {
@@ -113,15 +100,20 @@ const ArtistList = () => {
     navigate("/admin/artist/add");
   };
 
-  const handleEditArtist = (artist) => {
-    navigate(`/admin/artist/edit/${artist.id}`); // Chuyển hướng đến trang edit với ID của nghệ sĩ
-    handleCloseMenu(); // Đóng Menu sau khi chọn
+  const handleEditArtist = (artistId) => {
+    navigate(`/admin/artist/edit/${artistId}`);
+    handleCloseMenu();
   };
 
-  const getInitials = (name) => {
-    if (!name) return "";
-    const names = name.split(" ");
-    return names.length > 1 ? names[0][0] + names[1][0] : names[0][0];
+  const handleDeleteClick = (artist) => {
+    setArtistToDelete(artist);
+    setShowDeleteModal(true);
+    handleCloseMenu();
+  };
+
+  const handleDeleteSuccess = () => {
+    setShowDeleteModal(false);
+    mutate(); // Refreshes the list after deletion
   };
 
   if (error) {
@@ -140,187 +132,112 @@ const ArtistList = () => {
       >
         <CircularProgress color="inherit" />
       </Backdrop>
+
+      {/* Top section with search and action buttons */}
       <div className="flex justify-between mb-4">
         <TextField
-          label="Search Artist"
+          label="Search"
           variant="outlined"
           value={searchTerm}
           onChange={handleSearch}
           className="w-64"
-          placeholder="Search by artist name..."
+          placeholder="Search..."
           disabled={isLoading}
         />
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded-md w-full md:w-auto hover:bg-blue-600"
-          onClick={handleAddArtist}
-        >
-          ADD ARTIST +
-        </button>
+        <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2 justify-end">
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-md w-full md:w-auto"
+            onClick={handleAddArtist}
+          >
+            + Add Artist
+          </button>
+        </div>
       </div>
+
       {data?.artists.length > 0 ? (
         <>
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "#18181b" }}>
-                  <TableCell sx={{ color: "white" }}>#</TableCell>
-                  <TableCell sx={{ color: "white" }}>Artist Name</TableCell>
-                  <TableCell sx={{ color: "white" }}>Avatar</TableCell>
-                  <TableCell sx={{ color: "white" }}>
-                    Monthly Listeners
-                  </TableCell>
-                  <TableCell sx={{ color: "white" }}>CreateAt</TableCell>
-                  <TableCell sx={{ color: "white" }}>Update At</TableCell>
-                  <TableCell sx={{ color: "white" }}>Actions</TableCell>
                   <TableCell />
+                  <TableCell sx={{ color: "white" }}>#</TableCell>
+                  <TableCell sx={{ color: "white" }}>Avatar</TableCell>
+                  <TableCell sx={{ color: "white" }}>Artist Name</TableCell>
+                  <TableCell sx={{ color: "white" }}>Role</TableCell>
+                  <TableCell sx={{ color: "white" }}>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data.artists.map((artist, index) => (
-                  <>
-                    <TableRow
-                      key={artist.id}
-                      sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}
-                    >
-                      <TableCell>
-                        {index + 1 + (page - 1) * ITEMS_PER_PAGE}
-                      </TableCell>
-                      <TableCell>{artist.name || "No name"}</TableCell>
-                      <TableCell>
-                        {artist.avatar ? (
-                          <img
-                            src={artist.avatar}
-                            alt={artist.name || "Avatar"}
-                            className="w-10 h-10 rounded-full"
-                          />
-                        ) : (
-                          <Avatar>{getInitials(artist.name)}</Avatar>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {artist.monthly_listeners.toLocaleString() || 0}
-                      </TableCell>
-                      <TableCell>
-                        {artist.createdAt
-                          ? new Date(
-                              artist.createdAt._seconds * 1000
-                            ).toLocaleDateString()
-                          : "N/A"}
-                      </TableCell>
-                      <TableCell>
-                        {artist.updatedAt
-                          ? new Date(
-                              artist.updatedAt._seconds * 1000
-                            ).toLocaleDateString()
-                          : "N/A"}
-                      </TableCell>
-                      <TableCell>
-                        <IconButton
-                          onClick={(event) => handleOpenMenu(event, artist)}
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
-                      </TableCell>
+                {data.artists.map((artistItem) => (
+                  <React.Fragment key={artistItem.id}>
+                    <TableRow sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}>
                       <TableCell>
                         <IconButton
                           aria-label="expand row"
                           size="small"
-                          onClick={() => toggleRow(artist.id)}
+                          onClick={() => toggleRow(artistItem.id)}
                         >
-                          {openRow[artist.id] ? (
-                            <KeyboardArrowUp />
-                          ) : (
-                            <KeyboardArrowDown />
-                          )}
+                          {openRow[artistItem.id] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                        </IconButton>
+                      </TableCell>
+                      <TableCell>{artistItem.id}</TableCell>
+                      <TableCell>
+                        <Avatar src={artistItem.avatar} alt={artistItem.name} />
+                      </TableCell>
+                      <TableCell>{artistItem.name || "No name"}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={artistItem.role === 1 ? "Artist" : artistItem.role === 2 ? "Rapper" : "Unknown"}
+                          color="primary"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <IconButton onClick={(event) => handleOpenMenu(event, artistItem)}>
+                          <MoreVertIcon />
                         </IconButton>
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell
-                        style={{ paddingBottom: 0, paddingTop: 0 }}
-                        colSpan={6}
-                      >
-                        <Collapse
-                          in={openRow[artist.id]}
-                          timeout="auto"
-                          unmountOnExit
-                        >
+                      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                        <Collapse in={openRow[artistItem.id]} timeout="auto" unmountOnExit>
                           <Box margin={1}>
-                            <Typography
-                              variant="h6"
-                              gutterBottom
-                              component="div"
-                            >
-                              Additional Information for {artist.name}
-                            </Typography>
-                            <Typography variant="body1">
-                              Bio: {artist.bio}
-                            </Typography>
-                            <Typography variant="body1">
-                              Albums:{" "}
-                              {artist.albumId && artist.albumId.length > 0
-                                ? artist.albumId
-                                    .map((album) => album.title || "No title")
-                                    .join(", ")
-                                : "No albums"}
-                            </Typography>
-                            <Typography variant="body1">
-                              Songs:{" "}
-                              {artist.songId
-                                ? artist.songId
-                                    .map((song) => song.title || "No title")
-                                    .join(", ")
-                                : "No songs"}
-                            </Typography>
-                            <Typography variant="body1">
-                              Followers:{" "}
-                              {artist.followerId ? artist.followerId.length : 0}
+                            <Typography variant="h6" gutterBottom component="div">
+                              Biography: {artistItem.biography}
                             </Typography>
                           </Box>
                         </Collapse>
                       </TableCell>
                     </TableRow>
-                  </>
+                  </React.Fragment>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleCloseMenu}
-          >
-            <MenuItem onClick={() => handleEditArtist(selectedArtist)}>
-              <EditIcon className="mr-2 text-yellow-500" /> Edit
+
+          <Menu anchorEl={anchorEl} open={Boolean(anchorEl) && selectedArtist !== null} onClose={handleCloseMenu}>
+            <MenuItem onClick={() => handleEditArtist(selectedArtist.id)} sx={{ color: "blue" }}>
+              <MdEdit className="mr-1" /> Edit
             </MenuItem>
-            <MenuItem onClick={() => handleDeleteClick(selectedArtist)}>
-              <DeleteIcon className="mr-2 text-red-500" /> Delete
+            <MenuItem onClick={() => handleDeleteClick(selectedArtist)} sx={{ color: "red" }}>
+              <MdDelete className="mr-1" /> Delete
             </MenuItem>
           </Menu>
-          {showDeleteModal && (
-            <DeleteArtist
-              artistToDelete={artistToDelete}
-              onClose={() => setShowDeleteModal(false)}
-              onDeleteSuccess={handleDeleteSuccess}
-            />
-          )}
-          <div className="mt-4 flex justify-end items-center">
-            <Stack spacing={2}>
-              <Pagination
-                count={data.totalPages || 1}
-                page={page}
-                onChange={handleChangePage}
-                color="primary"
-                variant="outlined"
-                shape="rounded"
-              />
-            </Stack>
-          </div>
+
+          <Stack spacing={2} direction="row" alignItems="center" justifyContent="flex-end" sx={{ marginTop: 2 }}>
+            <Pagination count={data?.totalPages} page={page} onChange={handleChangePage} color="primary" shape="rounded" />
+          </Stack>
         </>
       ) : (
-        <Alert severity="warning">
-          No artists found matching the search keyword.
-        </Alert>
+        <Alert severity="info">No artists found.</Alert>
+      )}
+
+      {showDeleteModal && (
+        <DeleteArtist
+          artistToDelete={artistToDelete}
+          onClose={() => setShowDeleteModal(false)}
+          onDeleteSuccess={handleDeleteSuccess}
+        />
       )}
     </div>
   );

@@ -1,139 +1,94 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import InputField from "../../../../components/SharedIngredients/InputField";
-import SelectField from "../../../../components/SharedIngredients/SelectField";
-import {
-  updateArtist,
-  getArtistById,
-} from "../../../../../../services/artists";
-import { getAlbums } from "../../../../../../services/albums";
-import { handleEdit, handleError } from "../../../../components/notification";
+import { handleAdd } from "../../../../components/notification";
+import { getArtistById, updateArtist } from "../../../../../../services/artist"; // Import necessary functions
 
 const EditArtist = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [coverImagePreview, setCoverImagePreview] = useState(null);
-  const [albumOptions, setAlbumOptions] = useState([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const { id } = useParams(); // Get the artist ID from URL parameters
   const {
     control,
     handleSubmit,
     setValue,
     clearErrors,
-    formState: { errors },
     trigger,
     setError,
+    formState: { errors },
   } = useForm({
     defaultValues: {
       name: "",
-      bio: "",
-      albumId: [],
-      songId: "",
-      followerId: "",
-      monthly_listeners: 0,
+      role: "",
       avatar: null,
+      biography: "",
     },
   });
 
-  // Fetch artist data and albums when component mounts
+  const navigate = useNavigate();
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [existingAvatar, setExistingAvatar] = useState(null); // Track existing avatar
+
+  // Fetch artist data when component mounts
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchArtist = async () => {
       try {
-        // Fetch artist details
-        const artistData = await getArtistById(id);
-        if (artistData) {
-          setValue("name", artistData.name);
-          setValue("bio", artistData.bio);
-          setValue("monthly_listeners", artistData.monthly_listeners);
-          setCoverImagePreview(artistData.avatar);
-
-          // Format album data for select field
-          if (artistData.albumId) {
-            const formattedAlbums = artistData.albumId.map((album) => ({
-              value: album.id,
-              label: album.title,
-            }));
-            setValue("albumId", formattedAlbums);
-          }
-
-          // Format song and follower IDs
-          setValue("songId", artistData.songId?.join(", ") || "");
-          setValue("followerId", artistData.followerId?.join(", ") || "");
-        }
-
-        // Fetch albums for select options
-        const albumsData = await getAlbums();
-        const formattedAlbumOptions = albumsData.albums.map((album) => ({
-          value: album.id,
-          label: album.title,
-        }));
-        setAlbumOptions(formattedAlbumOptions);
+        const artist = await getArtistById(id); // Fetch artist data by ID
+        setValue("name", artist.name);
+        setValue("role", artist.role);
+        setValue("biography", artist.biography);
+        setExistingAvatar(artist.avatar); // Store existing avatar
+        setAvatarPreview(artist.avatar); // Set avatar preview if there's an existing avatar
       } catch (error) {
-        console.error("Failed to fetch data:", error);
+        console.error("Error fetching artist data:", error);
       }
     };
 
-    fetchData();
+    fetchArtist();
   }, [id, setValue]);
 
-  const handleDrop = useCallback(
-    (acceptedFiles) => {
-      const file = acceptedFiles[0];
-      if (!file) return;
-      setValue("avatar", file);
-      const objectUrl = URL.createObjectURL(file);
-      setCoverImagePreview(objectUrl);
-      clearErrors("avatar");
-    },
-    [setValue, clearErrors]
-  );
+  const handleDrop = useCallback((acceptedFiles) => {
+    const file = acceptedFiles[0];
+    if (!file) return;
 
-  const { getRootProps, getInputProps } = useDropzone({
+    setValue("avatar", file);
+    const objectURL = URL.createObjectURL(file);
+    setAvatarPreview(objectURL);
+    clearErrors("avatar");
+  }, [setValue, clearErrors]);
+
+  const { getRootProps: getAvatarRootProps, getInputProps: getAvatarInputProps } = useDropzone({
     onDrop: handleDrop,
     accept: "image/*",
   });
 
+  const handleCancel = () => {
+    navigate("/admin/artist");
+  };
+
   const onSubmit = async (data) => {
+    const valid = await trigger();
+    if (!valid) return;
+
     try {
-      setIsSubmitting(true);
-
-      const isValid = await trigger();
-      if (!isValid) {
-        handleError("Please check the information again!");
-        return;
-      }
-
       const formData = new FormData();
       formData.append("name", data.name);
-      formData.append("bio", data.bio);
-      formData.append("monthly_listeners", data.monthly_listeners);
+      formData.append("role", data.role);
+      formData.append("biography", data.biography);
 
-      // Handle albums
-      const albumIds = data.albumId.map((album) => album.value);
-      formData.append("albumId", albumIds);
-
-      // Handle songs and followers
-      const songIds = data.songId.split(",").map((id) => id.trim());
-      const followerIds = data.followerId.split(",").map((id) => id.trim());
-      formData.append("songId", songIds);
-      formData.append("followerId", followerIds);
-
-      // Only append avatar if a new file was selected
+      // Only append avatar if a new file is uploaded
       if (data.avatar instanceof File) {
         formData.append("avatar", data.avatar);
+      } else if (existingAvatar) {
+        // If no new avatar, use the existing one
+        formData.append("avatar", existingAvatar);
       }
 
-      await updateArtist(id, formData);
-      handleEdit("Artist edit successfully!");
-      navigate("/admin/artist");
+      await updateArtist(id, formData); // Call update function with artist ID
+      handleAdd(); // Display success notification
+      navigate("/admin/artist"); // Navigate back to artist list after update
     } catch (error) {
-      console.error("Failed to update artist:", error);
-      handleError(error?.response?.data?.message || "Failed to add artist");
-    } finally {
-      setIsSubmitting(false);
+      console.error("Error updating artist:", error.response ? error.response.data : error.message);
     }
   };
 
@@ -141,111 +96,136 @@ const EditArtist = () => {
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-blue-500">
-          <h2 className="text-xl font-semibold mb-4">Basic information</h2>
+          <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
           <div className="grid grid-cols-2 gap-4">
-            <Controller
-              name="name"
-              control={control}
-              rules={{
-                required: "Artist name is required",
-                minLength: {
-                  value: 2,
-                  message: "The name must have at least 2 characters",
-                },
-              }}
-              render={({ field }) => (
-                <InputField
-                  label="Artist name"
-                  error={errors.name?.message}
-                  {...field}
-                />
-              )}
-            />
-
-            <Controller
-              name="bio"
-              control={control}
-              rules={{
-                required: "Biography is required",
-              }}
-              render={({ field }) => (
-                <InputField
-                  label="Biography"
-                  error={errors.bio?.message}
-                  {...field}
-                />
-              )}
-            />
-
-            <Controller
-              name="albumId"
-              control={control}
-              render={({ field }) => (
-                <SelectField
-                  label="Albums"
-                  options={albumOptions}
-                  isMulti={true}
-                  error={errors.albumId?.message}
-                  {...field}
-                />
-              )}
-            />
-
-            <Controller
-              name="monthly_listeners"
-              control={control}
-              rules={{
-                required: "Monthly listener count is required",
-                min: {
-                  value: 0,
-                  message: "Monthly listener count is required",
-                },
-              }}
-              render={({ field }) => (
-                <InputField
-                  type="number"
-                  label="Monthly listener count"
-                  error={errors.monthly_listeners?.message}
-                  {...field}
-                />
-              )}
-            />
-          </div>
-        </div>
-
-        <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-red-500">
-          <h2 className="text-xl font-semibold mb-4">Avatar</h2>
-          <div
-            {...getRootProps()}
-            className="border-2 border-dashed p-4 text-center cursor-pointer"
-          >
-            <input {...getInputProps()} />
-            <p>Drag and drop or click to select photos</p>
-            {coverImagePreview && (
-              <img
-                src={coverImagePreview}
-                alt="Preview"
-                className="mt-4 mx-auto h-32 w-32 object-cover"
+            <div>
+              <Controller
+                name="name"
+                control={control}
+                render={({ field }) => (
+                  <InputField
+                    label="Name"
+                    id="name"
+                    name="name"
+                    {...field}
+                  />
+                )}
+                rules={{
+                  validate: (value) => {
+                    if (!value) return "Name is required";
+                    if (value.length < 1 || value.length > 100) return "Name must be between 1 and 100 characters";
+                    const invalidCharacters = /[<>:"/\\|?*]/;
+                    if (invalidCharacters.test(value)) return "Name contains invalid characters";
+                    return true;
+                  }
+                }}
               />
-            )}
+            </div>
+
+            {/* Role Select Input */}
+            <div>
+              <Controller
+                name="role"
+                control={control}
+                rules={{
+                  required: "Please select a role",
+                }}
+                render={({ field }) => (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="role">Role</label>
+                    <select
+                      id="role"
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-base focus:ring-blue-500 focus:border-blue-500"
+                      {...field}
+                    >
+                      <option value="">Please select a role</option>
+                      <option value="1">Artist</option>
+                      <option value="2">Rapper</option>
+                    </select>
+                    {errors.role && <small className="text-red-500">{errors.role.message}</small>}
+                  </div>
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Biography Input */}
+          <div className="grid grid-cols-1 gap-4 mt-4 w-full max-w-4xl">
+            <div>
+              <Controller
+                name="biography"
+                control={control}
+                render={({ field }) => (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="biography">Biography</label>
+                    <textarea
+                      id="biography"
+                      name="biography"
+                      {...field}
+                      rows={5}
+                      cols={10}
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    {errors.biography && <small className="text-red-500">{errors.biography.message}</small>}
+                  </div>
+                )}
+                rules={{ required: "Biography is required" }}
+              />
+            </div>
+          </div>
+
+        </div>
+
+        {/* Avatar Upload Section */}
+        <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-red-500">
+          <h2 className="text-xl font-semibold mb-4">Avatar Upload</h2>
+          <div className="grid grid-cols-1 gap-2">
+            <Controller
+              name="avatar"
+              control={control}
+              render={({ field }) => (
+                <div
+                  {...getAvatarRootProps()}
+                  className={`w-full p-6 border-2 border-dashed ${errors.avatar ? 'border-red-600' : 'border-gray-400'} rounded-md cursor-pointer hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500`}
+                >
+                  <input {...getAvatarInputProps()} />
+                  <p className="text-center text-gray-600">
+                    Drag & drop an avatar image file here, or click to select a file
+                  </p>
+                  {field.value && (
+                    <p className="text-center text-green-500 mt-2">
+                      Selected file: {field.value?.name}
+                    </p>
+                  )}
+                  {avatarPreview && (
+                    <div className="mt-4 flex justify-center">
+                      <img
+                        src={avatarPreview}
+                        alt="Avatar Preview"
+                        className="w-32 h-32 object-cover rounded-md border-2 border-gray-300"
+                      />
+                    </div>
+                  )}
+                  {errors.avatar && <small className="text-red-500 mt-2">{errors.avatar.message}</small>}
+                </div>
+              )}
+            />
           </div>
         </div>
 
-        <div className="flex justify-end gap-4">
+        <div className="flex justify-end">
           <button
             type="button"
-            onClick={() => navigate("/admin/artist")}
-            className="px-4 py-2 bg-gray-500 text-white rounded-lg transition-colors"
-            disabled={isSubmitting}
+            onClick={handleCancel}
+            className="bg-gray-500 text-white py-2 px-4 rounded-lg mr-4"
           >
-            Cancle
+            Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg  hover:bg-blue-600 transition-colors disabled:bg-blue-300"
-            disabled={isSubmitting}
+            className="bg-blue-500 text-white py-2 px-4 rounded-lg"
           >
-            {isSubmitting ? "Saving..." : "Save changes"}
+            Save
           </button>
         </div>
       </form>

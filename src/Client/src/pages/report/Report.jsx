@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { handleAddReport, handleAcceptTerms } from "../../components/notification"; // Adjust the path
-import Tb from "../../../public/assets/img/tc.jpg";
-import '../../../src/assets/css/report/report.css'; // Import CSS file
+import { handleAddReport, handleAcceptTerms } from "../../components/notification";
+import '../../../src/assets/css/report/report.css';
 
 const Report = () => {
-  const [selectedReasons, setSelectedReasons] = useState([]);
+  const [selectedReason, setSelectedReason] = useState("");
   const [description, setDescription] = useState("");
-  const [isTermsAccepted, setIsTermsAccepted] = useState(false); // New state for terms acceptance
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+  const [reportTitle, setReportTitle] = useState("");
+  const [showThankYouModal, setShowThankYouModal] = useState(false);
 
   const reportReasons = [
     "Inappropriate content",
@@ -17,111 +18,129 @@ const Report = () => {
     "Disruptive content",
   ];
 
-  const handleReasonToggle = (reason) => {
-    setSelectedReasons((prev) =>
-      prev.includes(reason)
-        ? prev.filter((r) => r !== reason)
-        : [...prev, reason]
-    );
-  };
-
   const handleSubmit = () => {
     if (!isTermsAccepted) {
-      handleAcceptTerms(); // Show notification if terms are not accepted
-      return; // Return if terms are not accepted
+      return;
     }
-
-    console.log("Selected Reasons:", selectedReasons);
+    console.log("Report Title:", reportTitle);
+    console.log("Selected Reason:", selectedReason);
     console.log("Description:", description);
-    handleAddReport(); // Show notification when report is submitted
+   
+    setShowThankYouModal(true);
 
-    // Open a new tab with the thank-you message
-    window.open('/thankYou.html', '_blank');
-
-    // Reset state
-    setSelectedReasons([]);
+    setReportTitle("");
+    setSelectedReason("");
     setDescription("");
     setIsTermsAccepted(false);
+
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 2000);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <div className="w-full md:w-5/4 bg-zinc-900 rounded-lg p-6 min-h-screen">
-        <div className="flex flex-col md:flex-row w-full h-full">
-          <div className="md:w-1/2 p-6">
-            <h2 className="text-3xl font-extrabold text-white mb-6">
-              Report Content
-            </h2>
-            <div className="space-y-4">
-              {reportReasons.map((reason) => (
-                <div key={reason} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={reason}
-                    checked={selectedReasons.includes(reason)}
-                    onChange={() => handleReasonToggle(reason)}
-                    className="custom-checkbox"
-                  />
-                  <label
-                    htmlFor={reason}
-                    className="ml-3 text-lg font-medium text-white"
-                  >
-                    {reason}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-900 p-6">
+      <div className="w-full h-full bg-zinc-800 rounded-lg shadow-lg p-8 mb-20">
+        <h2 className="text-3xl font-extrabold text-white mb-8 text-center">
+          Report Content
+        </h2>
 
-          <div className="md:w-1/2 relative p-6 flex flex-col items-center justify-center">
-            <div className="relative w-full h-80">
-              <img
-                src={Tb}
-                alt="Reported content"
-                className="w-full h-full object-cover filter brightness-75"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80 flex items-center justify-center">
-                <h3 className="text-white text-3xl font-bold">MUSIC HEALS</h3>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6">
-          <textarea
-            className="w-full p-4 bg-black border border-white rounded-lg text-white focus:ring-blue-400"
-            placeholder="Describe the report in detail..."
-            rows="4"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-
-        <div className="flex items-center ml-7">
-          <input
-            type="checkbox"
-            id="terms"
-            checked={isTermsAccepted}
-            onChange={() => setIsTermsAccepted((prev) => !prev)} // Toggle the checkbox state
-            className="custom-checkbox"
-          />
-          <label htmlFor="terms" className="ml-2 text-white">
-            I agree to the terms
+        <div className="mb-8">
+          <label htmlFor="reportTitle" className="block text-white text-lg font-medium mb-2">
+            Report Title
           </label>
+          <input
+            type="text"
+            id="reportTitle"
+            value={reportTitle}
+            onChange={(e) => setReportTitle(e.target.value)}
+            className="w-full p-3 bg-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-blue-400 border-none"
+            placeholder="Enter a title for the report"
+          />
         </div>
 
-        <div className="flex justify-center mt-6 space-x-4">
-          <button className="px-6 py-3 bg-gray-600 text-white rounded-lg shadow-md hover:bg-gray-500 transition transform hover:scale-105">
-            Back
-          </button>
+        <div className="space-y-6">
+          <div>
+            <label htmlFor="reason" className="block text-white text-lg font-medium mb-2">
+              Select Reason
+            </label>
+            <select
+              id="reason"
+              value={selectedReason}
+              onChange={(e) => setSelectedReason(e.target.value)}
+              className="w-full p-3 bg-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-blue-400 border-none"
+            >
+              <option value="">Choose a reason</option>
+              {reportReasons.map((reason) => (
+                <option key={reason} value={reason}>
+                  {reason}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="description" className="block text-white text-lg font-medium mb-2">
+              Description
+            </label>
+            <textarea
+              id="description"
+              className="w-full p-3 bg-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-blue-400 border-none"
+              placeholder="Describe the report in detail..."
+              rows="4"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="mt-8 flex items-center justify-between">
+          <div className="flex items-center mb-4">
+            <input
+              type="checkbox"
+              id="terms"
+              checked={isTermsAccepted}
+              onChange={() => setIsTermsAccepted((prev) => !prev)}
+              className="custom-checkbox mr-3"
+            />
+            <label htmlFor="terms" className="text-white">
+              I agree to the terms
+            </label>
+          </div>
+
           <button
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-500 transition transform hover:scale-105"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-500 transition transform hover:scale-105"
             onClick={handleSubmit}
           >
-            Report
+            Submit Report
           </button>
         </div>
       </div>
+
+      {showThankYouModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn">
+          <div className="bg-zinc-800 p-8 rounded-lg shadow-lg text-center">
+            <h2 className="text-2xl font-bold text-white mb-4">Thank You!</h2>
+            <div className="mb-4">
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className="w-16 h-16 text-green-500 mx-auto animate-checkmark" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+            <p className="text-white">Your report has been submitted successfully.</p>
+            <p className="text-white">Redirecting you to the home page...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

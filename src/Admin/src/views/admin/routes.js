@@ -38,7 +38,7 @@ const AdminRoutes = (
     <Route path="song" element={<Songs />} />
     <Route path="song/add" element={<AddSong />} />
     <Route path="song/edit/:id" element={<EditSong />} />
-    <Route path="artist" element={<UnderDevelopment />} />
+    <Route path="artist" element={<Artists />} />
     <Route path="artist/add" element={<AddArtist />} />
     <Route path="artist/edit/:id" element={<EditArtist />} />
     <Route path="album" element={<Albums />} />
