@@ -5,8 +5,6 @@ import {
 } from "@mui/material";
 import {
     MoreVert as MoreVertIcon,
-    KeyboardArrowDown,
-    KeyboardArrowUp,
 } from "@mui/icons-material";
 import { MdEdit, MdDelete } from 'react-icons/md';
 import { getGenres } from "../../../../../../services/genres";
@@ -21,7 +19,6 @@ const GenreList = () => {
     const [Genres, setGenres] = useState([]);
     const [genreToDelete, setGenreToDelete] = useState(null);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
-    const [showActionMenu, setShowActionMenu] = useState(false);
     const [totalPages, setTotalPages] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(5);
@@ -36,11 +33,20 @@ const GenreList = () => {
         setGenres(data.genres || []);
         setTotalPages(data.totalPages);
     };
-    
+    const useDebouncedValue = (value, delay = 500) => {
+        const [debouncedValue, setDebouncedValue] = useState(value);
+        useEffect(() => {
+          const timer = setTimeout(() => setDebouncedValue(value), delay);
+          return () => clearTimeout(timer);
+        }, [value, delay]);
+        return debouncedValue;
+      };
+
+      const debouncedSearchName = useDebouncedValue(searchName);
 
     useEffect(() => {
-        GenreData(currentPage, limit,selectedCountries,searchName);
-    }, [currentPage, limit,selectedCountries,searchName]);
+        GenreData(currentPage, limit,selectedCountries,debouncedSearchName);
+    }, [currentPage, limit,selectedCountries,debouncedSearchName]);
 
   
     const handleFilterChange = (event, countryId) => {
@@ -138,9 +144,6 @@ const GenreList = () => {
     };
     return (
         <div className="p-4">
-            {/* <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-                <CircularProgress color="inherit" />
-            </Backdrop> */}
             <div className="flex justify-between mb-4">
                 <div className="flex-grow">
                     <TextField
@@ -162,13 +165,13 @@ const GenreList = () => {
                     </button>
                     <div className="relative w-full md:w-auto">
                         <button
-                            className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto"
+                            className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto bg-[#823ad5] text-white"
                            onClick={() => setShowFilterMenu(prev => !prev)} 
                         >
                             Filter <i className="fas fa-chevron-down ml-2"></i>
                         </button>
                         {showFilterMenu && (
-                            <div  ref={filterMenuRef} className="absolute right-0 mt-2 w-full md:w-48 bg-white rounded-md shadow-lg z-100">
+                            <div  ref={filterMenuRef} className="absolute right-0 mt-2 w-full md:w-48 bg-white rounded-md shadow-lg z-10">
                                 {Country.map((country) => (
                                     <label
                                         key={country.id}
@@ -185,32 +188,7 @@ const GenreList = () => {
                                 ))}
                             </div>
                         )}
-                    </div>
-                    <div className="relative w-full md:w-auto">
-                        <button
-                            className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto"
-                            onClick={() => setShowActionMenu(!showActionMenu)}
-                        >
-                            Actions <i className="fas fa-chevron-down ml-2"></i>
-                        </button>
-
-                        {showActionMenu && (
-                            <div className="absolute right-0 mt-2 w-full md:w-48 bg-white rounded-md shadow-lg z-10">
-                                <button
-                                    onClick={() => console.log("Mass edit")}
-                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                >
-                                    Mass edit
-                                </button>
-                                <button
-                                    onClick={() => console.log("Delete all")}
-                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                >
-                                    Delete all
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                    </div>               
                 </div>
             </div>
 

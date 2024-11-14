@@ -6,6 +6,7 @@ import SelectField from "../../../../components/SharedIngredients/SelectField";
 import { handleEdit } from "../../../../components/notification";
 import { updateGenre, getGenreById } from "../../../../../../services/genres";
 import { getCountry } from "../../../../../../services/country";
+import LoadingSpinner from "Admin/src/components/LoadingSpinner";
 
 const EditGenre = () => {
     const { id } = useParams();
@@ -32,6 +33,7 @@ const EditGenre = () => {
     const navigate = useNavigate();
     const [coverImagePreview, setCoverImagePreview] = useState(null);
     const [Country, setCountry] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         Data();
@@ -79,6 +81,7 @@ const EditGenre = () => {
     };
 
     const onSubmit = async (data) => {
+        setLoading(true);
         const formData = new FormData();
         const countryIDValue = typeof data.countryID === 'object' ? data.countryID.value : data.countryID;
         formData.append('countryID', countryIDValue);
@@ -92,11 +95,15 @@ const EditGenre = () => {
         } catch (error) {
             console.error(error);
         }
+        finally {
+            setLoading(false);
+          }
     };
 
 
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+             <LoadingSpinner isLoading={loading} />
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" encType="multipart/form-data">
                 <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-blue-500">
                     <h2 className="text-xl font-semibold mb-4">Basic Information</h2>

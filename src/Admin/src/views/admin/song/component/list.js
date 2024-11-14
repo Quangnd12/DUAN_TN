@@ -15,7 +15,7 @@ import DeleteSong from "./delete";
 import { formatDate, formatDuration } from "Admin/src/components/formatDate";
 import PlayerControls from "../../../../components/audio/PlayerControls";
 import { usePlayerContext } from "Admin/src/components/audio/playerContext";
-import { getGenres } from "services/genres";
+import { getGenres } from "../../../../../../services/genres";
 import RangeSliderField from "Admin/src/components/SharedIngredients/RangeSliderField";
 import LoadingSpinner from "Admin/src/components/LoadingSpinner";
 import "../../../../assets/styles/visualizerAdmin.css";
@@ -148,25 +148,25 @@ const SongList = () => {
     };
   }, [location.pathname]);
 
-// // Hàm chuyển đến bài hát tiếp theo
-// const handleNext= () => {
-//   if (currentSongIndex < Songs.length - 1) {
-//     setCurrentSongIndex(currentSongIndex + 1);
-//     setSelectedPlayer(Songs[currentSongIndex + 1]);
-//     setIsPlaying(true);
-//   }
-// };
+  // // Hàm chuyển đến bài hát tiếp theo
+  // const handleNext= () => {
+  //   if (currentSongIndex < Songs.length - 1) {
+  //     setCurrentSongIndex(currentSongIndex + 1);
+  //     setSelectedPlayer(Songs[currentSongIndex + 1]);
+  //     setIsPlaying(true);
+  //   }
+  // };
 
-// // Hàm quay lại bài hát trước
-// const handlePrev = () => {
-//   if (currentSongIndex > 0) {
-//     setCurrentSongIndex(currentSongIndex - 1);
-//     setSelectedPlayer(Songs[currentSongIndex - 1]);
-//     setIsPlaying(true);
-//   }
-// };
+  // // Hàm quay lại bài hát trước
+  // const handlePrev = () => {
+  //   if (currentSongIndex > 0) {
+  //     setCurrentSongIndex(currentSongIndex - 1);
+  //     setSelectedPlayer(Songs[currentSongIndex - 1]);
+  //     setIsPlaying(true);
+  //   }
+  // };
 
-  
+
   const handleOpenMenu = (event, song) => {
     setAnchorEl(event.currentTarget);
     setSelectedSong(song);
@@ -184,6 +184,7 @@ const SongList = () => {
       setSongs(prevSongs => prevSongs.filter(song => song.id !== id));
       setSelectedPlayer(null);
       setLoading(false);
+      SongData(currentPage, limit, debouncedSearchName, selectedGenres, debouncedMinDuration, debouncedMaxDuration, debouncedMinListen, debouncedMaxListen);
     } catch (error) {
       console.log("Error deleting song", error);
       setLoading(false);
@@ -263,7 +264,7 @@ const SongList = () => {
       setCopied(true);
       setTimeout(() => {
         setCopied(false);
-      }, 2000);  
+      }, 2000);
     }
 
   };
@@ -482,43 +483,43 @@ const SongList = () => {
                             <Typography variant="body1" className="pb-2 ">release date: {formatDate(song.releaseDate)}</Typography>
                             <Typography variant="body1" className="pb-2">Play count: {song.listens_count}</Typography>
                             <Typography
-  variant="body1"
-  className="pb-2"
-  style={{
-    lineHeight: '1.6',
-    whiteSpace: 'pre-wrap',
-    maxHeight: '200px', // Set a maximum height for the lyrics container
-    overflowY: 'auto',  // Enable vertical scrolling
-  }}
->
-  Lyrics:
-  <Tooltip title={copied ? 'Copied!' : 'Copy'}>
-    <IconButton onClick={() => handleCopy(song.lyrics)}>
-      <MdContentCopy size={20} />
-    </IconButton>
-  </Tooltip>
-  <br />
-  {expandedLyrics[song.id] ? (
-    song.lyrics
-  ) : (
-    <span>{song.lyrics.substring(0, 50)}...</span>
-  )}
+                              variant="body1"
+                              className="pb-2"
+                              style={{
+                                lineHeight: '1.6',
+                                whiteSpace: 'pre-wrap',
+                                maxHeight: '200px', // Set a maximum height for the lyrics container
+                                overflowY: 'auto',  // Enable vertical scrolling
+                              }}
+                            >
+                              Lyrics:
+                              <Tooltip title={copied ? 'Copied!' : 'Copy'}>
+                                <IconButton onClick={() => handleCopy(song.lyrics)}>
+                                  <MdContentCopy size={20} />
+                                </IconButton>
+                              </Tooltip>
+                              <br />
+                              {expandedLyrics[song.id] ? (
+                                song.lyrics
+                              ) : (
+                                <span>{song.lyrics.substring(0, 50)}...</span>
+                              )}
 
-  {song.lyrics.length > 50 && (
-    <span
-      onClick={() => handleToggleLyrics(song.id)}
-      style={{
-        color: '#1a73e8', 
-        cursor: 'pointer',
-        fontSize: '14px',
-        fontWeight: '600',
-        textDecoration: 'underline', 
-      }}
-    >
-      {expandedLyrics[song.id] ? ' Show less' : 'Show more'}
-    </span>
-  )}
-</Typography>
+                              {song.lyrics.length > 50 && (
+                                <span
+                                  onClick={() => handleToggleLyrics(song.id)}
+                                  style={{
+                                    color: '#1a73e8',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    textDecoration: 'underline',
+                                  }}
+                                >
+                                  {expandedLyrics[song.id] ? ' Show less' : 'Show more'}
+                                </span>
+                              )}
+                            </Typography>
 
 
                           </Box>

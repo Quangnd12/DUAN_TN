@@ -32,7 +32,7 @@ import {
   KeyboardArrowDown,
 } from "@mui/icons-material";
 import { MdEdit, MdDelete } from "react-icons/md";
-import { fetcher } from "../../../../../../services/artist"; // Adjust as needed
+import { fetcher } from "../../../../../../services/artist"; 
 import DeleteArtist from "./delete";
 
 const ITEMS_PER_PAGE = 5;

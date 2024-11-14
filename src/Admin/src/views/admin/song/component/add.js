@@ -6,13 +6,12 @@ import { useForm, Controller } from "react-hook-form";
 import InputField from "../../../../components/SharedIngredients/InputField";
 import SelectField from "../../../../components/SharedIngredients/SelectField";
 import DatePickerField from "../../../../components/SharedIngredients/DatePickerField";
-import SliderField from "../../../../components/SharedIngredients/SliderField";
 import SwitchField from "../../../../components/SharedIngredients/SwitchField";
 import { addSong } from "../../../../../../services/songs";
 import { handleAdd } from "Admin/src/components/notification";
-import { getGenres } from "services/genres";
-import { getArtists } from "services/artist";
-import { getAlbums } from "services/album";
+import { getGenres } from "../../../../../../services/genres";
+import { getArtists } from "../../../../../../services/artist";
+import { getAlbums } from "../../../../../../services/album";
 import LoadingSpinner from "Admin/src/components/LoadingSpinner";
 
 
