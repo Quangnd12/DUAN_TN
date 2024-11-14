@@ -13,21 +13,23 @@ import { getArtists } from "../../../../../../services/artist";
 const EditAlbum = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const { control, handleSubmit, setValue, watch, clearErrors, formState: { errors }, trigger } = useForm({
     defaultValues: {
       title: "",
-      artistID: [],
+      artistID: null,
       releaseDate: null,
       image: null,
     }
   });
 
   const [coverImagePreview, setCoverImagePreview] = useState(null);
-  const [artistOptions, setArtistOptions] = useState([]);
-  const [songOptions, setSongOptions] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [Artists, setArtists] = useState([]);
+
+  useEffect(() => {
+    initData();
+  }, []);
 
   const initData = async () => {
     try {
@@ -37,26 +39,16 @@ const EditAlbum = () => {
       ]);
 
       if (albumData) {
-        // Set basic fields
         setValue("title", albumData.title || "");
         setCoverImagePreview(albumData.image);
-        
-        // Handle release date
+
         if (albumData.releaseDate) {
           setValue("releaseDate", new Date(albumData.releaseDate));
         }
 
-        // Handle artists - assuming albumData.artists is an array of objects
-        if (albumData.artists && Array.isArray(albumData.artists)) {
-          const artistValues = albumData.artists.map(artist => ({
-            value: artist.id,
-            label: artist.name
-          }));
-          setValue("artistID", artistValues);
-        }
+        setValue("artistID", { value: albumData.artistID, label: albumData.artistName });
       }
 
-      // Set available artists for selection
       if (artistData && artistData.artists) {
         setArtists(artistData.artists);
       }
@@ -64,10 +56,6 @@ const EditAlbum = () => {
       console.error("Error initializing data:", error);
     }
   };
-
-  useEffect(() => {
-    initData();
-  }, []);
 
   const handleDrop = useCallback(async (acceptedFiles) => {
     const file = acceptedFiles[0];
@@ -94,28 +82,37 @@ const EditAlbum = () => {
   };
 
   const onSubmit = async (data) => {
+    setIsSubmitting(true);
+
     const valid = await trigger();
-    if (!valid) return;
+    if (!valid) {
+      setIsSubmitting(false);
+      return;
+    }
 
     const formData = new FormData();
     formData.append('title', data.title);
 
-    const artistIDs = data.artistID.map(artist => artist.value);
-    artistIDs.forEach(id => formData.append('artistID[]', id));
+    if (Array.isArray(data.artistID)) {
+      data.artistID.forEach(artist => formData.append('artistID[]', artist.value));
+    } else {
+      formData.append('artistID', data.artistID.value);
+    }
 
     const releaseDateFormatted = new Date(data.releaseDate).toISOString().split('T')[0];
     formData.append('releaseDate', releaseDateFormatted);
-    
+
     if (data.image instanceof File) {
       formData.append('image', data.image);
     }
 
     try {
       await updateAlbum(id, formData);
-      navigate("/admin/album");
       handleEdit();
+      navigate("/admin/album");
     } catch (error) {
       console.error(error);
+      setIsSubmitting(false);
     }
   };
 
@@ -237,9 +234,9 @@ const EditAlbum = () => {
             type="submit"
             disabled={isSubmitting}
             className={`px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 
-              ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+             ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            {isSubmitting ? 'Saving...' : 'Save changes'}
+            {isSubmitting ? 'Saving...' : 'Save'}
           </button>
         </div>
       </form>

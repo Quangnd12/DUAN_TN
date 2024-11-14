@@ -1,6 +1,6 @@
 import React from "react";
 import { MdDelete } from "react-icons/md";
-import { deleteAlbum } from "../../../../../../services/albums";
+import { deleteAlbum } from "../../../../../../services/album";
 
 const DeleteAlbum = ({ onClose, albumToDelete, onDeleteSuccess }) => {
     const handleConfirmDelete = async () => {
