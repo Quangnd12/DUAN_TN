@@ -43,10 +43,11 @@ const AlbumList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [searchTitle, setSearchTitle] = useState("");
+
   const [showActionMenu, setShowActionMenu] = useState(false);
-  const [showFilterMenu, setShowFilterMenu] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
-  const filterMenuRef = useRef(null);
+
 
   const fetchAlbumData = useCallback(
     async (page, limit, searchTitle) => {
@@ -78,11 +79,24 @@ const AlbumList = () => {
     fetchAlbumData(currentPage, limit, searchTitle);
   }, [fetchAlbumData, currentPage, limit, searchTitle]);
 
+  const debouncedSearch = useCallback(
+    debounce((searchTerm) => {
+      setCurrentPage(1);
+      fetchAlbumData(1, limit, searchTerm);
+    }, 500),
+    [fetchAlbumData, limit]
+  );
+
   const handleSearchChange = (e) => {
-    setSearchTitle(e.target.value);
-    setCurrentPage(1);
+    const value = e.target.value;
+    setSearchTitle(value);
+    debouncedSearch(value);
   };
 
+
+  // const handleSearchChange = (e) => {
+  //   debouncedSearch(e.target.value);
+  // };
   const handleChangePage = (event, value) => {
     setCurrentPage(value);
   };
@@ -144,18 +158,9 @@ const AlbumList = () => {
     return color;
   };
 
-  const handleClickOutside = (event) => {
-    if (filterMenuRef.current && !filterMenuRef.current.contains(event.target)) {
-      setShowFilterMenu(false);
-    }
-  };
 
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+
+
 
   return (
     <div className="p-4">
@@ -178,22 +183,7 @@ const AlbumList = () => {
           >
             + Add Album
           </button>
-          <div className="relative w-full md:w-auto">
-            <button
-              className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto"
-              onClick={() => setShowFilterMenu((prev) => !prev)}
-            >
-              Filter <i className="fas fa-chevron-down ml-2"></i>
-            </button>
-            {showFilterMenu && (
-              <div
-                ref={filterMenuRef}
-                className="absolute right-0 mt-2 w-full md:w-96 bg-white rounded-md shadow-lg z-10"
-              >
-                {/* Add filter options specific to albums here */}
-              </div>
-            )}
-          </div>
+
           <div className="relative w-full md:w-auto">
             <button
               className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto"
@@ -236,6 +226,7 @@ const AlbumList = () => {
               <TableBody>
                 {albums.map((album, index) => (
                   <React.Fragment key={album.id}>
+
                     <TableRow sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}>
                       <TableCell>
                         <IconButton
@@ -250,7 +241,7 @@ const AlbumList = () => {
                           )}
                         </IconButton>
                       </TableCell>
-                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{(currentPage - 1) * limit + index + 1}</TableCell>
                       <TableCell>
                         <div className="flex items-center">
                           {album.image ? (
@@ -299,10 +290,11 @@ const AlbumList = () => {
                             <MdEdit style={{ marginRight: "8px", color: "blue" }} />
                             <span style={{ color: "blue" }}>Edit</span>
                           </MenuItem>
-                          <MenuItem onClick={() => handleOpenDeleteModal(album)}>
+                          <MenuItem onClick={() => handleOpenDeleteModal(album)} style={{ display: 'none' }}>
                             <MdDelete style={{ marginRight: "8px", color: "red" }} />
                             <span style={{ color: "red" }}>Delete</span>
                           </MenuItem>
+
                         </Menu>
                       </TableCell>
                     </TableRow>
