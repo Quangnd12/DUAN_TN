@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import InputField from "../../../../components/SharedIngredients/InputField";
 import { handleAdd } from "../../../../components/notification";
-import { addArtist, getArtists } from "../../../../../../services/artist"; // Đảm bảo bạn đã import hàm addArtist từ api
+import { addArtist} from "../../../../../../services/artist";
+import LoadingSpinner from "Admin/src/components/LoadingSpinner";
 
 const AddArtist = () => {
   const {
@@ -15,11 +16,11 @@ const AddArtist = () => {
     trigger,
     setError,
     watch,
-    formState: { errors } // Lấy errors từ formState
+    formState: { errors }
   } = useForm({
     defaultValues: {
       name: "",
-      role: "", // Default role
+      role: "",
       avatar: null,
       biography: "",
     }
@@ -27,6 +28,7 @@ const AddArtist = () => {
 
   const navigate = useNavigate();
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleDrop = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
@@ -47,37 +49,47 @@ const AddArtist = () => {
     navigate("/admin/artist");
   };
 
-const onSubmit = async (data) => {
-  const valid = await trigger();
-  if (!valid) return;
-
-  // Kiểm tra và hiển thị lỗi nếu không có avatar
-  if (!data.avatar) {
-    setError("avatar", { type: "manual", message: "Avatar image is required" });
-    return;
-  }
-
-  try {
-    // Tạo một đối tượng FormData
-    const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("avatar", data.avatar); // Đảm bảo đây là file
-    formData.append("role", data.role);
-    formData.append("biography", data.biography);
-
-    // Gọi hàm addArtist với formData
-    await addArtist(formData);
-    const artists = await getArtists();
-    handleAdd(); // Hiển thị thông báo thành công
-    navigate("/admin/artist"); // Điều hướng về danh sách nghệ sĩ sau khi thêm thành công
-  } catch (error) {
-    console.error("Error adding artist:", error.response ? error.response.data : error.message);
-  }
-};
+  const onSubmit = async (data) => {
+    const valid = await trigger();
+    if (!valid) return;
+  
+    if (!data.avatar) {
+      setError("avatar", { type: "manual", message: "Avatar image is required" });
+      return;
+    }
+  
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("avatar", data.avatar);
+      formData.append("role", data.role);
+      formData.append("biography", data.biography);
+  
+      // Call addArtist and catch errors
+      await addArtist(formData);
+      handleAdd(); // Show success notification
+      navigate("/admin/artist");
+    } catch (error) {
+      console.error("Error adding artist:", error.message);
+      
+      // Display error message if artist already exists
+      if (error.message === "Artist with this name already exists") {
+        setError("name", { type: "manual", message: "Artist with this name already exists" });
+      } else {
+        setError("name", { type: "manual", message: "An unexpected error occurred" });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <LoadingSpinner isLoading={loading} />
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6"  encType="multipart/form-data">
+        {/* Rest of your form code remains the same */}
         <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-blue-500">
           <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -103,15 +115,16 @@ const onSubmit = async (data) => {
                   }
                 }}
               />
+              {errors.name && <small className="text-red-500">{errors.name.message}</small>}
+              
             </div>
 
-            {/* Role Select Input */}
             <div>
               <Controller
                 name="role"
                 control={control}
                 rules={{
-                  required: "Please select a role", // Validation rule to ensure role is selected
+                  required: "Please select a role",
                 }}
                 render={({ field }) => (
                   <div>
@@ -121,7 +134,7 @@ const onSubmit = async (data) => {
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-base focus:ring-blue-500 focus:border-blue-500"
                       {...field}
                     >
-                      <option value="">Please select a role</option> {/* Initial empty option */}
+                      <option value="">Please select a role</option>
                       <option value="1">Artist</option>
                       <option value="2">Rapper</option>
                     </select>
@@ -132,7 +145,6 @@ const onSubmit = async (data) => {
             </div>
           </div>
 
-          {/* Biography Input */}
           <div className="grid grid-cols-1 gap-4 mt-4 w-full max-w-4xl">
             <div>
               <Controller
@@ -156,10 +168,8 @@ const onSubmit = async (data) => {
               />
             </div>
           </div>
-
         </div>
 
-        {/* Avatar Upload Section */}
         <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-red-500">
           <h2 className="text-xl font-semibold mb-4">Avatar Upload</h2>
           <div className="grid grid-cols-1 gap-2">
@@ -207,6 +217,7 @@ const onSubmit = async (data) => {
           </button>
           <button
             type="submit"
+            disabled={loading}
             className="bg-blue-500 text-white py-2 px-4 rounded-lg"
           >
             Save
