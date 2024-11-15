@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useSWR from "swr";
+import Collapse from "@mui/material/Collapse";
+
 import {
   Table,
   TableBody,
@@ -13,70 +14,72 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  CircularProgress,
   Pagination,
   Typography,
   Alert,
   Stack,
-  Collapse,
   Box,
-  Backdrop,
   Chip,
   Avatar,
+  Select,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
-import {
-  MoreVert as MoreVertIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  KeyboardArrowUp,
-  KeyboardArrowDown,
-} from "@mui/icons-material";
+import { MoreVert as MoreVertIcon, KeyboardArrowUp, KeyboardArrowDown } from "@mui/icons-material";
 import { MdEdit, MdDelete } from "react-icons/md";
 import { fetcher } from "../../../../../../services/artist"; 
 import DeleteArtist from "./delete";
-
-const ITEMS_PER_PAGE = 5;
+import LoadingSpinner from "Admin/src/components/LoadingSpinner";
 
 const ArtistList = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [page, setPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedArtist, setSelectedArtist] = useState(null);
   const [openRow, setOpenRow] = useState({});
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [artistToDelete, setArtistToDelete] = useState(null);
+  const [artists, setArtists] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Debounce search input
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-    }, 500); // Adjust delay as needed
-
-    return () => {
-      clearTimeout(handler);
-    };
+    }, 500);
+    return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // Fetch data using SWR
-  const { data, error, isLoading, mutate } = useSWR(
-    ["getArtists", page, ITEMS_PER_PAGE, debouncedSearchTerm],
-    () => fetcher(page, ITEMS_PER_PAGE, debouncedSearchTerm),
-    {
-      revalidateIfStale: false,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    }
-  );
+  // Fetch artists data
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetcher(page, itemsPerPage, debouncedSearchTerm);
+        setArtists(response.artists);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [debouncedSearchTerm, page, itemsPerPage]);
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+  const handleChangePage = (event, newPage) => setPage(newPage);
+
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(event.target.value);
+    setPage(1); // Reset to first page when items per page changes
   };
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
-    setPage(1);
+    setPage(1); // Reset to first page when search term changes
   };
 
   const handleOpenMenu = (event, artist) => {
@@ -96,9 +99,7 @@ const ArtistList = () => {
     }));
   };
 
-  const handleAddArtist = () => {
-    navigate("/admin/artist/add");
-  };
+  const handleAddArtist = () => navigate("/admin/artist/add");
 
   const handleEditArtist = (artistId) => {
     navigate(`/admin/artist/edit/${artistId}`);
@@ -113,27 +114,20 @@ const ArtistList = () => {
 
   const handleDeleteSuccess = () => {
     setShowDeleteModal(false);
-    mutate(); // Refreshes the list after deletion
+    setArtists(artists.filter((artist) => artist.id !== artistToDelete.id));
   };
 
+  // Error handling and rendering loading state
   if (error) {
-    return (
-      <Typography color="error">
-        Error: {error.message || "Failed to fetch artists"}
-      </Typography>
-    );
+    return <Typography color="error">Error: {error.message || "Failed to fetch artists"}</Typography>;
   }
 
   return (
     <div className="p-4">
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={isLoading}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
+      {/* Loading Spinner */}
+      <LoadingSpinner isLoading={loading} />
 
-      {/* Top section with search and action buttons */}
+      {/* Top section with search and add button */}
       <div className="flex justify-between mb-4">
         <TextField
           label="Search"
@@ -142,7 +136,7 @@ const ArtistList = () => {
           onChange={handleSearch}
           className="w-64"
           placeholder="Search..."
-          disabled={isLoading}
+          disabled={loading}
         />
         <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2 justify-end">
           <button
@@ -154,7 +148,7 @@ const ArtistList = () => {
         </div>
       </div>
 
-      {data?.artists.length > 0 ? (
+      {artists.length > 0 ? (
         <>
           <TableContainer component={Paper}>
             <Table>
@@ -169,7 +163,7 @@ const ArtistList = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data.artists.map((artistItem) => (
+                {artists.map((artistItem) => (
                   <React.Fragment key={artistItem.id}>
                     <TableRow sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}>
                       <TableCell>
@@ -224,12 +218,28 @@ const ArtistList = () => {
             </MenuItem>
           </Menu>
 
-          <Stack spacing={2} direction="row" alignItems="center" justifyContent="flex-end" sx={{ marginTop: 2 }}>
-            <Pagination count={data?.totalPages} page={page} onChange={handleChangePage} color="primary" shape="rounded" />
-          </Stack>
+          {/* Rows per page selector and pagination */}
+          <div className="flex justify-between items-center mt-4">
+            <FormControl variant="outlined" sx={{ minWidth: 120 }}>
+              <InputLabel>Rows per page</InputLabel>
+              <Select
+                value={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+                label="Rows per page"
+              >
+                <MenuItem value={5}>5</MenuItem>
+                <MenuItem value={10}>10</MenuItem>
+                <MenuItem value={20}>20</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Stack spacing={2} direction="row" alignItems="center">
+              <Pagination count={2} page={page} onChange={handleChangePage} color="primary" shape="rounded" />
+            </Stack>
+          </div>
         </>
       ) : (
-        <Alert severity="info">No artists found.</Alert>
+        <Alert severity="info">No artists found</Alert>
       )}
 
       {showDeleteModal && (

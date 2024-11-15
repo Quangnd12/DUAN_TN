@@ -5,6 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import InputField from "../../../../components/SharedIngredients/InputField";
 import { handleAdd } from "../../../../components/notification";
 import { getArtistById, updateArtist } from "../../../../../../services/artist"; // Import necessary functions
+import LoadingSpinner from "Admin/src/components/LoadingSpinner";
 
 const EditArtist = () => {
   const { id } = useParams(); // Get the artist ID from URL parameters
@@ -28,10 +29,12 @@ const EditArtist = () => {
   const navigate = useNavigate();
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [existingAvatar, setExistingAvatar] = useState(null); // Track existing avatar
+  const [loading, setLoading] = useState(false); // Loading state for data fetching and form submission
 
   // Fetch artist data when component mounts
   useEffect(() => {
     const fetchArtist = async () => {
+      setLoading(true); // Set loading to true while fetching data
       try {
         const artist = await getArtistById(id); // Fetch artist data by ID
         setValue("name", artist.name);
@@ -41,6 +44,8 @@ const EditArtist = () => {
         setAvatarPreview(artist.avatar); // Set avatar preview if there's an existing avatar
       } catch (error) {
         console.error("Error fetching artist data:", error);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
       }
     };
 
@@ -70,6 +75,7 @@ const EditArtist = () => {
     const valid = await trigger();
     if (!valid) return;
 
+    setLoading(true); // Set loading to true before submitting form
     try {
       const formData = new FormData();
       formData.append("name", data.name);
@@ -89,11 +95,15 @@ const EditArtist = () => {
       navigate("/admin/artist"); // Navigate back to artist list after update
     } catch (error) {
       console.error("Error updating artist:", error.response ? error.response.data : error.message);
+    } finally {
+      setLoading(false); // Set loading to false after submission
     }
   };
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+      <LoadingSpinner isLoading={loading} /> {/* Display loading spinner */}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-blue-500">
           <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
@@ -234,3 +244,4 @@ const EditArtist = () => {
 };
 
 export default EditArtist;
+
