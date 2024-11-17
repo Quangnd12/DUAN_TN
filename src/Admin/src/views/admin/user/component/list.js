@@ -8,46 +8,29 @@ import {
   TableRow,
   Paper,
   TextField,
-  IconButton,
   MenuItem,
   CircularProgress,
   Pagination,
-  Typography,
   Avatar,
   Backdrop,
-  Chip,
-  Box,
-  Collapse,
+  Badge,
   FormControl,
   Select,
   Stack,
 } from "@mui/material";
-import {
-  MoreVert as MoreVertIcon,
-  KeyboardArrowDown,
-  KeyboardArrowUp,
-} from "@mui/icons-material";
 import { useGetUsersQuery } from "../../../../../../redux/slice/apiSlice";
-
-const ITEMS_PER_PAGE = 5;
 
 const UserList = () => {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [sort, setSort] = useState("createdAt");
-  const [order, setOrder] = useState("desc");
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [openRow, setOpenRow] = useState({});
 
   const { data, isLoading, isFetching } = useGetUsersQuery({
     page,
-    limit: ITEMS_PER_PAGE,
+    limit: itemsPerPage,
     search: debouncedSearchTerm,
-    sort,
-    order,
   });
 
   useEffect(() => {
@@ -67,30 +50,11 @@ const UserList = () => {
     setPage(newPage);
   };
 
-  const handleSortChange = (event) => {
-    setSort(event.target.value);
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(event.target.value);
+    setPage(1);
   };
 
-  const handleOrderChange = (event) => {
-    setOrder(event.target.value);
-  };
-
-  const handleOpenMenu = (event, user) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedUser(user);
-  };
-
-  const handleCloseMenu = () => {
-    setAnchorEl(null);
-    setSelectedUser(null);
-  };
-
-  const toggleRow = (userId) => {
-    setOpenRow((prevState) => ({
-      ...prevState,
-      [userId]: !prevState[userId],
-    }));
-  };
 
   const getInitials = (username) => {
     if (!username) return "";
@@ -124,30 +88,32 @@ const UserList = () => {
           className="w-64"
           placeholder="Search by username or email..."
           disabled={isLoading}
+          size="small"
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              height: "40px",
+            },
+          }}
         />
 
-        <FormControl variant="outlined" className="w-48">
+        <FormControl variant="outlined" className="w-48" size="small">
           <Select
-            value={sort}
-            onChange={handleSortChange}
+            value={itemsPerPage}
+            onChange={handleItemsPerPageChange}
             disabled={isLoading}
             displayEmpty
+            sx={{
+              height: "40px",
+              "& .MuiSelect-select": {
+                paddingTop: "6px",
+                paddingBottom: "6px",
+              },
+            }}
           >
-            <MenuItem value="createdAt">Created Date</MenuItem>
-            <MenuItem value="username">Username</MenuItem>
-            <MenuItem value="email">Email</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControl variant="outlined" className="w-48">
-          <Select
-            value={order}
-            onChange={handleOrderChange}
-            disabled={isLoading}
-            displayEmpty
-          >
-            <MenuItem value="asc">Ascending</MenuItem>
-            <MenuItem value="desc">Descending</MenuItem>
+            <MenuItem value={5}>5 per page</MenuItem>
+            <MenuItem value={10}>10 per page</MenuItem>
+            <MenuItem value={15}>15 per page</MenuItem>
+            <MenuItem value={20}>20 per page</MenuItem>
           </Select>
         </FormControl>
       </div>
@@ -156,21 +122,37 @@ const UserList = () => {
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: "#18181b" }}>
-              <TableCell sx={{ color: "white" }}>#</TableCell>
-              <TableCell sx={{ color: "white" }}>Avatar</TableCell>
-              <TableCell sx={{ color: "white" }}>Username</TableCell>
-              <TableCell sx={{ color: "white" }}>Email</TableCell>
-              <TableCell sx={{ color: "white" }}>Role</TableCell>
-              <TableCell />
+              <TableCell width="5%" sx={{ color: "white" }}>
+                #
+              </TableCell>
+              <TableCell width="10%" sx={{ color: "white" }}>
+                Avatar
+              </TableCell>
+              <TableCell width="15%" sx={{ color: "white" }}>
+                Username
+              </TableCell>
+              <TableCell width="20%" sx={{ color: "white" }}>
+                Email
+              </TableCell>
+              <TableCell
+                width="10%"
+                sx={{ color: "white", paddingLeft: "24px" }}
+              >
+                Role
+              </TableCell>
+              <TableCell width="15%" sx={{ color: "white" }}>
+                Birthday
+              </TableCell>
+              <TableCell  width="15%" sx={{ color: "white" }}>
+                Created At
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {data?.users?.map((user, index) => (
               <React.Fragment key={user.id}>
                 <TableRow>
-                  <TableCell>
-                    {(page - 1) * ITEMS_PER_PAGE + index + 1}
-                  </TableCell>
+                  <TableCell>{(page - 1) * itemsPerPage + index + 1}</TableCell>
                   <TableCell>
                     <Avatar src={user.avatar}>
                       {getInitials(user.username)}
@@ -178,66 +160,21 @@ const UserList = () => {
                   </TableCell>
                   <TableCell>{user.username || "N/A"}</TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <Chip
-                      sx={{ width: "80px"}}
-                      label={user.role}
+                  <TableCell sx={{ paddingLeft: "24px" }}>
+                    <Badge
+                      badgeContent={user.role}
                       color={user.role === "admin" ? "primary" : "success"}
+                      sx={{
+                        "& .MuiBadge-badge": {
+                          minWidth: "60px",
+                          height: "24px",
+                          margin: "0 -20px",
+                        },
+                      }}
                     />
                   </TableCell>
-                  <TableCell>
-                    <IconButton size="small" onClick={() => toggleRow(user.id)}>
-                      {openRow[user.id] ? (
-                        <KeyboardArrowUp />
-                      ) : (
-                        <KeyboardArrowDown />
-                      )}
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell
-                    style={{ paddingBottom: 0, paddingTop: 0 }}
-                    colSpan={6}
-                  >
-                    <Collapse
-                      in={openRow[user.id]}
-                      timeout="auto"
-                      unmountOnExit
-                    >
-                      <Box sx={{ margin: 1 }}>
-                        <Typography variant="h6" gutterBottom component="div">
-                          User Details
-                        </Typography>
-                        <Table size="small">
-                          <TableBody>
-                            <TableRow>
-                              <TableCell component="th" scope="row">
-                                Birthday
-                              </TableCell>
-                              <TableCell>{formatDate(user.birthday)}</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell component="th" scope="row">
-                                Created At
-                              </TableCell>
-                              <TableCell>
-                                {formatDate(user.createdAt)}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell component="th" scope="row">
-                                Updated At
-                              </TableCell>
-                              <TableCell>
-                                {formatDate(user.updatedAt)}
-                              </TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
-                      </Box>
-                    </Collapse>
-                  </TableCell>
+                  <TableCell>{formatDate(user.birthday)}</TableCell>
+                  <TableCell>{formatDate(user.createdAt)}</TableCell>
                 </TableRow>
               </React.Fragment>
             ))}
@@ -249,7 +186,7 @@ const UserList = () => {
         <div className="flex justify-end items-center mt-4">
           <Stack spacing={2}>
             <Pagination
-              count={Math.ceil(data.pagination.total / ITEMS_PER_PAGE)}
+              count={Math.ceil(data.pagination.total / itemsPerPage)}
               page={page}
               onChange={handlePageChange}
               color="primary"

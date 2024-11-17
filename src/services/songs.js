@@ -1,4 +1,10 @@
 import request from "config";
+import { store } from '../redux/store';
+import { addNotification } from '../redux/slice/notificationSlice';
+
+const dispatchNotification = (message, type = 'default') => {
+  store.dispatch(addNotification({ message, type }));
+};
 
 const getSongs = async (page, limit, searchName, genres, minDuration, maxDuration, minListensCount,maxListensCount) => {
   let path = '/api/songs';
@@ -40,7 +46,6 @@ const getSongs = async (page, limit, searchName, genres, minDuration, maxDuratio
       method: "GET",
       path: path,
     });
-
     return res;
   } catch (error) {
     console.error('Error fetching songs:', error);
@@ -59,29 +64,47 @@ const getSongById = async (id) => {
 };
 
 const addSong = async (song) => {
-  const res = await request({
-    method: "POST",
-    path: "/api/songs",
-    data: song,
-  });
-  return res;
+  try {
+    const res = await request({
+      method: "POST",
+      path: "/api/songs",
+      data: song,
+    });
+    dispatchNotification('Song added successfully', 'success');
+    return res;
+  } catch (error) {
+    dispatchNotification('Failed to add song', 'error');
+    throw error;
+  }
 };
 
 const deleteSong = async (id) => {
-  const res = await request({
-    method: "DELETE",
-    path: `/api/songs/${id}`,
-  });
-  return res;
+  try {
+    const res = await request({
+      method: "DELETE",
+      path: `/api/songs/${id}`,
+    });
+    dispatchNotification('Song deleted successfully', 'success');
+    return res;
+  } catch (error) {
+    dispatchNotification('Failed to delete song', 'error');
+    throw error;
+  }
 };
 
 const updateSong = async (id, song) => {
-  const res = await request({
-    method: "PUT",
-    path: `/api/songs/${id}`,
-    data: song,
-  });
-  return res;
+  try {
+    const res = await request({
+      method: "PUT",
+      path: `/api/songs/${id}`,
+      data: song,
+    });
+    dispatchNotification('Song updated successfully', 'success');
+    return res;
+  } catch (error) {
+    dispatchNotification('Failed to update song', 'error');
+    throw error;
+  }
 };
 
 

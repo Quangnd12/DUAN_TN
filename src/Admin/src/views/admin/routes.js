@@ -4,7 +4,6 @@ import { Route, Navigate } from "react-router-dom";
 // views
 import Dashboard from "./Dashboard.js";
 import Home from "./Home.js";
-import Settings from "./Settings.js";
 import Info from "./info/index.js";
 import Songs from "./song";
 import Users from "./user";
@@ -32,7 +31,6 @@ const AdminRoutes = (
   <>
     <Route path="dashboard" element={<Dashboard />} />
     <Route path="home" element={<Home />} />
-    <Route path="settings" element={<Settings />} />
     <Route path="info/:id" element={<Info />} />
     <Route path="user" element={<Users />} />
     <Route path="song" element={<Songs />} />

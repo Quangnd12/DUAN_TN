@@ -8,7 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { PieChart, Pie, Cell, Legend } from "recharts";
+import { useTheme } from "./ThemeContext";
 
 // Các components 
 import StatCard from "../../components/StatCard/StatCard";
@@ -16,8 +16,63 @@ import TopFansCard from "../../components/TopFansCard/TopFansCard";
 import PieChartCard from "../../components/PieChartCard/PieChartCard";
 import ChartSwitcher from "../../components/ChartSwitcher/ChartSwitcher";
 
+const translations = {
+  vi: {
+    dashboard: "Bảng Điều Khiển",
+    downloadCurrent: "Tải Dữ Liệu Hiện Tại (CSV)",
+    downloadAll: "Tải Tất Cả Dữ Liệu (CSV)",
+  
+    stats: {
+      listeners: "Người Nghe",
+      newFollowers: "Người Theo Dõi Mới",
+      unfollows: "Bỏ Theo Dõi",
+      newStreams: "Lượt Phát Mới",
+      addedToPlaylist: "Thêm Vào Playlist",
+      streamTotalHours: "Tổng Giờ Phát",
+      topFans: "Người Hâm Mộ Hàng Đầu"
+    },
+    charts: {
+      newListenersByMonth: "Người Nghe Mới Theo Tháng",
+      men: "Nam",
+      women: "Nữ",
+      avgListeningTime: "Thời Gian Nghe Trung Bình",
+      hours: "Giờ",
+      popularGenres: "Thể Loại Phổ Biến",
+      topArtists: "Nghệ Sĩ Hàng Đầu",
+      count: "Số Lượng"
+    }
+  },
+  en: {
+    dashboard: "Dashboard",
+    downloadCurrent: "Download Current Data as CSV",
+    downloadAll: "Download All Data as CSV",
+    stats: {
+      listeners: "Listeners",
+      newFollowers: "New Followers",
+      unfollows: "Unfollows",
+      newStreams: "New Streams",
+      addedToPlaylist: "Added to Playlist",
+      streamTotalHours: "Stream Total Hours",
+      topFans: "Top Fans"
+    },
+    charts: {
+      newListenersByMonth: "New Listeners by Month",
+      men: "Men",
+      women: "Women",
+      avgListeningTime: "Average Listening Time",
+      hours: "Hours",
+      popularGenres: "Popular Genres",
+      topArtists: "Top Artists",
+      count: "Count"
+    }
+  }
+};
+
+
 
 export default function Dashboard() {
+  const { language } = useTheme();
+  const t = translations[language];
   // State để lưu dữ liệu hiện tại của biểu đồ
   const [chartType, setChartType] = useState("newListeners");
 
@@ -132,87 +187,115 @@ export default function Dashboard() {
 
   return (
     <div className="p-6">
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold mb-4 md:mb-0">Dashboard</h1>
-        <div className="flex space-x-2">
-          <button
-            className="px-3 py-2 bg-gray-200 rounded"
-            onClick={() => downloadCSV()}
-          >
-            Download Current Data as CSV
-          </button>
-          <button
-            className="px-3 py-2 bg-green-500 text-white rounded"
-            onClick={() => downloadCSV(true)}
-          >
-            Download All Data as CSV
-          </button>
-          <button className="px-3 py-2 bg-blue-500 text-white rounded">
-            + New Dashboard
-          </button>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard icon={<i className="fas fa-users"></i>} value="62" label="Listeners" color="bg-purple-100" />
-        <StatCard icon={<i className="fas fa-chart-line"></i>} value="23" label="New followers" color="bg-blue-100" />
-        <StatCard icon={<i className="fas fa-exclamation-triangle"></i>} value="3" label="Unfollows" color="bg-red-100" />
-        <StatCard icon={<i className="fas fa-music"></i>} value="83%" label="New streams" color="bg-green-100" />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        <StatCard icon={<i className="fas fa-heart"></i>} value="25" label="Added to playlist" color="bg-yellow-100" />
-        <StatCard icon={<i className="fas fa-clock"></i>} value="1396" label="Stream total hours" color="bg-indigo-100" />
-        <TopFansCard />
-        <PieChartCard data={streamData} colors={COLORS} />
-      </div>
-
-      <div className="bg-white p-4 rounded-lg shadow">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-4 space-y-2 md:space-y-0">
-          <h2 className="text-lg font-semibold">New listeners by month</h2>
-          <ChartSwitcher chartType={chartType} handleChartTypeChange={handleChartTypeChange} />
-        </div>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            {chartType === "newListeners" && (
-              <BarChart data={newListenersData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="Men" fill="#8884d8" />
-                <Bar dataKey="Women" fill="#82ca9d" />
-              </BarChart>
-            )}
-            {chartType === "avgListeningTime" && (
-              <BarChart data={avgListeningTimeData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="hours" fill="#8884d8" />
-              </BarChart>
-            )}
-            {chartType === "popularGenres" && (
-              <BarChart data={popularGenresData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="genre" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#8884d8" />
-              </BarChart>
-            )}
-            {chartType === "topArtists" && (
-              <BarChart data={topArtistsData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="artist" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#8884d8" />
-              </BarChart>
-            )}
-          </ResponsiveContainer>
-        </div>
+    <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+      <h1 className="text-2xl font-bold mb-4 md:mb-0">{t.dashboard}</h1>
+      <div className="flex space-x-2">
+        <button
+          className="px-3 py-2 bg-gray-200 rounded"
+          onClick={() => downloadCSV()}
+        >
+          {t.downloadCurrent}
+        </button>
+        <button
+          className="px-3 py-2 bg-green-500 text-white rounded"
+          onClick={() => downloadCSV(true)}
+        >
+          {t.downloadAll}
+        </button>
       </div>
     </div>
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <StatCard 
+        icon={<i className="fas fa-users"></i>} 
+        value="62" 
+        label={t.stats.listeners} 
+        color="bg-purple-100" 
+      />
+      <StatCard 
+        icon={<i className="fas fa-chart-line"></i>} 
+        value="23" 
+        label={t.stats.newFollowers} 
+        color="bg-blue-100" 
+      />
+      <StatCard 
+        icon={<i className="fas fa-exclamation-triangle"></i>} 
+        value="3" 
+        label={t.stats.unfollows} 
+        color="bg-red-100" 
+      />
+      <StatCard 
+        icon={<i className="fas fa-music"></i>} 
+        value="83%" 
+        label={t.stats.newStreams} 
+        color="bg-green-100" 
+      />
+    </div>
+
+    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+      <StatCard 
+        icon={<i className="fas fa-heart"></i>} 
+        value="25" 
+        label={t.stats.addedToPlaylist} 
+        color="bg-yellow-100" 
+      />
+      <StatCard 
+        icon={<i className="fas fa-clock"></i>} 
+        value="1396" 
+        label={t.stats.streamTotalHours} 
+        color="bg-indigo-100" 
+      />
+      <TopFansCard title={t.stats.topFans} />
+      <PieChartCard data={streamData} colors={COLORS} />
+    </div>
+
+    <div className="bg-white p-4 rounded-lg shadow">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-4 space-y-2 md:space-y-0">
+        <h2 className="text-lg font-semibold">{t.charts.newListenersByMonth}</h2>
+        <ChartSwitcher chartType={chartType} handleChartTypeChange={handleChartTypeChange} />
+      </div>
+      <div className="h-64">
+        <ResponsiveContainer width="100%" height="100%">
+          {chartType === "newListeners" && (
+            <BarChart data={newListenersData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey={t.charts.men} fill="#8884d8" />
+              <Bar dataKey={t.charts.women} fill="#82ca9d" />
+            </BarChart>
+          )}
+          {chartType === "avgListeningTime" && (
+            <BarChart data={avgListeningTimeData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="hours" fill="#8884d8" />
+            </BarChart>
+          )}
+          {chartType === "popularGenres" && (
+            <BarChart data={popularGenresData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="genre" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="count" fill="#8884d8" />
+            </BarChart>
+          )}
+          {chartType === "topArtists" && (
+            <BarChart data={topArtistsData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="artist" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="count" fill="#8884d8" />
+            </BarChart>
+          )}
+        </ResponsiveContainer>
+      </div>
+    </div>
+  </div>
   );
 }

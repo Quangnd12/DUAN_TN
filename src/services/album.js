@@ -1,8 +1,15 @@
 import request from "config";
+import { store } from "../redux/store";
+import { addNotification } from "../redux/slice/notificationSlice";
 
-const getAlbums = async (page, limit, countryID, searchTitle) => { // Đổi tên param thành searchTitle
-  let path = '/api/albums';
-  
+const dispatchNotification = (message, type = "default") => {
+  store.dispatch(addNotification({ message, type }));
+};
+
+const getAlbums = async (page, limit, countryID, searchTitle) => {
+  // Đổi tên param thành searchTitle
+  let path = "/api/albums";
+
   let query = [];
   if (page && limit) {
     query.push(`page=${page}`);
@@ -19,7 +26,7 @@ const getAlbums = async (page, limit, countryID, searchTitle) => { // Đổi tê
   }
 
   if (query.length > 0) {
-    path += `?${query.join('&')}`;
+    path += `?${query.join("&")}`;
   }
 
   const res = await request({
@@ -31,36 +38,54 @@ const getAlbums = async (page, limit, countryID, searchTitle) => { // Đổi tê
 };
 const getAlbumById = async (id) => {
   const res = await request({
-    method: "GET", 
+    method: "GET",
     path: `/api/albums/${id}`,
   });
   return res;
 };
 
 const addAlbum = async (album) => {
-  const res = await request({
-    method: "POST",
-    path: "/api/albums",
-    data: album,
-  });
-  return res;
+  try {
+    const res = await request({
+      method: "POST",
+      path: "/api/albums",
+      data: album,
+    });
+    dispatchNotification("Album added successfully", "success");
+    return res;
+  } catch (error) {
+    dispatchNotification("Failed to add album", "error");
+    throw error;
+  }
 };
 
 const deleteAlbum = async (id) => {
-  const res = await request({
-    method: "DELETE",
-    path: `/api/albums/${id}`,
-  });
-  return res;
+  try {
+    const res = await request({
+      method: "DELETE",
+      path: `/api/albums/${id}`,
+    });
+    dispatchNotification("Album deleted successfully", "success");
+    return res;
+  } catch (error) {
+    dispatchNotification("Failed to delete album", "error");
+    throw error;
+  }
 };
 
 const updateAlbum = async (id, album) => {
-  const res = await request({
-    method: "PUT", 
-    path: `/api/albums/${id}`,
-    data: album,
-  });
-  return res;
+  try {
+    const res = await request({
+      method: "PUT",
+      path: `/api/albums/${id}`,
+      data: album,
+    });
+    dispatchNotification("Album updated successfully", "success");
+    return res;
+  } catch (error) {
+    dispatchNotification("Failed to update album", "error");
+    throw error;
+  }
 };
 
 export { getAlbums, getAlbumById, addAlbum, deleteAlbum, updateAlbum };

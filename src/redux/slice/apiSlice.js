@@ -2,6 +2,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_BASE_URL } from "../../config/Api_url";
 import { setCredentials }  from "./authSlice"
+import { addNotification }  from "./notificationSlice"
 
 export const apiSlice = createApi({
   reducerPath: "api",
@@ -46,9 +47,18 @@ export const apiSlice = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setCredentials({ token: data.token, user: data.user })); // Cập nhật thông tin người dùng
+          dispatch(setCredentials({ token: data.token, user: data.user }));
+          
+          // Thêm thông báo khi đăng ký thành công
+          dispatch(addNotification({
+            id: Date.now(),
+            type: 'user',
+            message: `New user ${data.user.username || 'Anonymous'} has registered`,
+            time: new Date().toLocaleTimeString(),
+            read: false
+          }));
         } catch (error) {
-          console.error("Login failed:", error);
+          console.error("Registration failed:", error);
         }
       },
       invalidatesTags: ["User"],
@@ -58,10 +68,7 @@ export const apiSlice = createApi({
       query: ({ idToken, userData }) => ({
         url: "/auth/register/google",
         method: "POST",
-        body: {
-          idToken,
-          userData
-        }
+        body: { idToken, userData }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
@@ -76,9 +83,16 @@ export const apiSlice = createApi({
             token: data.token,
             role: data.user.role 
           }));
+          // Thêm thông báo khi đăng ký Google thành công
+          dispatch(addNotification({
+            id: Date.now(),
+            type: 'user',
+            message: `New user ${data.user.username || 'Google User'} has registered via Google`,
+            time: new Date().toLocaleTimeString(),
+            read: false
+          }));
         } catch (error) {
           console.error("Google registration error:", error);
-          // Let the component handle the error
           throw error;
         }
       },
@@ -175,10 +189,10 @@ export const apiSlice = createApi({
       }
     }),
     updateUser: builder.mutation({
-      query: ({ id, ...userData }) => ({
+      query: ({ id, formData }) => ({
         url: `/auth/${id}`,
         method: "PUT",
-        body: userData,
+        body: formData,
       }),
       // Improve cache invalidation
       invalidatesTags: (result, error, { id }) => [

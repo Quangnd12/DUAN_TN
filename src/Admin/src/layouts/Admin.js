@@ -9,6 +9,8 @@ import Sidebar from "../components/Sidebar/Sidebar.js";
 // Import routes
 import AdminRoutes from "../views/admin/routes.js";
 
+import { ThemeProvider } from '../views/admin/ThemeContext.js';
+
 import "../assets/styles/index.css";
 
 const Admin = () => {
@@ -23,6 +25,7 @@ const Admin = () => {
 
   return (
     <Box sx={{ display: "flex" }}>
+      <ThemeProvider>
       <Sidebar open={sidebarOpen} onToggle={handleSidebarToggle} />
       <Box
         component="main"
@@ -43,6 +46,7 @@ const Admin = () => {
           <Routes>{AdminRoutes}</Routes>
         </Box>
       </Box>
+      </ThemeProvider>
     </Box>
   );
 };

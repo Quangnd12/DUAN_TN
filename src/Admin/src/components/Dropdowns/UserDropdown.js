@@ -4,12 +4,16 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { Avatar, Button, Menu, MenuItem, Typography, Box, CircularProgress } from "@mui/material";
 import { logout } from "../../../../redux/slice/authSlice";
+import { useTheme } from '../../views/admin/ThemeContext'; 
+import { translations } from '../Translation/translation';
 
 const UserDropdown = ({ user }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [anchorEl, setAnchorEl] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { language } = useTheme();
+  const t = translations[language].userDropdown;
 
   useEffect(() => {
     // Check if we have user data either from props or sessionStorage
@@ -85,16 +89,10 @@ const UserDropdown = ({ user }) => {
           handleMenuClose();
           navigate(`/admin/info/${userData.id}`);
         }}>
-          <Typography>Profile</Typography>
-        </MenuItem>
-        <MenuItem onClick={() => {
-          handleMenuClose();
-          navigate("/admin/settings");
-        }}>
-          <Typography>Settings</Typography>
+         <Typography>{t.profile}</Typography>
         </MenuItem>
         <MenuItem onClick={handleLogout}>
-          <Typography color="error">Logout</Typography>
+        <Typography color="error">{t.logout}</Typography>
         </MenuItem>
       </Menu>
     </Box>

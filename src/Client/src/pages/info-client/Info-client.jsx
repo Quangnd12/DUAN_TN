@@ -8,10 +8,7 @@ import { Alert, Snackbar } from "@mui/material";
 import tb from "../../../public/assets/img/image 27.png";
 import LogoutDialog from "./components/logoutDialog";
 
-import {
-  useUpdateUserMutation,
-  useUploadAvatarMutation,
-} from "../../../../redux/slice/apiSlice";
+import { useUpdateUserMutation } from "../../../../redux/slice/apiSlice";
 import { updateUser, logout } from "../../../../redux/slice/authSlice";
 
 const topTracks = [
@@ -24,7 +21,7 @@ const topTracks = [
   },
   {
     id: 2,
-    title: "Tên bài hát 2", 
+    title: "Tên bài hát 2",
     artist: "Tên nghệ sĩ 2",
     duration: "3:45",
     imageUrl: "/assets/images/anh1.jpg",
@@ -32,7 +29,7 @@ const topTracks = [
   {
     id: 3,
     title: "Tên bài hát 3",
-    artist: "Tên nghệ sĩ 3", 
+    artist: "Tên nghệ sĩ 3",
     duration: "5:00",
     imageUrl: "/assets/images/anh1.jpg",
   },
@@ -64,9 +61,9 @@ const InfoClient = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewImage, setPreviewImage] = useState("");
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     birthday: "",
-    avatar: ""
+    avatar: "",
   });
   const [isUpdating, setIsUpdating] = useState(false);
   const fileInputRef = useRef(null);
@@ -75,14 +72,13 @@ const InfoClient = () => {
   const { user: authUser } = useSelector((state) => state.auth);
 
   const [updateUserInfo] = useUpdateUserMutation();
-  const [uploadAvatar] = useUploadAvatarMutation();
-  
+
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const [validationErrors, setValidationErrors] = useState({
     username: false,
-    birthday: false
+    birthday: false,
   });
   const [showValidationAlert, setShowValidationAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
@@ -91,16 +87,33 @@ const InfoClient = () => {
     const fetchUserData = async () => {
       try {
         const userDataFromStore = authUser;
-        const userIdToFetch = userId || userDataFromStore.id || userDataFromStore.uid;
+        const userIdToFetch =
+          userId || userDataFromStore.id || userDataFromStore.uid;
 
         if (userIdToFetch) {
           setUser(userDataFromStore);
+
+          // Format birthday to YYYY-MM-DD for input type="date"
+          let formattedBirthday = "";
+          if (userDataFromStore.birthday) {
+            const birthDate = new Date(userDataFromStore.birthday);
+            formattedBirthday = birthDate.toISOString().split("T")[0];
+          }
+
           setFormData({
-            name: userDataFromStore.username || userDataFromStore.displayName || "",
-            birthday: userDataFromStore.birthday || "",
-            avatar: userDataFromStore.avatar || userDataFromStore.photoURL || "/assets/images/default-avatar.jpg"
+            username:
+              userDataFromStore.username || userDataFromStore.displayName || "",
+            birthday: formattedBirthday,
+            avatar:
+              userDataFromStore.avatar ||
+              userDataFromStore.photoURL ||
+              "/assets/images/default-avatar.jpg",
           });
-          setPreviewImage(userDataFromStore.avatar || userDataFromStore.photoURL || "/assets/images/default-avatar.jpg");
+          setPreviewImage(
+            userDataFromStore.avatar ||
+              userDataFromStore.photoURL ||
+              "/assets/images/default-avatar.jpg"
+          );
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -116,8 +129,8 @@ const InfoClient = () => {
 
   const validateForm = () => {
     const errors = {
-      username: !formData.name.trim(),
-      birthday: !formData.birthday
+      username: !formData.username.trim(),
+      birthday: !formData.birthday,
     };
 
     setValidationErrors(errors);
@@ -125,9 +138,9 @@ const InfoClient = () => {
     if (errors.username || errors.birthday) {
       setAlertMessage(
         `Please fill in the following fields: ${[
-          ...(errors.username ? ['Username'] : []),
-          ...(errors.birthday ? ['Birthday'] : [])
-        ].join(', ')}`
+          ...(errors.username ? ["Username"] : []),
+          ...(errors.birthday ? ["Birthday"] : []),
+        ].join(", ")}`
       );
       setShowValidationAlert(true);
       return false;
@@ -143,53 +156,32 @@ const InfoClient = () => {
 
     setIsUpdating(true);
     try {
-      let updatedFields = {};
-      let newAvatarUrl = formData.avatar;
+      const formDataToSend = new FormData();
+      formDataToSend.append("username", formData.username);
 
-      // Only include changed fields in the update
-      if (formData.name !== user.username) {
-        updatedFields.username = formData.name;
-      }
-      
-      if (formData.birthday !== user.birthday) {
-        updatedFields.birthday = formData.birthday;
+      // Ensure birthday is properly formatted before sending
+      if (formData.birthday) {
+        // Convert to ISO string and keep only the date part
+        const birthDate = new Date(formData.birthday);
+        formDataToSend.append(
+          "birthday",
+          birthDate.toISOString().split("T")[0]
+        );
       }
 
-      // Handle avatar upload if a new file was selected
       if (selectedFile) {
-        const formDataFile = new FormData();
-        formDataFile.append('avatar', selectedFile);
-        
-        const uploadResponse = await uploadAvatar({
-          id: user.id,
-          file: selectedFile
-        });
-        
-        if (uploadResponse.data?.avatarUrl) {
-          newAvatarUrl = uploadResponse.data.avatarUrl;
-          updatedFields.avatar = newAvatarUrl;
-        }
+        formDataToSend.append("avatar", selectedFile);
       }
 
-      // Only proceed with update if there are changes
-      if (Object.keys(updatedFields).length > 0) {
-        const { data: updatedUser } = await updateUserInfo({
-          id: user.id,
-          ...updatedFields
-        });
+      const { data: updatedUser } = await updateUserInfo({
+        id: user.id,
+        formData: formDataToSend,
+      });
 
-        dispatch(updateUser(updatedUser));
-        setUser(updatedUser);
-        setFormData(prev => ({
-          ...prev,
-          avatar: newAvatarUrl
-        }));
-        setIsEditing(false);
-        setLogoutDialogOpen(true);
-      } else {
-        setAlertMessage("No changes were made to update");
-        setShowValidationAlert(true);
-      }
+      dispatch(updateUser(updatedUser));
+      setUser(updatedUser);
+      setIsEditing(false);
+      setLogoutDialogOpen(true);
     } catch (error) {
       console.error("Error updating user info:", error);
       setAlertMessage("An error occurred while updating your profile");
@@ -215,10 +207,17 @@ const InfoClient = () => {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
+    // Clear validation error
+    if (validationErrors[name]) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        [name]: false,
+      }));
+    }
   };
 
   const handleCloseLogoutDialog = () => {
@@ -267,12 +266,17 @@ const InfoClient = () => {
             />
             <div className="text-center sm:text-left mt-18">
               <p className="text-gray-400 text-base sm:text-lg mb-1">Profile</p>
-              <h2 className="text-3xl sm:text-6xl font-bold mb-2">{formData.name}</h2>
+              <h2 className="text-3xl sm:text-6xl font-bold mb-2">
+                {formData.name}
+              </h2>
               <p className="text-gray-400 text-base sm:text-lg">
                 Email: {user.email}
               </p>
               <p className="text-gray-400 text-base sm:text-lg">
-                Birthday: {formData.birthday ? new Date(formData.birthday).toLocaleDateString("en-GB") : "N/A"}
+                Birthday:{" "}
+                {formData.birthday
+                  ? new Date(formData.birthday).toLocaleDateString("en-GB")
+                  : "N/A"}
               </p>
               <p className="text-gray-400 text-base sm:text-lg">
                 Following {user.followsId ? user.followsId.length : 0}
@@ -345,16 +349,20 @@ const InfoClient = () => {
                 <div className="mb-4">
                   <input
                     type="text"
-                    name="name"
-                    value={formData.name}
+                    name="username"
+                    value={formData.username}
                     onChange={handleFormChange}
                     placeholder="Enter your name"
                     className={`bg-zinc-700 text-white p-3 rounded w-full border ${
-                      validationErrors.username ? 'border-red-500' : 'border-gray-600'
+                      validationErrors.username
+                        ? "border-red-500"
+                        : "border-gray-600"
                     } focus:border-blue-500 transition-colors duration-300`}
                   />
                   {validationErrors.username && (
-                    <p className="text-red-500 text-sm mt-1">Username is required</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      Username is required
+                    </p>
                   )}
                 </div>
                 <div className="mb-4">
@@ -364,18 +372,23 @@ const InfoClient = () => {
                     value={formData.birthday}
                     onChange={handleFormChange}
                     className={`bg-zinc-700 text-white p-3 rounded w-full border ${
-                      validationErrors.birthday ? 'border-red-500' : 'border-gray-600'
+                      validationErrors.birthday
+                        ? "border-red-500"
+                        : "border-gray-600"
                     } focus:border-blue-500 transition-colors duration-300`}
                   />
                   {validationErrors.birthday && (
-                    <p className="text-red-500 text-sm mt-1">Birthday is required</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      Birthday is required
+                    </p>
                   )}
                 </div>
                 <button
                   onClick={handleSave}
                   className="bg-blue-600 text-white py-3 px-6 rounded hover:bg-blue-700 transition-colors duration-300"
+                  disabled={isUpdating}
                 >
-                  Save
+                  {isUpdating ? "Saving..." : "Save"}
                 </button>
               </div>
             </div>
@@ -387,17 +400,17 @@ const InfoClient = () => {
         onClose={handleCloseLogoutDialog}
         onLogout={handleLogout}
       />
-       <Snackbar
+      <Snackbar
         open={showValidationAlert}
         autoHideDuration={6000}
         onClose={handleCloseValidationAlert}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
           onClose={handleCloseValidationAlert}
           severity="error"
           variant="filled"
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           {alertMessage}
         </Alert>
