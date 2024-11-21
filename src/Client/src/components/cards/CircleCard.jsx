@@ -16,6 +16,7 @@ const CircleCard = ({ image, name, title }) => {
               style={{ width: "100%", height: "100%" }}
               src={image}
               alt={name}
+              onError={(e) => e.target.src = '/images/avatar-artist.jpg'}
             />
           </div>
        

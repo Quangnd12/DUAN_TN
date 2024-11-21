@@ -9,16 +9,17 @@ import {
 import data from "../../data/fetchSongData";
 import { usePip } from "../../utils/pip";
 
-const PictureInPicturePlayer = () => {
+const PictureInPicturePlayer = (audioUrl, title, artist, Image, lyrics, album, playCount, TotalDuration) => {
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const { isPipOpen, togglePip, position, updatePosition } = usePip();
   const [isDragging, setIsDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
 
-  const currentSong = data.songs[currentSongIndex];
 
-  const playerRef = useRef(null); // Ref cho thành phần player
+  const Songs = JSON.parse(localStorage.getItem("playerState"));
+
+  const playerRef = useRef(null);
 
   // Xử lý phát/dừng nhạc
   const handlePlay = () => setIsPlaying(!isPlaying);
@@ -87,43 +88,42 @@ const PictureInPicturePlayer = () => {
     >
       <div className="relative">
         <img
-          src={currentSong.image}
-          alt={currentSong.name}
+          src={Songs.Image}
+          alt={Songs.title}
           className="w-full h-auto object-cover mb-2 rounded-lg shadow-md"
         />
-        <h3 className="text-lg font-semibold truncate">{currentSong.name}</h3>
-        <p className="text-gray-400 text-sm truncate">{currentSong.artist}</p>
+        <h3 className="text-lg font-semibold truncate">{Songs.title}</h3>
+        <p className="text-gray-400 text-sm truncate">{Songs.artist}</p>
       </div>
       {/* Nút đóng PIP */}
       <button
         onClick={togglePip}
-        className="absolute top-1 right-0  text-gray-400 text-2xl hover:text-white p-1 transition-colors duration-300"
+        className="absolute top-1 right-0 text-gray-400 text-xl hover:text-white p-2 transition-colors duration-300"
       >
         <FaTimes />
       </button>
-      <div className="flex justify-between items-center px-4 py-2 bg-gray-800 rounded-b-lg">
+      <div className="flex justify-between items-center px-4 py-1 bg-gray-800 rounded-b-lg">
         <button
           onClick={handlePrevious}
-          className="text-gray-400 hover:text-white transition-transform duration-300 hover:scale-125"
+          className="text-gray-400 hover:text-white transition-transform duration-300 hover:scale-110 p-2"
         >
           <FaStepBackward />
         </button>
         <button
           onClick={handlePlay}
-          className={`text-white bg-blue-600 rounded-full p-2 transition-transform duration-300 hover:scale-110 hover:bg-blue-700 ${
-            isPlaying ? "animate-pulse" : ""
-          }`}
+          className={`flex items-center justify-center text-white bg-blue-600 rounded-full p-3 transition-transform duration-300  hover:bg-blue-700 ${isPlaying ? "animate-pulse" : ""
+            }`}
         >
           {isPlaying ? <FaPause /> : <FaPlay />}
         </button>
         <button
           onClick={handleNext}
-          className="text-gray-400 hover:text-white transition-transform duration-300 hover:scale-125"
+          className="text-gray-400 hover:text-white transition-transform duration-300 hover:scale-110 p-2"
         >
           <FaStepForward />
         </button>
-      </div>
     </div>
+    </div >
   );
 };
 

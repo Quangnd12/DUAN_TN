@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
-import data from "../../../data/fetchSongData";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import {
   MdPlayArrow,
   MdShuffle,
@@ -7,29 +6,79 @@ import {
   MdPlaylistAdd,
   MdCheck,
 } from "react-icons/md";
-import PlayerControls from "../../../components/audio/PlayerControls";
 import SongItem from "../../../components/dropdown/dropdownMenu";
 import "../../../assets/css/artist/artist.css";
-import LikeButton from "../../../components/button/favorite";
 import MoreButton from "../../../components/button/more";
-import { handleAddPlaylist } from "../../../components/notification";
+import { handleAddPlaylist, handleWarning } from "../../../components/notification";
+import { getSongs } from '../../../../../services/songs';
+import { useParams } from "react-router-dom";
+import { formatDuration } from "Admin/src/components/formatDate";
+import { PlayerContext } from "Client/src/components/context/MusicPlayer";
+import useAge from "Client/src/components/calculateAge";
+
 
 const ListSongOfGenres = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [dropdownIndex, setDropdownIndex] = useState(null);
   const [showShareOptions, setShowShareOptions] = useState(false);
   const [likedSongs, setLikedSongs] = useState({});
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
-  const [clickedIndex, setClickedIndex] = useState(null);
   const [selectedCheckboxes, setSelectedCheckboxes] = useState(new Set());
   const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
-
+  const [Songs, setSongs] = useState([]);
   const dropdownRefs = useRef({});
+  const { id } = useParams();
+  const { setPlayerState, clickedIndex, setClickedIndex } = useContext(PlayerContext);
+  const age = useAge();
+
+  const SongData = async (page = 0, limit = 0, search = '', genre = [], minDuration = 0, maxDuration = 0, minListensCount = 0, maxListensCount = 0) => {
+    const data = await getSongs(page, limit, search, genre, minDuration, maxDuration, minListensCount, maxListensCount);
+    setSongs(data.songs || []);
+  };
+
+  const useDebouncedValue = (value, delay = 1000) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    useEffect(() => {
+      const timer = setTimeout(() => setDebouncedValue(value), delay);
+      return () => clearTimeout(timer);
+    }, [value, delay]);
+    return debouncedValue;
+  };
+
+  const debounced = useDebouncedValue(id);
+
+  useEffect(() => {
+    if (id) {
+      const genre = JSON.parse(id)
+      SongData(0, 0, '', [genre]);
+    }
+  }, [debounced]);
+
 
   const handleRowClick = (song, index) => {
-    setSelectedPlayer(song);
-    setClickedIndex(index);
+    if (song.is_explicit === 1 && age < 18) {
+      handleWarning();
+      setClickedIndex(null);
+      return;
+    } else {
+      setPlayerState({
+        audioUrl: song.file_song,
+        title: song.title,
+        artist: song.artist,
+        Image: song.image,
+        lyrics: song.lyrics,
+        album: song.album,
+        playCount: song.listens_count,
+        TotalDuration:song.duration
+      });
+      setClickedIndex(index);
+      try {
+        localStorage.setItem("songs", JSON.stringify(Songs));
+      } catch (error) {
+        console.error("Error saving songs to localStorage:", error);
+      }
+    }
   };
+
 
   const handleOptionSelect = (action) => {
     console.log("Selected action:", action);
@@ -45,7 +94,7 @@ const ListSongOfGenres = () => {
         updatedCheckboxes.add(index);
       }
 
-      if (updatedCheckboxes.size === data.songs.length) {
+      if (updatedCheckboxes.size === Songs.length) {
         setIsSelectAllChecked(true);
       } else if (updatedCheckboxes.size === 0) {
         setIsSelectAllChecked(false);
@@ -61,7 +110,7 @@ const ListSongOfGenres = () => {
     if (isSelectAllChecked) {
       setSelectedCheckboxes(new Set());
     } else {
-      const allIndices = data.songs.map((_, idx) => idx);
+      const allIndices = Songs.map((_, idx) => idx);
       setSelectedCheckboxes(new Set(allIndices));
     }
     setIsSelectAllChecked(!isSelectAllChecked);
@@ -78,11 +127,13 @@ const ListSongOfGenres = () => {
     setDropdownIndex(index === dropdownIndex ? null : index);
   };
 
+
   const isAnyCheckboxSelected = () => {
     return selectedCheckboxes.size > 0;
   };
 
   return (
+
     <div className="pt-4  w-full text-white ">
       <div className="flex flex-col">
         <div className="flex items-center justify-between mb-6">
@@ -144,15 +195,18 @@ const ListSongOfGenres = () => {
           )}
         </div>
         <div className="flex flex-col gap-4 pt-2">
-          {data.songs.map((song, index) => (
+          {Songs.filter(song => {
+            const today = new Date();
+            const releaseDate = new Date(song.releaseDate);
+            return releaseDate <= today;
+          }).map((song, index) => (
             <div
               key={index}
               className={`relative flex items-center p-2 rounded-lg transition-colors hover:bg-gray-700 
-                   ${
-                     hoveredIndex === index || clickedIndex === index
-                       ? "bg-gray-700"
-                       : ""
-                   }`}
+                   ${hoveredIndex === index || clickedIndex === index
+                  ? "bg-gray-700"
+                  : ""
+                }`}
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
               onClick={() => handleRowClick(song, index)}
@@ -163,11 +217,10 @@ const ListSongOfGenres = () => {
                   style={{ zIndex: 2 }}
                 >
                   <div
-                    className={`relative cursor-pointer ${
-                      selectedCheckboxes.has(index)
-                        ? "text-gray-400"
-                        : "text-gray-400"
-                    }`}
+                    className={`relative cursor-pointer ${selectedCheckboxes.has(index)
+                      ? "text-gray-400"
+                      : "text-gray-400"
+                      }`}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleCheckboxToggle(index);
@@ -184,11 +237,10 @@ const ListSongOfGenres = () => {
                 </div>
               )}
               <p
-                className={`text-sm font-semibold w-8 text-center ${
-                  hoveredIndex === index || selectedCheckboxes.size > 0
-                    ? "opacity-0"
-                    : ""
-                }`}
+                className={`text-sm font-semibold w-8 text-center ${hoveredIndex === index || selectedCheckboxes.size > 0
+                  ? "opacity-0"
+                  : ""
+                  }`}
               >
                 {index + 1}
               </p>
@@ -199,23 +251,22 @@ const ListSongOfGenres = () => {
               />
               <div className="flex flex-grow flex-col ml-3 relative">
                 <div className="flex justify-between items-center">
-                  <p className="text-sm font-semibold w-48">{song.name}</p>
+                  <p className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-[400px]">{song.title}</p>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <p className="text-gray-500 text-sm text-center">
-                      {"Havana"}
+                    <p className="text-gray-500 text-sm text-center whitespace-nowrap overflow-hidden text-ellipsis w-[430px]">
+                      {song.album}
                     </p>
                   </div>
                   <div className="absolute inset-0 flex items-center justify-end">
                     <p
-                      className={`text-gray-500 text-sm w-20 text-right ${
-                        hoveredIndex === index ? "opacity-0" : ""
-                      }`}
+                      className={`text-gray-500 text-sm w-20 text-right ${hoveredIndex === index ? "opacity-0" : ""
+                        }`}
                     >
-                      {song.duration}
+                      {formatDuration(song.duration)}
                     </p>
                   </div>
                 </div>
-                <p className="text-gray-400 text-sm mt-1">{song.artist}</p>
+                <p className="text-gray-400 text-sm mt-1 whitespace-nowrap overflow-hidden text-ellipsis w-[430px]">{song.artist}</p>
                 <SongItem
                   key={index}
                   song={song}
@@ -234,25 +285,10 @@ const ListSongOfGenres = () => {
                   align={"right"}
                   type="song"
                 />
-                {selectedPlayer && (
-                  <PlayerControls
-                    title={selectedPlayer.name}
-                    artist={selectedPlayer.artist}
-                    Image={selectedPlayer.image}
-                    next={() => {
-                      /*  next track */
-                    }}
-                    prevsong={() => {
-                      /*  previous track */
-                    }}
-                    onTrackEnd={() => {
-                      /* Handle track end */
-                    }}
-                  />
-                )}
               </div>
             </div>
           ))}
+
         </div>
       </div>
     </div>

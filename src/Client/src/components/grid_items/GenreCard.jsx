@@ -3,16 +3,17 @@ import React from "react";
 const GenreCard = ({ genre }) => {
   return (
     <div
-      key={genre.name}
-      className={`${genre.color} text-white w-full h-36 cursor-pointer rounded-lg text-left relative p-4 overflow-hidden`}
+      key={genre.id}
+      className={`text-white w-full  cursor-pointer rounded-md text-left p-4 overflow-hidden relative`}
     >
       <img
-        src={`${genre.coverArt}`}
+        src={`${genre.image}`}
         alt={genre.name}
-        className="absolute w-36 h-36 object-cover shadow-2xl transform rotate-12 -right-8 -bottom-8"
+        className="rounded-md w-full h-full object-cover"
       />
-      <span className="relative text-md font-bold">{genre.name}</span>
+      <span className="absolute top-[1.5rem] left-[1.7rem] text-md font-bold">{genre.name}</span>
     </div>
   );
 };
+
 export default GenreCard;

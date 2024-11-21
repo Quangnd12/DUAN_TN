@@ -77,6 +77,26 @@ const handleDeletePlaylistSuccess = () => {
     });
 };
 
+const handleWarning = () => {
+    toast.warning("You must be 18 or older to listen to this song.", {
+        autoClose: 4000,
+    
+    });
+}
+
+const handleWarningUser = () => {
+    toast.warning("Please log in to listen to music.", {
+        autoClose: 4000,
+    
+    });
+}
+const handleCopy = () => {
+    toast.success("Copied the song successfully.", {
+        autoClose: 4000,
+    
+    });
+}
+
 export { 
     handleAddPlaylist, 
     handleAddFavorite,
@@ -84,8 +104,12 @@ export {
     handleAddLibrary, 
     handleCopyLinkSong, 
     handleAddReport,
-    handleAcceptTerms,
     handleCreatePlaylistSuccess, // Xuất thông báo mới
     handleUpdatePlaylistSuccess, // Xuất thông báo mới
     handleDeletePlaylistSuccess, // Xuất thông báo xoá
+    handleAcceptTerms ,
+    handleWarning,
+    handleWarningUser,
+    handleCopy
+    
 };

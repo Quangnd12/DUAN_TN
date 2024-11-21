@@ -4,7 +4,7 @@ import React, { forwardRef } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const DatePickerField = forwardRef(({ label, selected, onChange, id }, ref) => (
+const DatePickerField = forwardRef(({ label, selected, onChange, id,disabled,minDate }, ref) => (
   <div className="mb-4">
     <label
       htmlFor={id}
@@ -16,10 +16,13 @@ const DatePickerField = forwardRef(({ label, selected, onChange, id }, ref) => (
       ref={ref}
       selected={selected}
       onChange={onChange}
+      minDate={new Date()} 
       dateFormat="yyyy-MM-dd"
       className="w-96 px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       id={id}
       name={id}
+      customInput={<input autoComplete="off" />} 
+      disabled={disabled}
     />
   </div>
 ));

@@ -44,7 +44,11 @@ const EditSong = () => {
   const [Genres, setGenres] = useState([]);
   const [Albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [existingReleaseDate, setExistingReleaseDate] = useState(null);
 
+
+  
   const initData = async () => {
     const data = await getSongById(id);
     setValue("title", data.title);
@@ -53,6 +57,11 @@ const EditSong = () => {
     setValue("lyrics", data.lyrics);
     setValue("duration", data.duration);
     setValue("releaseDate", data.releaseDate);
+    if(data.releaseDate){
+      setExistingReleaseDate(true);
+    }else{
+      setExistingReleaseDate(false);
+    }
     setValue("is_explicit", data.is_explicit);
 
     const genreNames = data.genre.split(', ');
@@ -90,6 +99,12 @@ const EditSong = () => {
   useEffect(() => {
     initData();
   }, []);
+
+  useEffect(() => {
+    if (existingReleaseDate) {
+      setIsEditing(true);
+    }
+  }, [existingReleaseDate]);
 
   const handleDrop = useCallback(async (acceptedFiles, name) => {
     const file = acceptedFiles[0];
@@ -291,6 +306,8 @@ const EditSong = () => {
                     id="releaseDate"
                     selected={field.value}
                     onChange={(date) => setValue("releaseDate", date, { shouldValidate: true })}
+                    disabled={isEditing}
+                    minDate={new Date()}
                   />
                 )}
                 rules={{ required: "Release date is required" }}

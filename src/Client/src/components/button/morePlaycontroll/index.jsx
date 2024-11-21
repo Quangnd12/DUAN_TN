@@ -8,8 +8,9 @@ import { FaMicrophoneAlt } from 'react-icons/fa';
 import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb';
 import ShareOptions from '../share';
 import AddPlaylistOption from '../../dropdown/dropdownAddPlaylist';
+import LyricModal from '../../lyrics';
 
-const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName }) => {
+const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName,lyrics }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
@@ -17,9 +18,20 @@ const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName }) => {
     const shareDropdownRef = useRef(null);
     const playlistDropdownRef = useRef(null);
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleButtonClick = (e) => {
+        e.stopPropagation(); // Ngăn chặn sự kiện click lan truyền
+        setIsModalOpen(true); // Mở modal khi click vào button
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false); // Đóng modal
+    };
+
     const menuOptions = {
         songPlay: [
-            { label: 'Play similar content', action: 'play_similar', icon: <WifiTetheringIcon  /> },
+            { label: 'Play similar content', action: 'play_similar', icon: <WifiTetheringIcon /> },
             { label: 'Add to playlist', action: 'add_to_playlist', icon: <PlaylistAddIcon /> },
             { label: 'Share', action: 'share', icon: <ShareIcon /> },
         ],
@@ -48,7 +60,7 @@ const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName }) => {
             case 'add_to_playlist':
                 setIsPlaylistOpen(!isPlaylistOpen);
                 setIsOpen(false);
-                break;      
+                break;
             default:
                 onOptionSelect(action);
                 setIsOpen(false);
@@ -81,17 +93,22 @@ const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName }) => {
                                 </div>
                             </div>
                             <div className="rounded-md p-1 flex justify-between items-center w-[250px] bg-gray-700 mt-4">
-                                <Link to={'/lyrics/1'}>
-                                    <button
-                                        className="flex flex-col ml-8 items-center text-gray-300 hover:bg-gray-600 p-2 rounded"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                        }}
-                                    >
-                                        <FaMicrophoneAlt className="mb-1" style={{ fontSize: 18 }} />
-                                        <span className='text-[13px]'>Lyrics</span>
-                                    </button>
-                                </Link>
+
+                                <button
+                                    className="flex flex-col ml-8 items-center text-gray-300 hover:bg-gray-600 p-2 rounded"
+                                    onClick={handleButtonClick}
+                                >
+                                    <FaMicrophoneAlt className="mb-1" style={{ fontSize: 18 }} />
+                                    <span className='text-[13px]'>Lyrics</span>
+                                </button>
+                                {isModalOpen && (
+                                    <LyricModal onClose={closeModal} lyrics={lyrics}>
+                                        <div className="p-4">
+                                            <h2 className="text-xl">Lyrics Content</h2>
+                                            <p>Here are the lyrics...</p>
+                                        </div>
+                                    </LyricModal>
+                                )}
                                 <button
                                     className="flex flex-col mr-8 items-center text-gray-300 hover:bg-gray-600 p-2 rounded"
                                     onClick={(e) => {
@@ -110,8 +127,8 @@ const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName }) => {
                                 <button
                                     className={`flex items-center w-full text-left px-4 py-2 text-sm rounded-sm text-gray-300 hover:bg-gray-700 hover:text-white
                                     ${isShareOpen && option.action === 'share' && isShareOpen ? 'bg-gray-700' :
-                                    isPlaylistOpen && option.action === 'add_to_playlist' ? 'bg-gray-700' :
-                                        'text-gray-300 hover:bg-gray-700 hover:text-white'}`}
+                                            isPlaylistOpen && option.action === 'add_to_playlist' ? 'bg-gray-700' :
+                                                'text-gray-300 hover:bg-gray-700 hover:text-white'}`}
                                     role="menuitem"
                                     onClick={(e) => {
                                         e.stopPropagation();
