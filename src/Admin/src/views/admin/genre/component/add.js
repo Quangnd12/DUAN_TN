@@ -6,6 +6,7 @@ import SelectField from "../../../../components/SharedIngredients/SelectField";
 import { handleAdd } from "../../../../components/notification";
 import { addGenre } from "../../../../../../services/genres";
 import { getCountry } from "../../../../../../services/country";
+import LoadingSpinner from "Admin/src/components/LoadingSpinner";
 
 const AddGenre = () => {
     const { control, handleSubmit, setValue, watch, clearErrors, getValues, formState: { errors }, trigger, setError } = useForm({
@@ -30,7 +31,7 @@ const AddGenre = () => {
     const navigate = useNavigate();
     const [coverImagePreview, setCoverImagePreview] = useState(null);
     const [Country, setCountry] = useState([]);
-
+    const [loading, setLoading] = useState(false);
    
 
     const CountryData = async () => {
@@ -77,6 +78,10 @@ const AddGenre = () => {
     };
 
     const onSubmit = async (data) => {
+        const valid = await trigger();
+        if (!valid) return; 
+        setLoading(true);
+
         const formData = new FormData();
         const countryIDValue = typeof data.countryID === 'object' ? data.countryID.value : data.countryID;
         formData.append('countryID', countryIDValue);
@@ -92,9 +97,6 @@ const AddGenre = () => {
             return;
         }
 
-        const valid = await trigger();
-        if (!valid) return; 
-        console.log("FormData to send: ", formData);
         try {
             await addGenre(formData);
             navigate("/admin/genre");
@@ -102,12 +104,16 @@ const AddGenre = () => {
         } catch (error) {
             console.error(error);
         }
+        finally {
+            setLoading(false);
+          }
     };
 
 
 
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+             <LoadingSpinner isLoading={loading} />
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" encType="multipart/form-data">
                 <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-blue-500">
                     <h2 className="text-xl font-semibold mb-4">Basic Information</h2>

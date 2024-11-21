@@ -44,15 +44,11 @@ const EditSong = () => {
   const [Genres, setGenres] = useState([]);
   const [Albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [expandedLyrics, setExpandedLyrics] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [existingReleaseDate, setExistingReleaseDate] = useState(null);
 
 
-
-  const handleToggleLyrics = () => {
-    setExpandedLyrics((prev) => !prev);
-  };
-
-
+  
   const initData = async () => {
     const data = await getSongById(id);
     setValue("title", data.title);
@@ -61,6 +57,11 @@ const EditSong = () => {
     setValue("lyrics", data.lyrics);
     setValue("duration", data.duration);
     setValue("releaseDate", data.releaseDate);
+    if(data.releaseDate){
+      setExistingReleaseDate(true);
+    }else{
+      setExistingReleaseDate(false);
+    }
     setValue("is_explicit", data.is_explicit);
 
     const genreNames = data.genre.split(', ');
@@ -99,6 +100,12 @@ const EditSong = () => {
     initData();
   }, []);
 
+  useEffect(() => {
+    if (existingReleaseDate) {
+      setIsEditing(true);
+    }
+  }, [existingReleaseDate]);
+
   const handleDrop = useCallback(async (acceptedFiles, name) => {
     const file = acceptedFiles[0];
     if (!file) return;
@@ -106,9 +113,9 @@ const EditSong = () => {
     if (name === "file_song") {
       setValue("file_song", file);
       clearErrors("file_song");
-      const audioUrl = URL.createObjectURL(file); // Tạo URL từ file
-      setCoverAudioPreview(audioUrl); // Lưu URL vào state để hiển thị
-      const audio = new Audio(audioUrl); // Sử dụng URL để tạo đối tượng Audio
+      const audioUrl = URL.createObjectURL(file);
+      setCoverAudioPreview(audioUrl); 
+      const audio = new Audio(audioUrl); 
       audio.onloadedmetadata = () => {
         const durationInSeconds = Math.floor(audio.duration);
         setValue("duration", durationInSeconds, { shouldValidate: true });
@@ -130,20 +137,19 @@ const EditSong = () => {
 
   const { getRootProps: getAudioRootProps, getInputProps: getAudioInputProps } =
     useDropzone({
-      onDrop: (files) => handleDrop(files, "file_song"), // Thay đổi thành file_song
+      onDrop: (files) => handleDrop(files, "file_song"), 
       accept: "audio/*",
     });
 
   const { getRootProps: getImageRootProps, getInputProps: getImageInputProps } =
     useDropzone({
-      onDrop: (files) => handleDrop(files, "image"), // Thay đổi thành image
+      onDrop: (files) => handleDrop(files, "image"), 
       accept: "image/*",
     });
 
   const handleCancel = () => {
-    navigate("/admin/song"); // Điều hướng về trang list.js
+    navigate("/admin/song"); 
   };
-
 
 
   const onSubmit = async (data) => {
@@ -265,8 +271,8 @@ const EditSong = () => {
                 <small className="text-red-500 mt-1 ml-2 block">{errors.genreID.message}</small>
               )}
             </div>
-            <div>
-              <Controller
+            <div >
+              <Controller className="z-10"
                 name="albumID"
                 control={control}
                 render={({ field }) => (
@@ -291,7 +297,7 @@ const EditSong = () => {
           <h2 className="text-xl font-semibold mb-4">Detailed Information</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Controller
+              <Controller     
                 name="releaseDate"
                 control={control}
                 render={({ field }) => (
@@ -300,12 +306,29 @@ const EditSong = () => {
                     id="releaseDate"
                     selected={field.value}
                     onChange={(date) => setValue("releaseDate", date, { shouldValidate: true })}
+                    disabled={isEditing}
+                    minDate={new Date()}
                   />
                 )}
                 rules={{ required: "Release date is required" }}
               />
 
               {errors.releaseDate && <small className="text-red-500 ml-2 block">{errors.releaseDate.message}</small>}
+            </div>
+            <div >
+              <Controller
+                name="listens_count"
+                control={control}
+                render={({ field }) => (
+                  <InputField
+                    label="Listens count"
+                    id="listens_count"
+                    name="listens_count"
+                    {...field}
+                    disabled={true}
+                  />
+                )}
+              />
             </div>
             <div>
               <Controller
@@ -331,35 +354,6 @@ const EditSong = () => {
               />
               {errors.duration && <small className="text-red-500 ml-2 block">{errors.duration.message}</small>}
             </div>           
-            <div className="w-[205px]">
-              <Controller
-                name="listens_count"
-                control={control}
-                render={({ field }) => (
-                  <InputField
-                    label="Listens count"
-                    id="listens_count"
-                    name="listens_count"
-                    {...field}
-                    disabled={true}
-                  />
-                )}
-              />
-            </div>
-            <div>
-              <Controller
-                name="is_explicit"
-                control={control}
-                render={({ field }) => (
-                  <SwitchField
-                    label="Explicit"
-                    {...field}
-                    checked={field.value}
-                    onChange={() => setValue("is_explicit", !field.value)}
-                  />
-                )}
-              />
-            </div>  
             <div className="col-span-2">
               <Controller
               style={{ lineHeight: '1.6', whiteSpace: 'pre-wrap' }}
@@ -378,7 +372,20 @@ const EditSong = () => {
                 )}
               />
             </div>
-
+            <div>
+              <Controller
+                name="is_explicit"
+                control={control}
+                render={({ field }) => (
+                  <SwitchField
+                    label="Explicit"
+                    {...field}
+                    checked={field.value}
+                    onChange={() => setValue("is_explicit", !field.value)}
+                  />
+                )}
+              />
+            </div>  
           </div>
         </div>
 

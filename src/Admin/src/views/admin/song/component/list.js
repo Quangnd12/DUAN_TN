@@ -15,10 +15,11 @@ import DeleteSong from "./delete";
 import { formatDate, formatDuration } from "Admin/src/components/formatDate";
 import PlayerControls from "../../../../components/audio/PlayerControls";
 import { usePlayerContext } from "Admin/src/components/audio/playerContext";
-import { getGenres } from "services/genres";
+import { getGenres } from "../../../../../../services/genres";
 import RangeSliderField from "Admin/src/components/SharedIngredients/RangeSliderField";
 import LoadingSpinner from "Admin/src/components/LoadingSpinner";
 import "../../../../assets/styles/visualizerAdmin.css";
+import "../../../../assets/styles/action.css";
 
 const SongList = () => {
   const navigate = useNavigate();
@@ -100,10 +101,13 @@ const SongList = () => {
       setSelectedGenres(prev => prev.filter(id => id !== genreID));
     }
   };
-
   const filterGenresWithSongs = (genres, songs) => {
     return genres.filter(genre =>
-      songs.some(song => song.genre === genre.name)
+      songs.some(song =>
+        song.genre.split(',').some(songGenre =>
+          songGenre.trim().toLowerCase() === genre.name.trim().toLowerCase()
+        )
+      )
     );
   };
 
@@ -148,25 +152,25 @@ const SongList = () => {
     };
   }, [location.pathname]);
 
-// // Hàm chuyển đến bài hát tiếp theo
-// const handleNext= () => {
-//   if (currentSongIndex < Songs.length - 1) {
-//     setCurrentSongIndex(currentSongIndex + 1);
-//     setSelectedPlayer(Songs[currentSongIndex + 1]);
-//     setIsPlaying(true);
-//   }
-// };
+  // // Hàm chuyển đến bài hát tiếp theo
+  // const handleNext= () => {
+  //   if (currentSongIndex < Songs.length - 1) {
+  //     setCurrentSongIndex(currentSongIndex + 1);
+  //     setSelectedPlayer(Songs[currentSongIndex + 1]);
+  //     setIsPlaying(true);
+  //   }
+  // };
 
-// // Hàm quay lại bài hát trước
-// const handlePrev = () => {
-//   if (currentSongIndex > 0) {
-//     setCurrentSongIndex(currentSongIndex - 1);
-//     setSelectedPlayer(Songs[currentSongIndex - 1]);
-//     setIsPlaying(true);
-//   }
-// };
+  // // Hàm quay lại bài hát trước
+  // const handlePrev = () => {
+  //   if (currentSongIndex > 0) {
+  //     setCurrentSongIndex(currentSongIndex - 1);
+  //     setSelectedPlayer(Songs[currentSongIndex - 1]);
+  //     setIsPlaying(true);
+  //   }
+  // };
 
-  
+
   const handleOpenMenu = (event, song) => {
     setAnchorEl(event.currentTarget);
     setSelectedSong(song);
@@ -184,6 +188,7 @@ const SongList = () => {
       setSongs(prevSongs => prevSongs.filter(song => song.id !== id));
       setSelectedPlayer(null);
       setLoading(false);
+      SongData(currentPage, limit, debouncedSearchName, selectedGenres, debouncedMinDuration, debouncedMaxDuration, debouncedMinListen, debouncedMaxListen);
     } catch (error) {
       console.log("Error deleting song", error);
       setLoading(false);
@@ -263,7 +268,7 @@ const SongList = () => {
       setCopied(true);
       setTimeout(() => {
         setCopied(false);
-      }, 2000);  
+      }, 2000);
     }
 
   };
@@ -274,12 +279,12 @@ const SongList = () => {
       <div className="flex justify-between mb-4">
         <div className="flex-grow">
           <TextField
-            label="Search"
             variant="outlined"
             value={searchName}
             onChange={handleSearchChange}
-            className="w-64 "
+            className=" custom-textfield"
             placeholder="Search..."
+
           />
         </div>
 
@@ -301,20 +306,22 @@ const SongList = () => {
               <div ref={filterMenuRef} className="absolute right-0 mt-2 w-full md:w-96 bg-white rounded-md shadow-lg z-10">
                 <div className="px-4 py-2">
                   <h4 className="font-medium text-gray-700 text-sm mb-2">Genres</h4>
-                  {Genres.map((genre, index) => (
-                    <label
-                      key={index}
-                      className="flex items-center px-4 py-2 hover:bg-gray-100"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedGenres.includes(genre.id)}
-                        onChange={(e) => handleFilterChange(e, genre.id)}
-                        className="mr-2"
-                      />
-                      {genre.name}
-                    </label>
-                  ))}
+                  <div className="grid grid-cols-2 gap-4">
+                    {Genres.map((genre, index) => (
+                      <label
+                        key={index}
+                        className="flex items-center px-4 py-2 hover:bg-gray-100"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedGenres.includes(genre.id)}
+                          onChange={(e) => handleFilterChange(e, genre.id)}
+                          className="mr-2"
+                        />
+                        {genre.name}
+                      </label>
+                    ))}
+                  </div>
                 </div>
                 <div className="px-4 py-2 w-[370px]">
                   <RangeSliderField
@@ -348,29 +355,23 @@ const SongList = () => {
             <Table>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "#18181b" }}>
+                  <TableCell sx={{ color: "white", width: "10%" }}>#</TableCell>
+                  <TableCell sx={{ color: "white", width: "27%" }}>Song</TableCell>
+                  <TableCell sx={{ color: "white", width: "16%" }}>Artist</TableCell>
+                  <TableCell sx={{ color: "white", width: "16%" }}>Album</TableCell>
+                  <TableCell sx={{ color: "white", width: "16%" }}>Genre</TableCell>
+                  <TableCell sx={{ color: "white", width: "10%" }}>Country</TableCell>
+                  <TableCell sx={{ color: "white", width: "5%" }}>Action</TableCell>
                   <TableCell />
-                  <TableCell sx={{ color: "white" }}>#</TableCell>
-                  <TableCell sx={{ color: "white" }}>Song</TableCell>
-                  <TableCell sx={{ color: "white" }}>Artist</TableCell>
-                  <TableCell sx={{ color: "white" }}>Country</TableCell>
-                  <TableCell sx={{ color: "white" }}>Album</TableCell>
-                  <TableCell sx={{ width: "70px", color: "white" }}>Action</TableCell>
                 </TableRow>
+
               </TableHead>
               <TableBody>
                 {Songs.map((song, index) => (
                   <React.Fragment key={song.id}>
                     <TableRow sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}
                     >
-                      <TableCell>
-                        <IconButton
-                          aria-label="expand row"
-                          size="small"
-                          onClick={() => toggleRow(song.id)}
-                        >
-                          {openRow[song.id] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                        </IconButton>
-                      </TableCell>
+
                       <TableCell>
                         {index + 1}
                       </TableCell>
@@ -383,18 +384,50 @@ const SongList = () => {
                               onError={(e) => e.target.src = '/images/music.png'}
                             />
                           </span>
-                          <span className="ml-2">
-                            {song.title || "No songname"}
+                          <span className="ml-2 whitespace-nowrap overflow-hidden text-ellipsis w-[250px]">
+                            {song.title}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={{ maxWidth: '145px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {song.artist}
                       </TableCell >
-                      <TableCell>{song.country}</TableCell>
-                      <TableCell>
+                      <TableCell sx={{ maxWidth: '145px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {song.album}
                       </TableCell>
+                      <TableCell sx={{ maxWidth: '145px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {typeof song.genre === 'string' && song.genre.trim() !== '' ? (
+                          <div className="flex flex-wrap">
+                            {song.genre.split(',').slice(0, 2).map((genreName) => {
+                              const trimmedName = genreName.trim();
+                              return (
+                                <Typography
+                                  key={trimmedName}
+                                  variant="body2"
+                                  component="div"
+                                  style={{
+                                    backgroundColor: getColorFromName(trimmedName),
+                                    color: '#fff',
+                                    padding: '4px 12px',
+                                    marginRight: '8px',
+                                    marginBottom: '4px',
+                                    borderRadius: '16px',
+                                  }}
+                                >
+                                  {trimmedName}
+                                </Typography>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <Typography variant="body2" component="div">
+                            No genres available
+                          </Typography>
+                        )}
+                      </TableCell >
+                      <TableCell sx={{ maxWidth: '90px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {song.country}
+                        </TableCell>
                       <TableCell>
                         <IconButton onClick={(event) => handleOpenMenu(event, song)}>
                           <MoreVertIcon />
@@ -410,7 +443,7 @@ const SongList = () => {
                             handleEditsong(song.id);
                           }
                           } >
-                            <MdEdit style={{ marginRight: '8px', color: 'blue' }} /> {/* Icon sửa */}
+                            <MdEdit style={{ marginRight: '8px', color: 'blue' }} />
                             <span style={{ color: 'blue' }}>Edit</span>
                           </MenuItem>
                           <MenuItem
@@ -423,6 +456,15 @@ const SongList = () => {
                             <span style={{ color: 'red' }}>Delete</span>
                           </MenuItem>
                         </Menu>
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          aria-label="expand row"
+                          size="small"
+                          onClick={() => toggleRow(song.id)}
+                        >
+                          {openRow[song.id] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                        </IconButton>
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -449,6 +491,9 @@ const SongList = () => {
                               </div>
 
                             </Typography>
+                            <Typography variant="body1" className="pb-2 pt-2">Song: {song.title}</Typography>
+                            <Typography variant="body1" className="pb-2 ">Artist: {song.artist}</Typography>
+                            <Typography variant="body1" className="pb-2">Album: {song.album}</Typography>
                             <Typography variant="body1" className="pb-2">Genres: </Typography>
                             {typeof song.genre === 'string' && song.genre.trim() !== '' ? (
                               <div className="flex flex-wrap">
@@ -482,43 +527,43 @@ const SongList = () => {
                             <Typography variant="body1" className="pb-2 ">release date: {formatDate(song.releaseDate)}</Typography>
                             <Typography variant="body1" className="pb-2">Play count: {song.listens_count}</Typography>
                             <Typography
-  variant="body1"
-  className="pb-2"
-  style={{
-    lineHeight: '1.6',
-    whiteSpace: 'pre-wrap',
-    maxHeight: '200px', // Set a maximum height for the lyrics container
-    overflowY: 'auto',  // Enable vertical scrolling
-  }}
->
-  Lyrics:
-  <Tooltip title={copied ? 'Copied!' : 'Copy'}>
-    <IconButton onClick={() => handleCopy(song.lyrics)}>
-      <MdContentCopy size={20} />
-    </IconButton>
-  </Tooltip>
-  <br />
-  {expandedLyrics[song.id] ? (
-    song.lyrics
-  ) : (
-    <span>{song.lyrics.substring(0, 50)}...</span>
-  )}
+                              variant="body1"
+                              className="pb-2"
+                              style={{
+                                lineHeight: '1.6',
+                                whiteSpace: 'pre-wrap',
+                                maxHeight: '200px',
+                                overflowY: 'auto',
+                              }}
+                            >
+                              Lyrics:
+                              <Tooltip title={copied ? 'Copied!' : 'Copy'}>
+                                <IconButton onClick={() => handleCopy(song.lyrics)}>
+                                  <MdContentCopy size={20} />
+                                </IconButton>
+                              </Tooltip>
+                              <br />
+                              {expandedLyrics[song.id] ? (
+                                song.lyrics
+                              ) : (
+                                <span>{song.lyrics.substring(0, 50)}...</span>
+                              )}
 
-  {song.lyrics.length > 50 && (
-    <span
-      onClick={() => handleToggleLyrics(song.id)}
-      style={{
-        color: '#1a73e8', 
-        cursor: 'pointer',
-        fontSize: '14px',
-        fontWeight: '600',
-        textDecoration: 'underline', 
-      }}
-    >
-      {expandedLyrics[song.id] ? ' Show less' : 'Show more'}
-    </span>
-  )}
-</Typography>
+                              {song.lyrics.length > 50 && (
+                                <span
+                                  onClick={() => handleToggleLyrics(song.id)}
+                                  style={{
+                                    color: '#1a73e8',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    textDecoration: 'underline',
+                                  }}
+                                >
+                                  {expandedLyrics[song.id] ? ' Show less' : 'Show more'}
+                                </span>
+                              )}
+                            </Typography>
 
 
                           </Box>

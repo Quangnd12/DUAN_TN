@@ -53,6 +53,26 @@ const handleAcceptTerms = () => {
     });
 }
 
+const handleWarning = () => {
+    toast.warning("You must be 18 or older to listen to this song.", {
+        autoClose: 4000,
+    
+    });
+}
+
+const handleWarningUser = () => {
+    toast.warning("Please log in to listen to music.", {
+        autoClose: 4000,
+    
+    });
+}
+const handleCopy = () => {
+    toast.success("Copied the song successfully.", {
+        autoClose: 4000,
+    
+    });
+}
+
 export { 
     handleAddPlaylist, 
     handleAddFavorite,
@@ -60,5 +80,9 @@ export {
     handleAddLibrary, 
     handleCopyLinkSong, 
     handleAddReport,
-    handleAcceptTerms // Xuất hàm mới
+    handleAcceptTerms ,
+    handleWarning,
+    handleWarningUser,
+    handleCopy
+    
 };

@@ -1,64 +1,52 @@
-import React, { useState, useEffect } from "react";
-import PlayerControls from "../audio/PlayerControls";
-
-const songs = [
-  {
-    image: "https://i.scdn.co/image/ab67616d00001e027c17174be9cdaa69349f47d6",
-    name: "Ai Mà Biết Được (feat. tlinh)",
-    artist: "Adele",
-    details: "1,947,983",
-    duration: "4:00",
-  },
-  {
-    image: "https://i.scdn.co/image/ab67616d00001e027c17174be9cdaa69349f47d6",
-    name: "NGÁO NGƠ- LYRICS (feat. HIEUTHUHAI, JSOL, Erik, Anh Tú ATUS, Orange) | ANH TRAI SAY HI",
-    artist: "HIEUTHUHAI, JSOL, Erik, Anh Tú ATUS, Orange, HIEUTHUHAI, JSOL, Erik, Anh Tú ATUS, Orange",
-    details: "4,065,807",
-    duration: "3:43",
-  },
-  {
-    image: "https://i.scdn.co/image/ab67616d00001e022922307c16bb852a0849bea0",
-    name: "Anh Đã Quen Với Cô Đơn",
-    artist: "HIEUTHUHAI, JSOL, Erik, Anh Tú ATUS",
-    details: "10,119,884",
-    duration: "4:28",
-  },
-  {
-    image: "https://i.scdn.co/image/ab67616d00001e027c17174be9cdaa69349f47d6",
-    name: "Ai Mà Biết Được (feat. tlinh)",
-    artist: "Adele",
-    details: "1,947,983",
-    duration: "4:00",
-  },
-  {
-    image: "https://i.scdn.co/image/ab67616d00001e027c17174be9cdaa69349f47d6",
-    name: "giá như",
-    artist: "Adele",
-    details: "4,065,807",
-    duration: "3:43",
-  },
-  {
-    image: "https://i.scdn.co/image/ab67616d00001e022922307c16bb852a0849bea0",
-    name: "Anh Đã Quen Với Cô Đơn",
-    artist: "Adele",
-    details: "10,119,884",
-    duration: "4:28",
-  },
-];
+import React, { useState, useEffect,useContext } from "react";
+import { getSongs } from "services/songs";
+import useAge from "../calculateAge";
+import { PlayerContext } from "../context/MusicPlayer";
+import { handleWarning } from "../notification";
 
 const GridItems = () => {
+  const [Songs, setSongs] = useState([]);
+  const { setPlayerState, clickedIndex, setClickedIndex } = useContext(PlayerContext);
+  const age = useAge();
 
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
-  const [clickedIndex, setClickedIndex] = useState(null);
+  const SongData = async () => {
+    const data = await getSongs();
+    setSongs(data.songs || []);
+  };
+
+
+  useEffect(() => {
+      SongData();
+  }, []);
 
   const handleRowClick = (song, index) => {
-    setSelectedPlayer(song);
-    setClickedIndex(index);
+    if (song.is_explicit === 1 && age < 18) {
+      handleWarning();
+      setClickedIndex(null);
+      return;
+    } else {
+      setPlayerState({
+        audioUrl: song.file_song,
+        title: song.title,
+        artist: song.artist,
+        Image: song.image,
+        lyrics: song.lyrics,
+        album: song.album,
+        playCount: song.listens_count,
+        TotalDuration:song.duration
+      });
+      setClickedIndex(index);
+      try {
+        localStorage.setItem("songs", JSON.stringify(Songs));
+      } catch (error) {
+        console.error("Error saving songs to localStorage:", error);
+      }
+    }
   };
 
   return (
     <div className="grid grid-cols-3 gap-4 mb-4">
-      {songs.map((song, index) => (
+      {Songs.slice(0,6).map((song, index) => (
         <div
           key={index}
           className={`relative rounded-md bg-zinc-900 hover:bg-zinc-700 overflow-hidden
@@ -67,24 +55,14 @@ const GridItems = () => {
         >
           <img
             src={song.image}
-            alt={song.name}
+            alt={song.title}
             className="w-20 h-20 object-cover"
           />
           <div className="absolute top-6 left-20  text-white p-2 text-sm whitespace-nowrap overflow-hidden text-ellipsis w-[300px]">
-            {song.name}
+            {song.title}
           </div>
         </div>
       ))}
-      {selectedPlayer && (
-        <PlayerControls
-          title={selectedPlayer.name}
-          artist={selectedPlayer.artist}
-          Image={selectedPlayer.image}
-          next={() => {/*  next track */ }}
-          prevsong={() => {/*  previous track */ }}
-          onTrackEnd={() => {/* Handle track end */ }}
-        />
-      )}
     </div>
   );
 };

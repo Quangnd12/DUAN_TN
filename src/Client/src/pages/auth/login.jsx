@@ -83,8 +83,11 @@ const Login = () => {
         })
       );
       toast.success("Login successful!");
-        navigate("/");
         setIsLoading(false);
+        setTimeout(() => {
+          navigate("/");  
+          setIsLoading(true); 
+        }, 1000);
     } catch (error) {
       setIsLoading(false);
       setError(error.data?.message || "An error occurred during login");

@@ -2,4 +2,12 @@
   background-color: #e0e7eb;
 }
 
+.custom-textfield .MuiInputLabel-root {
+  width: 100%;
+}
+
+.custom-textfield .MuiOutlinedInput-root {
+  height: 40px;         
+  text-align: center;   
+}
 

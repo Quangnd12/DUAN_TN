@@ -35,9 +35,20 @@ const CountryList = () => {
         }
     };
 
+    const useDebouncedValue = (value, delay = 500) => {
+        const [debouncedValue, setDebouncedValue] = useState(value);
+        useEffect(() => {
+          const timer = setTimeout(() => setDebouncedValue(value), delay);
+          return () => clearTimeout(timer);
+        }, [value, delay]);
+        return debouncedValue;
+      };
+
+      const debouncedSearchName = useDebouncedValue(searchName);
+
     useEffect(() => {
-        CountryData(currentPage, limit,searchName);
-    }, [currentPage, limit,searchName]);
+        CountryData(currentPage, limit,debouncedSearchName);
+    }, [currentPage, limit,debouncedSearchName]);
 
     const handleChangePage = (event, value) => {
         setCurrentPage(value);

@@ -1,13 +1,42 @@
 import React, { forwardRef } from 'react';
 import CodeIcon from '@mui/icons-material/Code';
+import { handleCopy } from '../../notification';
 
-const ShareOptionsList = forwardRef(({ onOptionClick }, ref) => {
+const ShareOptionsList = forwardRef(({ onOptionClick }, ref) => {    
+    const songLink = window.location.origin + window.location.pathname + window.location.search + window.location.hash;
+    
+   
+    const handleShare = (action) => {
+        switch (action) {
+            case 'share_facebook': {
+                const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${decodeURIComponent(songLink)}`;
+                window.open(facebookShareUrl, "_blank");
+                break;
+            }
+            case 'share_zalo': {
+                const zaloShareUrl = `https://zalo.me/share?url=${decodeURIComponent(songLink)}`;
+                window.open(zaloShareUrl, "_blank");
+                break;
+            }
+            case 'embed_code': {
+                navigator.clipboard.writeText(songLink).then(() => {
+                   handleCopy()
+                }).catch(err => {
+                    console.error("Failed to copy embed code: ", err);
+                });
+                break;
+            }
+            default:
+                console.log("Unknown action:", action);
+        }
+    }
+
     const shareOptions = [
         { label: 'Facebook', action: 'share_facebook', icon: <img src="/images/logo/fb.png" alt="Facebook" className="w-5 h-5" /> },
         { label: 'Zalo', action: 'share_zalo', icon: <img src="/images/logo/zalo.webp" alt="Zalo" className="w-5 h-5" /> },
         { label: 'Embed Code', action: 'embed_code', icon: <CodeIcon /> },
     ];
-
+    
     return (
         <div
             ref={ref}
@@ -23,6 +52,7 @@ const ShareOptionsList = forwardRef(({ onOptionClick }, ref) => {
                         onClick={(e) => {
                             e.stopPropagation();
                             onOptionClick(option.action);
+                            handleShare(option.action);
                         }}
                     >
                         <span className="mr-3 flex items-center">{option.icon}</span>

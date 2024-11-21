@@ -4,7 +4,7 @@ import "../../assets/css/artist/artist.css";
 import LikeButton from "../button/favorite";
 import MoreButton from "../button/morePlaycontroll";
 
-export default function ArtistInfo({ title, image, artist }) {
+export default function ArtistInfo({ title, image, artist,lyrics }) {
   const [likedSongs, setLikedSongs] = useState({});
 
   const handleLikeToggle = (index) => {
@@ -14,7 +14,7 @@ export default function ArtistInfo({ title, image, artist }) {
     }));
   };
 
-  const shouldUseMarquee = title.length > 35;
+  const shouldUseMarquee =title && title.length > 35;
 
   const handleOptionSelect = (action) => {
     console.log('Selected action:', action);
@@ -36,7 +36,7 @@ export default function ArtistInfo({ title, image, artist }) {
             <h4 className="track__info__track__name">{title}</h4>
           )}
         </div>
-        <h6 className="track__info__track__artists whitespace-nowrap overflow-hidden text-ellipsis w-[280px]">{artist}</h6>
+        <h6 className="track__info__track__artists whitespace-nowrap overflow-hidden text-ellipsis w-[280px]">{artist || ''}</h6>
       </div>
       <div className="track__info__like">
         <LikeButton
@@ -50,6 +50,7 @@ export default function ArtistInfo({ title, image, artist }) {
           songImage={image}
           songTitle={title}
           artistName={artist}
+          lyrics={lyrics}
         />
       </div>
     </div>

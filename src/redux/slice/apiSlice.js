@@ -1,6 +1,6 @@
 // src/redux/slice/apiSlice.js
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { API_BASE_URL } from "../../services/Api_url";
+import { API_BASE_URL } from "../../config/Api_url";
 import { setCredentials }  from "./authSlice"
 
 export const apiSlice = createApi({

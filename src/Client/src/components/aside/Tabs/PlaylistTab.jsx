@@ -1,14 +1,41 @@
-import React, {useState} from "react";
-import data from "../../../data/fetchSongData";
+
+import React, {useState,useContext} from "react";
+import useAge from "../../calculateAge";
+import { PlayerContext } from "../../context/MusicPlayer";
+import { formatDuration } from "../../format";
+import { handleWarning } from "../../notification";
+
 const PlaylistTab = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
-  const [clickedIndex, setClickedIndex] = useState(null);
-  // const [selectedPlayer, setSelectedPlayer] = useState(null);
-  const popularSongsList = data.songs.slice(0, 7);
+  const { setPlayerState, clickedIndex, setClickedIndex } = useContext(PlayerContext);
+  const age = useAge();
+  const popularSongsList = JSON.parse(localStorage.getItem("songs"));
 
-  // const handleRowClick = (song) => {
-  //   setSelectedPlayer(song);
-  // };
+  const handleRowClick = (song, index) => {
+    if (song.is_explicit === 1 && age < 18) {
+      handleWarning();
+      setClickedIndex(null);
+      return;
+    } else {
+      setPlayerState({
+        audioUrl: song.file_song,
+        title: song.title,
+        artist: song.artist,
+        Image: song.image,
+        lyrics: song.lyrics,
+        album: song.album,
+        playCount: song.listens_count,
+        TotalDuration:song.duration
+      });
+      setClickedIndex(index);
+      try {
+        localStorage.setItem("songs", JSON.stringify(popularSongsList));
+      } catch (error) {
+        console.error("Error saving songs to localStorage:", error);
+      }
+    }
+  };
+
   return (
     <div className="p-4">
       {popularSongsList.map((song, index) => (
@@ -17,7 +44,7 @@ const PlaylistTab = () => {
           onMouseEnter={() => setHoveredIndex(index)}
           onMouseLeave={() => setHoveredIndex(null)}
           onClick={() => {
-            // handleRowClick(song);
+            handleRowClick(song);
             setClickedIndex(index);
           }}
           className={`items-center p-1 rounded-md transition-colors ${
@@ -36,15 +63,14 @@ const PlaylistTab = () => {
               />
               <div>
                 <h3 className="text-white text-base font-semibold">
-                  {song.name}
+                  {song.title}
                 </h3>{" "}
                 {/* Tên bài hát lớn và đậm */}
                 <p className="text-gray-400 text-xs">{song.artist}</p>{" "}
-                {/* Tên nghệ sĩ màu xám và nhỏ */}
               </div>
             </div>
             {/* Thời lượng bài hát nằm phía cuối bên phải */}
-            <span className="text-gray-400 text-xs">{song.duration}</span>
+            <span className="text-gray-400 text-xs"> {formatDuration(song.duration)}</span>
           </div>
         </div>
       ))}

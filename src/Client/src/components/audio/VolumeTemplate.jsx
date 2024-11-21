@@ -7,7 +7,7 @@ import { usePip } from "../../utils/pip";
 import Drawer from "@mui/material/Drawer";
 import Lyrics from "../../pages/lyrics/lyrics";
 
-const Volume = ({ volume, onVolumeChange }) => {
+const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album,image,playCount,audio ,currentTime,TotalDuration}) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isLyricsOpen, setIsLyricsOpen] = useState(false);
   const { togglePip } = usePip();
@@ -36,7 +36,7 @@ const Volume = ({ volume, onVolumeChange }) => {
         onClick={togglePip}
       />
       <FaMicrophoneAlt // Sử dụng FaMicrophone thay cho FaMicrophoneAlt
-        className="icon-microphone mr-4"
+        className="icon-microphone mr-4 text-white"
         title="Mic Karaoke" // Đổi title thành Mic Karaoke
         onClick={toggleLyricsDrawer(true)} // Mở Drawer khi click
       />
@@ -62,14 +62,23 @@ const Volume = ({ volume, onVolumeChange }) => {
       />
       <MusicListDrawer open={drawerOpen} onClose={handleDrawerClose} />
 
-      {/* Drawer mở từ phía dưới */}
       <Drawer
         anchor="bottom"
-        open={isLyricsOpen}
-        onClose={toggleLyricsDrawer(false)}
+        open={isLyricsOpen && lyrics !== "Not Found!"} 
+        onClose={lyrics !== "Not Found!" ? toggleLyricsDrawer(false) : null}
       >
-        {/* Nội dung Drawer là component Lyrics */}
-        <Lyrics onClose={toggleLyricsDrawer(false)} />
+        <Lyrics
+          onClose={toggleLyricsDrawer(false)}
+          lyrics={lyrics}
+          title={title}
+          artist={artist}
+          album={album}
+          image={image}
+          playCount={playCount}
+          audioElement={audio}
+          currentTime={currentTime}
+          TotalDuration={TotalDuration}
+        />
       </Drawer>
     </div>
   );

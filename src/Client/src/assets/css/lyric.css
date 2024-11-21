@@ -1,0 +1,61 @@
+/* Định nghĩa container của lyrics */
+.lyrics-container {
+    max-height: 350px; /* Giới hạn chiều cao của phần hiển thị lyrics */
+    overflow-y: scroll; /* Cho phép cuộn theo chiều dọc */
+    position: relative;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    color: #fff;
+}
+
+/* Ẩn thanh cuộn */
+.lyrics-container::-webkit-scrollbar {
+    width: 0; /* Ẩn thanh cuộn ngang */
+    height: 0; /* Ẩn thanh cuộn dọc */
+}
+
+.lyrics-container {
+    scrollbar-width: none; /* Cho phép cuộn nhưng ẩn thanh cuộn trên Firefox */
+}
+
+/* Định nghĩa cho wrapper bao quanh lyrics */
+.lyric-wrapper {
+    display: block;
+    position: relative;
+    height: auto; /* Đảm bảo wrapper có chiều cao đủ lớn để cuộn */
+    padding-bottom: 20px; /* Đảm bảo các dòng lyric không bị cắt */
+}
+
+/* Định nghĩa cho từng dòng lyric */
+.lyric {
+    opacity: 0.5; /* Các dòng lyric không phải là dòng hiện tại sẽ mờ dần */
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; /* Hiệu ứng mờ dần và cuộn */
+    font-size: 1.2rem;
+    padding: 6px 0; /* Khoảng cách giữa các dòng lyrics */
+    line-height: 1.6;
+    text-align: center;
+    font-weight: 400; /* Độ đậm mặc định */
+}
+
+/* Dòng lyric đang phát (active) */
+.lyric.active {
+    opacity: 1; /* Dòng hiện tại có độ mờ đầy đủ */
+    font-weight: 700; /* Tăng độ đậm cho dòng hiện tại */
+    color: #3b82f6; /* Màu sắc nổi bật cho dòng hiện tại */
+}
+
+/* Dòng lyric đã phát xong (hidden) */
+.lyric.hidden {
+    opacity: 0.3; /* Dòng đã phát xong sẽ mờ đi */
+    transform: translateY(20px); /* Dòng đã qua sẽ bị dịch chuyển nhẹ xuống */
+}
+
+/* Hiệu ứng cuộn cho lyrics */
+@keyframes scrollLyrics {
+    0% {
+        transform: translateY(0); /* Bắt đầu ở vị trí ban đầu */
+    }
+    100% {
+        transform: translateY(-100%); /* Cuộn lên hết */
+    }
+}

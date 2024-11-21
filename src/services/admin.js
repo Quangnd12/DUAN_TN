@@ -1,4 +1,4 @@
-import api from './Api_url';
+import api from '../config/Api_url';
 
 // API đăng nhập admin
 export const loginAdmin = async (email, password, rememberMe) => {

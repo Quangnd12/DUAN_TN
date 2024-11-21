@@ -1,6 +1,6 @@
 import "./App.css";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { PipProvider } from "./utils/pip";
 import SideBar from "./components/sidebar/SideBar.component";
 import HomePage from "./pages/homepage/HomePage";
@@ -39,6 +39,9 @@ import LayoutArtist from "./pages/showAll/artists";
 import LayoutAlbums from "./pages/showAll/albums";
 import LayoutRadio from "./pages/showAll/radios";
 import AllTopranks from "./pages/artist/components/ToprankList";
+import { PlayerContext, PlayerProvider } from "./components/context/MusicPlayer";
+import PlayerControls from "./components/audio/PlayerControls";
+
 
 function MainLayout({ children }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -80,67 +83,75 @@ function PrivateRoute({ children }) {
 function AuthRoute({ children }) {
   const isAuthenticated = !!localStorage.getItem("user");
   const location = useLocation();
-  
+
   if (isAuthenticated) {
     // Nếu người dùng đã đăng nhập, chuyển hướng về trang chủ
     return <Navigate to="/" state={{ from: location }} replace />;
   }
-  
+
   return children;
 }
 
 function Client() {
-  
+
+  const [savedSongs, setSavedSongs] = useState([]);
+
+  useEffect(() => {
+    const songs = JSON.parse(localStorage.getItem("songs") || "[]");
+    setSavedSongs(songs);
+  }, []);
+
   return (
     <PipProvider>
       <div className="App max-h-dvh bg-black">
         <MainLayout>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path='/artist' element={<EmptyLayout />}>
-                  <Route path=':artistName' element={<Artist />} />
-                  <Route path=":artistName/album" element={<AllAlbums />} />
-                  <Route path=":artistName/song" element={<AllSong />} />
-                </Route>
-            <Route path='/allsong' element={<AllSong />} /><Route path='/show-all' element={<EmptyLayout />} >
-                  <Route path="artist" element={<LayoutArtist />} />
-                  <Route path="album" element={<LayoutAlbums />} />
-                
-                   <Route path="radio" element={<LayoutRadio />} />
-                </Route>
-            <Route path='/album/:albumName' element={<Albums />} />
-            <Route path='/listalbum/:id' element={<Albums />} />
-            <Route path="/toprank" element={<AllTopranks />} />
-            <Route path="/toprank/:id" element={<TopRank />} />
-            <Route path='/lyrics' element={<Lyrics />} />
-            <Route path='/genre' element={<AllGenre />} />
-            <Route path='/track' element={<Genres />} />
+          <PlayerProvider>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<HomePage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path='/artist' element={<EmptyLayout />}>
+                <Route path=':artistName' element={<Artist />} />
+                <Route path=":artistName/album" element={<AllAlbums />} />
+                <Route path=":artistName/song" element={<AllSong />} />
+              </Route>
+              <Route path='/allsong' element={<AllSong />} /><Route path='/show-all' element={<EmptyLayout />} >
+                <Route path="artist" element={<LayoutArtist />} />
+                <Route path="album" element={<LayoutAlbums />} />
+                <Route path="radio" element={<LayoutRadio />} />
+              </Route>
+              <Route path='/album/:albumName' element={<Albums />} />
+              <Route path='/listalbum/:id' element={<Albums />} />
+              <Route path="/toprank" element={<AllTopranks />} />
+              <Route path="/toprank/:id" element={<TopRank />} />
+              <Route path='/lyrics' element={<Lyrics />} />
+              <Route path='/genre' element={<AllGenre />} />
+              <Route path='/track/:id' element={<Genres />} />
 
-            {/* Auth routes - protected from logged-in users */}
-            <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
-            <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
-            <Route path="/forgot" element={<AuthRoute><ForgotPass /></AuthRoute>} />
-            <Route path="/reset-password/:token" element={<AuthRoute><ResetPass /></AuthRoute>} />
+              {/* Auth routes - protected from logged-in users */}
+              <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
+              <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
+              <Route path="/forgot" element={<AuthRoute><ForgotPass /></AuthRoute>} />
+              <Route path="/reset-password/:token" element={<AuthRoute><ResetPass /></AuthRoute>} />
 
-            {/* Private routes */}
-            <Route path="/library" element={<PrivateRoute><Library /></PrivateRoute>} />
-            <Route path="/playlist/:id" element={<PrivateRoute><Playlist /></PrivateRoute>} />
-            <Route path="/playlist" element={<PrivateRoute><EmptyLayout /></PrivateRoute>}>
-                  <Route path=":playlistName" element={<PrivateRoute><Playlist /> </PrivateRoute>} />
-                  <Route path="add" element={<PrivateRoute><AddPlaylist /></PrivateRoute>} />
-                  <Route path="all" element={<PrivateRoute><PlaylistAll /></PrivateRoute>} />
-                </Route>
-            <Route path="/info/:userId" element={<PrivateRoute><InfoClient /></PrivateRoute>} />
-            <Route path="/content" element={<PrivateRoute><Content /></PrivateRoute>} />
-            <Route path='/report' element= {<Report/>}/>
-            <Route path='/event' element={<PrivateRoute><Event /></PrivateRoute>} />
-            <Route path='/event/:id' element={<PrivateRoute><EventDetail /></PrivateRoute>} />
+              {/* Private routes */}
+              <Route path="/library" element={<PrivateRoute><Library /></PrivateRoute>} />
+              <Route path="/playlist/:id" element={<PrivateRoute><Playlist /></PrivateRoute>} />
+              <Route path="/playlist" element={<PrivateRoute><EmptyLayout /></PrivateRoute>}>
+                <Route path=":playlistName" element={<PrivateRoute><Playlist /> </PrivateRoute>} />
+                <Route path="add" element={<PrivateRoute><AddPlaylist /></PrivateRoute>} />
+                <Route path="all" element={<PrivateRoute><PlaylistAll /></PrivateRoute>} />
+              </Route>
+              <Route path="/info/:userId" element={<PrivateRoute><InfoClient /></PrivateRoute>} />
+              <Route path="/content" element={<PrivateRoute><Content /></PrivateRoute>} />
+              <Route path='/report' element={<Report />} />
+              <Route path='/event' element={<PrivateRoute><Event /></PrivateRoute>} />
+              <Route path='/event/:id' element={<PrivateRoute><EventDetail /></PrivateRoute>} />
 
-            {/* NotFound route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            {savedSongs.length > 0 && <PlayerControls />}
+          </PlayerProvider>
         </MainLayout>
         <PictureInPicturePlayer />
       </div>
