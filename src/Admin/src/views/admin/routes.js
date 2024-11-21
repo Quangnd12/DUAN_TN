@@ -5,6 +5,7 @@ import { Route, Navigate } from "react-router-dom";
 import Dashboard from "./Dashboard.js";
 import Home from "./Home.js";
 import Info from "./info/index.js";
+import PlaylistDetail from "./info/components/userplaylistDetail.js";
 import Songs from "./song";
 import Users from "./user";
 import AddSong from "./song/component/add";
@@ -32,6 +33,7 @@ const AdminRoutes = (
     <Route path="dashboard" element={<Dashboard />} />
     <Route path="home" element={<Home />} />
     <Route path="info/:id" element={<Info />} />
+    <Route path="/playlists/:playlistId" element={<PlaylistDetail />} />
     <Route path="user" element={<Users />} />
     <Route path="song" element={<Songs />} />
     <Route path="song/add" element={<AddSong />} />

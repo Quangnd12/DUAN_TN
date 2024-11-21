@@ -107,7 +107,6 @@ export default function NotificationDropdown() {
   
   // Log state để debug
   const notificationState = useSelector((state) => state.notifications);
-  console.log('Notification State:', notificationState);
   
   const { notifications, unreadCount } = notificationState;
 
@@ -115,8 +114,6 @@ export default function NotificationDropdown() {
 
   useEffect(() => {
     // Log để debug
-    console.log('Current notifications:', notifications);
-    console.log('Unread count:', unreadCount);
     
     if (unreadCount > 0) {
       setShowNewNotification(true);

@@ -2,19 +2,11 @@ import React from "react";
 import { useSelector } from "react-redux";
 import UserDropdown from "../Dropdowns/UserDropdown.js";
 import NotificationDropdown from "../Dropdowns/NotificationDropdown.js";
-import { useLocation } from "react-router-dom";
 import { useTheme } from '../../views/admin/ThemeContext.js';
 import { Switch } from '@mui/material';
 
 export default function AdminNavbar() {
-  const location = useLocation();
-  const pathParts = location.pathname.split("/").filter(Boolean);
-  let currentPage = pathParts.pop();
   const { theme, toggleTheme, language, toggleLanguage } = useTheme();
-
-  if (!isNaN(currentPage)) {
-    currentPage = pathParts.pop();
-  }
 
   const user = useSelector((state) => state.auth.user);
 
@@ -24,14 +16,12 @@ export default function AdminNavbar() {
       transition-colors duration-200`}>
       <div className="w-full mx-auto items-center flex justify-between md:flex-nowrap flex-wrap md:px-10 px-2">
         {/* Brand */}
-        <a
+        <p
           className={`text-sm uppercase hidden lg:inline-block font-semibold
             ${theme === 'dark' ? 'text-black' : 'text-white'}`}
-          href="#pablo"
-          onClick={(e) => e.preventDefault()}
         >
-          {currentPage}
-        </a>
+         Music Heals
+        </p>
         
         {/* User and Controls Section */}
         <div className="flex items-center">

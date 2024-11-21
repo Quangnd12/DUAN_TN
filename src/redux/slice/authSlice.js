@@ -24,7 +24,6 @@ const saveUserToStorage = (user, pathname) => {
     console.error("Error saving user to storage:", error);
     // Xóa thông tin đăng nhập nếu không có quyền truy cập
     localStorage.removeItem("user");
-    localStorage.removeItem("accessToken");
     sessionStorage.removeItem("user");
     throw error;
   }
@@ -60,10 +59,13 @@ export const checkAuth = createAsyncThunk(
       if (storedUser) {
         return { user: storedUser, token };
       }
-
       const response = await dispatch(
-        apiSlice.endpoints.getUser.initiate("me")
+        apiSlice.endpoints.validateToken.initiate(token)
       ).unwrap();
+
+      if (!response.valid) {
+        throw new Error("Invalid token");
+      }
 
       // Kiểm tra quyền truy cập trước khi lưu user mới
       if (!checkRoleAccess(response.role, currentPath)) {
@@ -72,7 +74,6 @@ export const checkAuth = createAsyncThunk(
       sessionStorage.setItem("user", JSON.stringify(response));
       return { user: response, token };
     } catch (error) {
-      localStorage.removeItem("accessToken");
       localStorage.removeItem("user");
       sessionStorage.removeItem("user");
       return rejectWithValue(error.message);
@@ -96,7 +97,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setCredentials: (state, action) => {
-      const { user, token } = action.payload;
+      const { user, token  } = action.payload;
       const currentPath = window.location.pathname;
 
       try {
@@ -106,9 +107,8 @@ const authSlice = createSlice({
           saveUserToStorage(user, currentPath);
         }
         if (token) {
-          state.token = token;
+          state.token = typeof token === 'object' ? token.accessToken : token;
           state.isAuthenticated = true;
-          localStorage.setItem("accessToken", token);
         }
         state.isLoading = false;
         state.error = null;
@@ -131,7 +131,6 @@ const authSlice = createSlice({
       state.error = null;
       sessionStorage.removeItem("user");
       localStorage.removeItem("user");
-      localStorage.removeItem("accessToken");
     },
     setError: (state, action) => {
       state.error = action.payload;

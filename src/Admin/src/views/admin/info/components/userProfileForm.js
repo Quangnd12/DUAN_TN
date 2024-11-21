@@ -20,6 +20,7 @@ import {
 } from '../../../../../../redux/slice/apiSlice';
 import LogoutDialog from './logoutDialog';
 import ProfileTabs from './tabs';
+import UserPlaylist from './userPlaylist';
 
 const UserProfileForm = ({ user }) => {
   const dispatch = useDispatch();
@@ -264,7 +265,7 @@ const UserProfileForm = ({ user }) => {
           </form>
         );
       case 1: // Playlists tab
-        return <div>Playlists Content</div>;
+        return <UserPlaylist/>;
       case 2: // Favorites tab
         return <div>Favorites Content</div>;
       case 3: // History tab

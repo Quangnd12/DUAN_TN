@@ -94,30 +94,23 @@ export default function Login() {
   const onSubmit = async (data) => {
     setLoading(true);
     setError("");
-
+  
     try {
       const response = await login({
         email: data.email,
         password: data.password,
         rememberMe,
-      }).unwrap();
-      
-       // Kiểm tra vai trò người dùng
-       if (response.user.role !== 'admin') {
-        setError("You do not have access to the admin site.");
-        return;
-      }
-
-      localStorage.setItem("accessToken", response.token);
-      sessionStorage.setItem("user", JSON.stringify(response.user));
+      }).unwrap();      
+      // Update Redux store with both tokens
       dispatch(
         setCredentials({
           user: response.user,
-          token: response.token,
+          token: response.accessToken,
+          refreshToken: response.refreshToken,
           rememberMe
         })
       );
-
+  
       navigate("/admin/dashboard", { replace: true });
     } catch (err) {
       setError(err.data?.message || "Login failed. Please try again.");
@@ -134,7 +127,6 @@ export default function Login() {
       const { user, token: googleToken } = await signInWithGoogle();
       const response = await googleLogin({idToken: googleToken}).unwrap();
 
-      localStorage.setItem("accessToken", response.token);
       sessionStorage.setItem("user", JSON.stringify(response.user));
       dispatch(
         setCredentials({

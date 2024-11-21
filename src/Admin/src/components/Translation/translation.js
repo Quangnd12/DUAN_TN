@@ -1,32 +1,74 @@
 export const translations = {
-    vi: {
-      notifications: {
-        title: "Thông báo",
-        markAllAsRead: "Đánh dấu tất cả đã đọc",
-        noNotifications: "Chưa có thông báo nào",
-        justNow: "Vừa xong",
-        minutesAgo: "phút trước",
-        hoursAgo: "giờ trước",
-        yesterday: "Hôm qua lúc",
-      },
-      userDropdown: {
-        profile: "Hồ sơ",
-        logout: "Đăng xuất"
-      }
+  vi: {
+    notifications: {
+      title: "Thông báo",
+      markAllAsRead: "Đánh dấu tất cả đã đọc",
+      noNotifications: "Chưa có thông báo nào",
+      justNow: "Vừa xong",
+      minutesAgo: "phút trước",
+      hoursAgo: "giờ trước",
+      yesterday: "Hôm qua lúc",
     },
-    en: {
-      notifications: {
-        title: "Notifications",
-        markAllAsRead: "Mark all as read",
-        noNotifications: "No notifications yet",
-        justNow: "Just now",
-        minutesAgo: "minutes ago",
-        hoursAgo: "hours ago",
-        yesterday: "Yesterday at",
-      },
-      userDropdown: {
-        profile: "Profile",
-        logout: "Logout"
-      }
-    }
-  };
+    userDropdown: {
+      profile: "Hồ sơ",
+      logout: "Đăng xuất",
+    },
+    playlist: {
+      pageTitle: "Danh sách phát của tôi",
+      createPlaylist: "Tạo danh sách phát mới",
+      playlistName: "Tên danh sách phát",
+      description: "Mô tả",
+      publicPlaylist: "Danh sách phát công khai",
+      uploadImage: "Tải ảnh lên",
+      changeImage: "Thay đổi ảnh",
+      createButton: "Tạo",
+      updateButton: "Cập nhật",
+      cancel: "Hủy bỏ",
+      editPlaylist: "Chỉnh sửa danh sách phát",
+      addSongToPlaylist: "Thêm bài hát vào danh sách phát",
+      songId: "ID bài hát",
+      addSong: "Thêm bài hát",
+      confirmDelete: "Bạn có chắc chắn muốn xóa danh sách phát này không?",
+      publicLabel: "Công khai",
+      privateLabel: "Riêng tư",
+      songCount: "bài hát",
+      createdAt: "Tạo vào",
+    },
+  },
+  en: {
+    notifications: {
+      title: "Notifications",
+      markAllAsRead: "Mark all as read",
+      noNotifications: "No notifications yet",
+      justNow: "Just now",
+      minutesAgo: "minutes ago",
+      hoursAgo: "hours ago",
+      yesterday: "Yesterday at",
+    },
+    playlist: {
+      pageTitle: "My Playlists",
+      createPlaylist: "Create New Playlist",
+      playlistName: "Playlist Name",
+      description: "Description",
+      publicPlaylist: "Public Playlist",
+      uploadImage: "Upload Image",
+      changeImage: "Change Image",
+      createButton: "Create",
+      updateButton: "Update",
+      cancel: "Cancel",
+      editPlaylist: "Edit Playlist",
+      addSongToPlaylist: "Add Song to Playlist",
+      songId: "Song ID",
+      addSong: "Add Song",
+      confirmDelete: "Are you sure you want to delete this playlist?",
+      publicLabel: "Public",
+      privateLabel: "Private",
+      songCount: "songs",
+      createdAt: "Created at",
+    },
+    userDropdown: {
+      profile: "Profile",
+      logout: "Logout",
+    },
+  },
+};

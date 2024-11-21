@@ -1,7 +1,7 @@
 // src/redux/slice/apiSlice.js
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_BASE_URL } from "../../config/Api_url";
-import { setCredentials }  from "./authSlice"
+import { setCredentials, logout }  from "./authSlice"
 import { addNotification }  from "./notificationSlice"
 
 export const apiSlice = createApi({
@@ -10,8 +10,9 @@ export const apiSlice = createApi({
     baseUrl: API_BASE_URL,
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth.token;
+      
       if (token) {
-        headers.set("authorization", `Bearer ${token}`);
+        headers.set("Authorization", `Bearer ${token}`);
       }
       return headers;
     },
@@ -19,6 +20,26 @@ export const apiSlice = createApi({
   }),
   tagTypes: ['User'], 
   endpoints: (builder) => ({
+    // Thêm endpoint refresh token
+    refreshToken: builder.mutation({
+      query: () => ({
+        url: "/auth/refresh-token",
+        method: "POST",
+        credentials: "include" // Để gửi refresh token từ cookie
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setCredentials({ 
+            token: data.accessToken,
+            // Không lưu refresh token vào localStorage
+          }));
+        } catch (error) {
+          // Nếu refresh token không hợp lệ, logout
+          dispatch(logout());
+        }
+      }
+    }),
     // Auth endpoints
     login: builder.mutation({
       query: (credentials) => ({
