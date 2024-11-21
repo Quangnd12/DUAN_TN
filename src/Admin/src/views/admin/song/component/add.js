@@ -148,6 +148,7 @@ const AddSong = () => {
     }
   }, [watch("duration")]);
 
+
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
         <LoadingSpinner isLoading={loading} />
@@ -257,6 +258,8 @@ const AddSong = () => {
                     id="releaseDate"
                     selected={field.value}
                     onChange={(date) => setValue("releaseDate", date, { shouldValidate: true })}
+                    autoComplete="off" 
+                    minDate={new Date()}
                   />
                 )}
                 rules={{ required: "Release date is required" }}

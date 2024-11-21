@@ -12,7 +12,6 @@ const MusicListDrawer = ({ open, onClose }) => {
     setActiveTab(newValue);
   };
 
-   // Hàm này sẽ được truyền xuống ArtistInfoTab để thay đổi tab
    const handleTabSwitch = (tabIndex) => {
     setActiveTab(tabIndex);
   };

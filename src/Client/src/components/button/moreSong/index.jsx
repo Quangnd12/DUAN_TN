@@ -21,6 +21,7 @@ const SongMoreButton = ({ type, onOptionSelect }) => {
     const shareDropdownRef = useRef(null);
     const playlistDropdownRef = useRef(null);
 
+    
     const songMenuOptionsMap = {
         song: [
             { label: 'Add to playlist', action: 'add_to_playlist', icon: <AddIcon /> },
@@ -98,6 +99,9 @@ const SongMoreButton = ({ type, onOptionSelect }) => {
 
         return { top: '100%', marginTop: '8px' };
     };
+
+
+
 
     return (
         <div className="relative" ref={dropdownRef}>
