@@ -14,7 +14,6 @@ import ResetPass from "./pages/auth/resetPass";
 import Content from "./pages/content/Content";
 import InfoClient from "./pages/info-client/Info-client";
 import TopRank from "./pages/toprank/TopRank";
-import TopChart from "./pages/topchart/sections/chart";
 import Library from "./pages/library/library";
 import AllSong from './pages/artist/components/SongList';
 import AllAlbums from './pages/artist/components/AllAlbum';
@@ -31,9 +30,9 @@ import EventDetail from "./pages/event/Detail-event/Detail-event";
 
 
 
-
-import PlaylistAll from "./pages/playlist/components/PlaylistAll";
 import AddPlaylist from "./pages/playlist/components/PlaylistAdd";
+import PlaylistList from "./pages/playlist/sections/playlist";
+import PlayListInfo from "./pages/playlist/components/PlaylistInfo";
 import EmptyLayout from "./layouts";
 import LayoutArtist from "./pages/showAll/artists";
 import LayoutAlbums from "./pages/showAll/albums";
@@ -126,12 +125,12 @@ function Client() {
 
             {/* Private routes */}
             <Route path="/library" element={<PrivateRoute><Library /></PrivateRoute>} />
-            <Route path="/playlist/:id" element={<PrivateRoute><Playlist /></PrivateRoute>} />
+            <Route path="/playlist" element={<PrivateRoute><Playlist /></PrivateRoute>} />
             <Route path="/playlist" element={<PrivateRoute><EmptyLayout /></PrivateRoute>}>
-                  <Route path=":playlistName" element={<PrivateRoute><Playlist /> </PrivateRoute>} />
-                  <Route path="add" element={<PrivateRoute><AddPlaylist /></PrivateRoute>} />
-                  <Route path="all" element={<PrivateRoute><PlaylistAll /></PrivateRoute>} />
-                </Route>
+                 <Route path="playlistdetail/:name" element={<PrivateRoute><PlaylistList /></PrivateRoute>} />
+                 <Route path="add" element={<PrivateRoute><AddPlaylist /></PrivateRoute>} />
+                 <Route path="info" element={<PrivateRoute><PlayListInfo /></PrivateRoute>} />
+            </Route>
             <Route path="/info/:userId" element={<PrivateRoute><InfoClient /></PrivateRoute>} />
             <Route path="/content" element={<PrivateRoute><Content /></PrivateRoute>} />
             <Route path='/report' element= {<Report/>}/>

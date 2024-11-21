@@ -1,0 +1,214 @@
+/* General container */
+.playlist-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #121212; /* Nền tối cho giao diện hiện đại */
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Bóng đổ nhẹ */
+}
+
+/* Title */
+.playlist-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #fff; /* Màu trắng cho tiêu đề */
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+/* Playlist Image */
+.playlist-image {
+    width: 120px; /* Giảm chiều rộng */
+    height: 120px; /* Giảm chiều cao */
+    object-fit: cover;
+    border-radius: 12px;
+    margin-right: 15px;
+    transition: transform 0.3s ease;
+}
+
+.playlist-image:hover {
+    transform: scale(1.05); /* Hiệu ứng phóng to khi hover */
+}
+
+/* Playlist grid layout */
+.playlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+/* Playlist Card */
+.playlist-card {
+    background-color: #1f1f1f;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #333;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.playlist-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Bóng đổ khi hover */
+}
+
+/* Playlist header */
+.playlist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* Playlist name */
+.playlist-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+/* Playlist status (Public/Private) */
+.playlist-status {
+    padding: 5px 10px;
+    border-radius: 16px;
+    font-size: 14px;
+    color: white;
+    font-weight: 600;
+    border: none;
+}
+
+.playlist-status.public {
+    background-color: #4CAF50; /* Màu xanh lá */
+}
+
+.playlist-status.private {
+    background-color: #757575; /* Màu xám */
+}
+
+/* Playlist description */
+.playlist-description {
+    color: #b0b0b0; /* Màu chữ xám sáng */
+    margin-bottom: 20px;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+/* Playlist details (songs count and creation date) */
+.playlist-details {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 15px;
+    border-top: 1px solid #333;
+}
+
+/* Songs count */
+.playlist-songs {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #fff;
+}
+
+.songs-count {
+    font-weight: 600;
+}
+
+/* Playlist creation date */
+.playlist-date {
+    color: #b0b0b0;
+    font-size: 14px;
+}
+
+/* Actions (delete button) */
+.playlist-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 12px;
+}
+
+.action-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.action-button:hover {
+    transform: scale(1.1); /* Tăng kích thước nút khi hover */
+}
+
+/* Delete button */
+.delete-button {
+    color: #F44336; /* Màu đỏ cho nút xóa */
+}
+
+.delete-button:hover {
+    color: #D32F2F; /* Màu đỏ đậm khi hover */
+}
+
+/* Loading spinner */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #444;
+    border-top: 3px solid #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error container */
+.error-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    color: white;
+}
+
+.error-message {
+    color: #dc3545; /* Màu đỏ cho thông báo lỗi */
+}
+
+/* Empty playlist */
+.empty-playlist {
+    text-align: center;
+    padding: 40px;
+    color: #b0b0b0;
+}
+
+.empty-playlist h3 {
+    font-size: 22px;
+    margin-bottom: 8px;
+    color: white;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .playlist-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .playlist-container {
+        padding: 16px;
+    }
+}
