@@ -1,7 +1,7 @@
 import React,{useState} from "react";
 import YourPlayList from "./YourPlaylist";
 import AddPlayListInfo from "./addInfoPlaylist";
-import RelatedSong from "./RelatedSong";
+
 
 const AddPlaylist = () => {
 
@@ -18,7 +18,7 @@ const AddPlaylist = () => {
         <div className="p-4 bg-zinc-900 p-4 rounded-md  mt-4 backdrop-filter">
           <YourPlayList playlistAdd={playlistAdd} />
         </div>
-        <RelatedSong onAddSong={handleAddSong} />
+        {/* <RelatedSong onAddSong={handleAddSong} /> */}
       </div>
     </div>
   );

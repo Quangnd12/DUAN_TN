@@ -30,7 +30,7 @@ const SideBar = () => {
 
   const data = ["NGÁO NGƠ- LYRICS", "HIEUTHUHAI, JSOL, Erik"];
   const [playlistName, artistName] = data; // ĐÚNG
-  
+
   const validPlaylistName = playlistName || "unknown";
   const validArtistName = artistName || "unknown";
 
@@ -92,11 +92,11 @@ const SideBar = () => {
         isOpen={isOpen}
       />
       <NavItem
-   to={`/playlist/${createAlbumSlug(validPlaylistName, validArtistName)}`}
-   icon={<QueueMusicIcon />}
-   text="Playlist"
-   isOpen={isOpen}
-/>
+        to="/playlist"
+        icon={<QueueMusicIcon />}
+        text="Playlist"
+        isOpen={isOpen}
+      />
       <NavItem
         to="/toprank"
         icon={<StarRateIcon />}
