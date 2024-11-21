@@ -93,10 +93,6 @@ const AlbumList = () => {
     debouncedSearch(value);
   };
 
-
-  // const handleSearchChange = (e) => {
-  //   debouncedSearch(e.target.value);
-  // };
   const handleChangePage = (event, value) => {
     setCurrentPage(value);
   };
