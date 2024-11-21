@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import debounce from "lodash/debounce";
 import {
@@ -27,7 +27,7 @@ import {
   KeyboardArrowUp,
 } from "@mui/icons-material";
 import { MdEdit, MdDelete } from "react-icons/md";
-import { getAlbums } from "../../../../../../services/album";
+import { getAlbums, getAlbumById } from "../../../../../../services/album";
 import DeleteAlbum from "./delete";
 import { formatDate } from "Admin/src/components/formatDate";
 
@@ -36,6 +36,7 @@ const AlbumList = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [openRow, setOpenRow] = useState({});
+  const [albumDetails, setAlbumDetails] = useState({});
   const [albums, setAlbums] = useState([]);
   const [albumToDelete, setAlbumToDelete] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -43,11 +44,9 @@ const AlbumList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [searchTitle, setSearchTitle] = useState("");
-
   const [showActionMenu, setShowActionMenu] = useState(false);
-
   const [isLoading, setIsLoading] = useState(false);
-
+  const [isDetailsLoading, setIsDetailsLoading] = useState({});
 
   const fetchAlbumData = useCallback(
     async (page, limit, searchTitle) => {
@@ -75,31 +74,35 @@ const AlbumList = () => {
     []
   );
 
+  const fetchAlbumDetails = useCallback(async (albumId) => {
+    setIsDetailsLoading(prev => ({ ...prev, [albumId]: true }));
+    try {
+      const details = await getAlbumById(albumId);
+      setAlbumDetails(prev => ({ ...prev, [albumId]: details }));
+    } catch (error) {
+      console.error(`Error fetching album ${albumId} details:`, error);
+    } finally {
+      setIsDetailsLoading(prev => ({ ...prev, [albumId]: false }));
+    }
+  }, []);
+
   useEffect(() => {
     fetchAlbumData(currentPage, limit, searchTitle);
   }, [fetchAlbumData, currentPage, limit, searchTitle]);
 
-  const debouncedSearch = useCallback(
-    debounce((searchTerm) => {
-      setCurrentPage(1);
-      fetchAlbumData(1, limit, searchTerm);
-    }, 500),
-    [fetchAlbumData, limit]
-  );
+  const toggleRow = (id) => {
+    setOpenRow((prevState) => {
+      const newState = {
+        ...prevState,
+        [id]: !prevState[id]
+      };
 
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTitle(value);
-    debouncedSearch(value);
-  };
+      if (newState[id] && !albumDetails[id]) {
+        fetchAlbumDetails(id);
+      }
 
-  const handleChangePage = (event, value) => {
-    setCurrentPage(value);
-  };
-
-  const handleLimitChange = (event) => {
-    setLimit(parseInt(event.target.value, 10));
-    setCurrentPage(1);
+      return newState;
+    });
   };
 
   const handleOpenMenu = (event, album) => {
@@ -132,11 +135,13 @@ const AlbumList = () => {
     navigate("/admin/album/add");
   };
 
-  const toggleRow = (id) => {
-    setOpenRow((prevState) => ({
-      ...prevState,
-      [id]: !prevState[id],
-    }));
+  const handleChangePage = (event, value) => {
+    setCurrentPage(value);
+  };
+
+  const handleLimitChange = (event) => {
+    setLimit(parseInt(event.target.value, 10));
+    setCurrentPage(1);
   };
 
   const getInitials = (title) => {
@@ -154,10 +159,6 @@ const AlbumList = () => {
     return color;
   };
 
-
-
-
-
   return (
     <div className="p-4">
       <div className="flex justify-between mb-4">
@@ -166,7 +167,13 @@ const AlbumList = () => {
             label="Search"
             variant="outlined"
             value={searchTitle}
-            onChange={handleSearchChange}
+            onChange={(e) => {
+              setSearchTitle(e.target.value);
+              debounce(() => {
+                setCurrentPage(1);
+                fetchAlbumData(1, limit, e.target.value);
+              }, 500)();
+            }}
             className="w-64"
             placeholder="Search by album name..."
           />
@@ -179,25 +186,6 @@ const AlbumList = () => {
           >
             + Add Album
           </button>
-
-          <div className="relative w-full md:w-auto">
-            <button
-              className="border px-4 py-2 rounded-md flex items-center w-full md:w-auto"
-              onClick={() => setShowActionMenu(!showActionMenu)}
-            >
-              Actions <i className="fas fa-chevron-down ml-2"></i>
-            </button>
-            {showActionMenu && (
-              <div className="absolute right-0 mt-2 w-full md:w-48 bg-white rounded-md shadow-lg z-10">
-                <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                  Mass edit
-                </button>
-                <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                  Delete all
-                </button>
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
@@ -222,7 +210,6 @@ const AlbumList = () => {
               <TableBody>
                 {albums.map((album, index) => (
                   <React.Fragment key={album.id}>
-
                     <TableRow sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}>
                       <TableCell>
                         <IconButton
@@ -230,11 +217,7 @@ const AlbumList = () => {
                           size="small"
                           onClick={() => toggleRow(album.id)}
                         >
-                          {openRow[album.id] ? (
-                            <KeyboardArrowUp />
-                          ) : (
-                            <KeyboardArrowDown />
-                          )}
+                          {openRow[album.id] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
                         </IconButton>
                       </TableCell>
                       <TableCell>{(currentPage - 1) * limit + index + 1}</TableCell>
@@ -286,45 +269,52 @@ const AlbumList = () => {
                             <MdEdit style={{ marginRight: "8px", color: "blue" }} />
                             <span style={{ color: "blue" }}>Edit</span>
                           </MenuItem>
-                          <MenuItem onClick={() => handleOpenDeleteModal(album)} style={{ display: 'none' }}>
-                            <MdDelete style={{ marginRight: "8px", color: "red" }} />
-                            <span style={{ color: "red" }}>Delete</span>
-                          </MenuItem>
-
                         </Menu>
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell
-                        style={{ paddingBottom: 0, paddingTop: 0 }}
-                        colSpan={8}
-                      >
+                      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
                         <Collapse in={openRow[album.id]} timeout="auto" unmountOnExit>
                           <Box margin={1}>
-                            <Typography variant="h6" gutterBottom component="div">
-                              Album Details
-                            </Typography>
-                            <Typography variant="body1" className="pb-2">
-                              Artists:
-                            </Typography>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                              {Array.isArray(album.artist) ? (
-                                album.artist.map((artist, idx) => (
-                                  <span
-                                    key={idx}
-                                    className="px-3 py-1 rounded-full text-sm"
-                                    style={{
-                                      backgroundColor: getColorFromName(artist),
-                                      color: "#fff",
-                                    }}
-                                  >
-                                    {artist}
-                                  </span>
-                                ))
-                              ) : (
-                                <span>{album.artist}</span>
-                              )}
-                            </div>
+                            {isDetailsLoading[album.id] ? (
+                              <Typography>Loading album details...</Typography>
+                            ) : albumDetails[album.id] ? (
+                              <>
+                                <Typography variant="h6" gutterBottom component="div">
+                                  Album Songs
+                                </Typography>
+                                {albumDetails[album.id].songs.length > 0 ? (
+                                  <Table size="small">
+                                    <TableHead>
+                                      <TableRow>
+                                        <TableCell>Title</TableCell>
+                                        <TableCell>Duration</TableCell>
+                                        <TableCell>Artists</TableCell>
+                                      </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                      {albumDetails[album.id].songs.map((song) => (
+                                        <TableRow key={song.id}>
+                                          <TableCell>{song.title}</TableCell>
+                                          <TableCell>
+                                            {(() => {
+                                              const minutes = Math.floor(song.duration / 60);
+                                              const seconds = Math.floor(song.duration % 60);
+                                              return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                                            })()}
+                                          </TableCell>
+                                          <TableCell>
+                                            {song.artistNames.join(", ")}
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                ) : (
+                                  <Typography>No songs in this album</Typography>
+                                )}
+                              </>
+                            ) : null}
                           </Box>
                         </Collapse>
                       </TableCell>
