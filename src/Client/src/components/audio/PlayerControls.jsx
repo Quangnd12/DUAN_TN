@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import ReactPlayer from "react-player";
 import { BsFillPlayCircleFill, BsFillPauseCircleFill } from "react-icons/bs";
 import { CgPlayTrackNext, CgPlayTrackPrev } from "react-icons/cg";
@@ -10,28 +11,35 @@ import "../../assets/css/artist/playercontroll.css";
 import { PlayerContext } from "../context/MusicPlayer";
 import useAge from "../calculateAge";
 import { handleWarning, handleWarningUser } from "../notification";
+import { updatePlayCount } from "services/songs";
+import { addHistory } from "services/history";
+import { getHistoryById } from "services/history";
+import { async } from "@firebase/util";
+import { formatDate } from "../format";
+import { getPaymentByUser } from "services/payment";
 
 
 const PlayerControls = () => {
   const [isPlaying, setIsPlaying] = useState(null)
-  const [currentTime, setCurrentTime ]=useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.8);
   const [isRepeat, setIsRepeat] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
-  const playerRef = useRef(null);
-  const { playerState, setPlayerState, Songs, clickedIndex, setClickedIndex} = useContext(PlayerContext);
-  const { audioUrl, title, artist, Image, lyrics, album, playCount,TotalDuration} = playerState;
-  const age = useAge();
-  const navigate=useNavigate();
-  const user = localStorage.getItem("user");
+  const [hasListened, setHasListened] = useState(false);
+  const [hasAddedHistory, setHasAddedHistory] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [payment, setPayments] = useState([]);
 
-  useEffect(() => {
-    const savedCurrentTime = localStorage.getItem("currentTime");
-    if (savedCurrentTime) {
-      setCurrentTime(parseFloat(savedCurrentTime)); 
-    }
-  }, []);
+  const playerRef = useRef(null);
+  const { playerState, setPlayerState, Songs, clickedIndex, setClickedIndex } = useContext(PlayerContext);
+  const { audioUrl, title, artist, Image, lyrics, album, playCount, TotalDuration, songId,is_premium } = playerState;
+  const age = useAge();
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
+  const currentUserId = user ? user.id : null;
+
+
 
   useEffect(() => {
     if (audioUrl) {
@@ -53,9 +61,11 @@ const PlayerControls = () => {
         album,
         playCount,
         TotalDuration,
+        songId,
+        is_premium
       }));
     }
-  }, [audioUrl, title, artist, Image, lyrics, album, playCount,TotalDuration, setPlayerState]);
+  }, [audioUrl, title, artist, Image, lyrics, album, playCount, TotalDuration,songId,is_premium ,setPlayerState]);
 
   const handlePlayPause = () => {
     if (currentTime >= 30 && !user) {
@@ -63,28 +73,115 @@ const PlayerControls = () => {
       navigate('/login');
       return;
     }
+    if (currentTime >= 30 && user && is_premium && payment.status ===0) {
+      navigate('/upgrade');
+      return;
+    }
     setIsPlaying(prev => !prev);
   };
 
+  const getPayment = async () => {
+    try {
+        if (user) {
+            const data = await getPaymentByUser(); 
+            setPayments(data || []); 
+        }
+    } catch (error) {
+        console.error("Error fetching payment data", error);
+        setPayments([]); 
+    }
+};
+
+useEffect(() => {
+    if (user) {
+        getPayment();
+    }
+}, [user]); 
+
   const handleProgress = (state) => {
     setCurrentTime(state.playedSeconds);
-    localStorage.setItem("currentTime", state.playedSeconds); 
     if (!user && state.playedSeconds > 30) {
       setIsPlaying(false);
+      return;
     }
+    if (is_premium && state.playedSeconds > 30 && user && !payment.user_id) {
+      setIsPlaying(false);
+      navigate('/upgrade');
+      return;
+    }
+    // if (user && state.playedSeconds > 30 && !hasAddedHistory) {
+    //   handleAddHistory(); 
+    // }
+
+    // if (user && state.playedSeconds > 60 && !hasAddedHistory) {
+    //   incrementPlayCount(); 
+    // }
   };
+  // const handleAddHistory = async () => {
+  //   try {
+  //     const today = new Date().toISOString().split("T")[0];
+  //     const HistoryDate = formatDate(history.listeningDate);
+  //     if (history  && HistoryDate === today) {
+  //       return;
+  //     }
+  //     else {
+  //       await addHistory({
+  //         userID: currentUserId,
+  //         songID: songId,
+  //         listeningDate: today,
+  //       });
+  //       setHasAddedHistory(true);
+  //       await getHistory();
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to add history:", error);
+  //   }
+  // };
+
+  // const getHistory = async () => {
+  //   const history = await getHistoryById(currentUserId);
+  //   setHistory(history || []);
+  // }
+
+  // useEffect(() => {
+  //   if (currentUserId) {
+  //     getHistory();
+  //   }
+  // }, [currentUserId])
+
+  // const incrementPlayCount = async () => {
+  //   try {
+  //     const today = new Date().toISOString().split("T")[0];
+  //     const HistoryDate = formatDate(history.listeningDate);
+  //     if (!history && HistoryDate !== today) {
+  //       const updatedPlayCount = await updatePlayCount(songId);
+  //       setPlayerState((prevState) => ({
+  //         ...prevState,
+  //         playCount: updatedPlayCount,
+  //       }));
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating play count:", error);
+  //   }
+  // };
 
   const handleDuration = (duration) => {
     setDuration(duration);
   };
 
   const handleSliderChange = (e) => {
-    const newTime = parseFloat(e.target.value);
-    setCurrentTime(newTime);
+    if (is_premium && payment.status ===1 ) { 
+      const newTime = parseFloat(e.target.value);
+      setCurrentTime(newTime);
+    } else {
+      navigate('/upgrade');
+    }
   };
   const handleSliderMouseUp = () => {
-    if (playerRef.current) {
+    if (is_premium && playerRef.current && payment.status ===1) {  
       playerRef.current.seekTo(currentTime, 'seconds');
+    } else {
+      navigate('/upgrade');
     }
   };
 
@@ -94,12 +191,12 @@ const PlayerControls = () => {
         ...playerState,
         audioUrl: playerState.audioUrl,
       });
-      setIsPlaying(true); 
+      setIsPlaying(true);
     } else {
       nextSong();
     }
   };
-  
+
   const handleRepeatToggle = () => {
     setIsRepeat((prevState) => !prevState);
   };
@@ -107,13 +204,13 @@ const PlayerControls = () => {
   const handleShuffleToggle = () => {
     setIsShuffle((prevState) => !prevState);
   };
-  
+
   const currentIndex = clickedIndex !== null ? clickedIndex : Songs.findIndex((song) => song.file_song === playerState.audioUrl);
 
   const nextSong = () => {
     let nextIndex = currentIndex;
-    let checkedSongs = 0; 
-  
+    let checkedSongs = 0;
+
     const findNextValidSong = () => {
       while (checkedSongs < Songs.length) {
         if (isShuffle) {
@@ -132,28 +229,33 @@ const PlayerControls = () => {
             lyrics: nextSong.lyrics,
             album: nextSong.album,
             playCount: nextSong.listens_count,
-            TotalDuration:nextSong.duration
+            TotalDuration: nextSong.duration,
+            songId: nextSong.songId,
+            is_premium:nextSong.is_premium
           });
           setClickedIndex(nextIndex);
           return;
         }
+        // if(is_premium && !payment.user_id){
+        //   return
+        // }
         handleWarning();
       }
     };
     findNextValidSong();
   };
-  
-  
+
+
   const prevSong = () => {
     if (currentIndex === 0) {
       return;
     }
     let prevIndex = currentIndex;
     let checkedSongs = 0;
-  
+
     while (checkedSongs < Songs.length) {
       prevIndex = (prevIndex - 1 + Songs.length) % Songs.length;
-  
+
       const prevSong = Songs[prevIndex];
       checkedSongs++;
       if (prevSong.is_explicit === 0 || age >= 18) {
@@ -165,10 +267,15 @@ const PlayerControls = () => {
           lyrics: prevSong.lyrics,
           album: prevSong.album,
           playCount: prevSong.listens_count,
-          TotalDuration:prevSong.duration
+          TotalDuration: prevSong.duration,
+          songId: prevSong.songId,
+          is_premium:prevSong.is_premium
         });
         setClickedIndex(prevIndex);
         return;
+      }
+      if(is_premium && !payment.user_id){
+        return
       }
       handleWarning();
     }

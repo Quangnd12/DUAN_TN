@@ -97,6 +97,12 @@ const handleCopy = () => {
     });
 }
 
+const handlePay = () => {
+    toast.success("Payment successful! Thank you for subscribing to the Premium music package!", {
+        autoClose: 4000,   
+    });
+}
+
 export { 
     handleAddPlaylist, 
     handleAddFavorite,
@@ -110,6 +116,6 @@ export {
     handleAcceptTerms ,
     handleWarning,
     handleWarningUser,
-    handleCopy
-    
+    handleCopy,
+    handlePay
 };

@@ -5,6 +5,8 @@ import RowItems from "../../components/row_items/RowItems";
 import GridItems from "../../components/grid_items/GridItems";
 import GridGenreItems from "../../components/grid_items/GridGenreItems";
 import Footer from "../../components/footer/Footer";
+import { CheckPayment } from "services/payment";
+import { useDispatch, useSelector } from "react-redux";
 
 const data = {
   artist: [
@@ -139,6 +141,8 @@ const data = {
 };
 
 const HomePage = () => {
+  const { user } = useSelector((state) => state.auth);
+
   //Khởi tạo globalPlayingState bằng cách kiểm tra localStorage. Nếu có dữ liệu được lưu, sử dụng nó; nếu không, sử dụng giá trị mặc định.
   const [globalPlayingState, setGlobalPlayingState] = useState(() => {
     const savedState = localStorage.getItem("globalPlayingState");
@@ -150,6 +154,18 @@ const HomePage = () => {
       JSON.stringify(globalPlayingState)
     );
   }, [globalPlayingState]);
+
+  const checkUserPremium = async () => {
+    if (user) {
+    await CheckPayment();
+    }
+}
+
+useEffect(() => {
+  if (user) {
+    checkUserPremium();
+  }
+}, [])
 
   return (
     <HelmetProvider>

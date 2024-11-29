@@ -16,6 +16,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { styled } from "@mui/joy";
 import Button from "@mui/joy/Button";
+import { getPaymentByUser } from 'services/payment';
+import { GiCrown } from 'react-icons/gi';
 
 const VisuallyHiddenInput = styled("input")`
   clip: rect(0 0 0 0);
@@ -40,6 +42,8 @@ const Header = () => {
   const [canGoForward, setCanGoForward] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [payment, setPayments] = useState([]);
+
 
   // State mới để lưu thông tin hiển thị của user
   const [displayUser, setDisplayUser] = useState({
@@ -53,7 +57,7 @@ const Header = () => {
     setCanGoBack(window.history.length > 1);
     setCanGoForward(
       window.history.state &&
-        window.history.state.idx < window.history.length - 1
+      window.history.state.idx < window.history.length - 1
     );
   }, [location]);
 
@@ -115,17 +119,35 @@ const Header = () => {
     }
   };
 
+  const getPayment = async () => {
+    try {
+        if (user) {
+            const data = await getPaymentByUser(); 
+            setPayments(data || []); 
+        }
+    } catch (error) {
+        console.error("Error fetching payment data", error);
+        setPayments([]);
+    }
+};
+
+useEffect(() => {
+    if (user) {
+        getPayment();
+    }
+}, [user]); 
+
   // Render user section based on authentication status
   const renderUserSection = () => {
     if (isAuthenticated && user) {
       return (
         <div className="relative">
-          <div
-            onClick={toggleMenu}
-            className="cursor-pointer flex items-center"
-          >
-            <p className="px-4 py-2 text-sm text-white hover:text-gray-300">
-              {displayUser.username}
+          <div onClick={toggleMenu} className="cursor-pointer flex items-center">
+            <p className="px-4 py-2 text-sm text-white hover:text-gray-300 flex items-center">
+            {displayUser.username}
+              {payment?.status===1 && ( 
+                <GiCrown className="ml-2 text-yellow-500" size={20} />
+              )}
             </p>
             <Avatar
               alt={displayUser.username}
@@ -191,11 +213,10 @@ const Header = () => {
             <Tooltip title={canGoBack ? "Back" : "Can't go back"}>
               <span>
                 <div
-                  className={`rounded-full p-2 ${
-                    canGoBack
-                      ? "bg-gray-500 text-white hover:text-gray-700 cursor-pointer"
-                      : "bg-gray-700 text-gray-500 cursor-not-allowed"
-                  }`}
+                  className={`rounded-full p-2 ${canGoBack
+                    ? "bg-gray-500 text-white hover:text-gray-700 cursor-pointer"
+                    : "bg-gray-700 text-gray-500 cursor-not-allowed"
+                    }`}
                   onClick={handleGoBack}
                 >
                   <ArrowBackIosIcon fontSize="small" className="ml-1" />
@@ -205,11 +226,10 @@ const Header = () => {
             <Tooltip title={canGoForward ? "Forward" : "Can't go on"}>
               <span>
                 <div
-                  className={`rounded-full p-2 ${
-                    canGoForward
-                      ? "bg-gray-500 text-white hover:text-gray-700 cursor-pointer"
-                      : "bg-gray-700 text-gray-500 cursor-not-allowed"
-                  }`}
+                  className={`rounded-full p-2 ${canGoForward
+                    ? "bg-gray-500 text-white hover:text-gray-700 cursor-pointer"
+                    : "bg-gray-700 text-gray-500 cursor-not-allowed"
+                    }`}
                   onClick={handleGoForward}
                 >
                   <ArrowForwardIosIcon fontSize="small" className="ml-1" />
@@ -222,20 +242,32 @@ const Header = () => {
           </div>
 
           <div className="flex gap-2 items-center">
+
             {isAuthenticated && (
-              <Link to="/content">
-                <Tooltip title="What's news">
-                  <div className="relative px-2 py-2 hover:bg-gray-600 rounded-md">
-                    <NotificationsIcon
-                      fontSize="large"
-                      className="text-white"
-                    />
-                    <div className="absolute top-0 right-1">
-                      <CircleIcon fontSize="small" className="text-red-500" />
+              <>
+
+                {!payment.user_id && (
+                <Link to="/upgrade">
+                  <button className="bg-white text-black text-[16px] font-bold px-3 py-2 rounded-[20px]  mr-6 shrink-0">
+                    Premium Upgrade
+                  </button>
+                  </Link>
+               )} 
+                <Link to="/content">
+                  <Tooltip title="What's news">
+                    <div className="relative px-2 py-2 hover:bg-gray-600 rounded-md">
+
+                      <NotificationsIcon
+                        fontSize="large"
+                        className="text-white"
+                      />
+                      <div className="absolute top-0 right-1">
+                        <CircleIcon fontSize="small" className="text-red-500" />
+                      </div>
                     </div>
-                  </div>
-                </Tooltip>
-              </Link>
+                  </Tooltip>
+                </Link>
+              </>
             )}
             {renderUserSection()}
           </div>

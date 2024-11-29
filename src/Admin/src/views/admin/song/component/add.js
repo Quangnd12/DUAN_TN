@@ -29,6 +29,7 @@ const AddSong = () => {
       releaseDate: null,
       duration: null,
       is_explicit: 0,
+      is_premium:0
     }
   });
   const [Artists, setArtists] = useState([]);
@@ -127,6 +128,7 @@ const AddSong = () => {
     formData.append('releaseDate', releaseDateFormatted);
     formData.append('duration', data.duration);
     formData.append('is_explicit', data.is_explicit ? 1 : 0);
+    formData.append('is_premium', data.is_premium? 1 : 0);
     formData.append('file_song', data.file_song);
     formData.append('image', data.image);
     try {
@@ -278,6 +280,20 @@ const AddSong = () => {
                     {...field}
                     checked={field.value}
                     onChange={() => setValue("is_explicit", !field.value)}
+                  />
+                )}
+              />
+            </div>
+            <div>
+              <Controller
+                name="is_premium"
+                control={control}
+                render={({ field }) => (
+                  <SwitchField
+                    label="Premium"
+                    {...field}
+                    checked={field.value}
+                    onChange={() => setValue("is_premium", !field.value)}
                   />
                 )}
               />

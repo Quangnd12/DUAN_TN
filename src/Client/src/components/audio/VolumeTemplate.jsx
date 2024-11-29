@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import "../../assets/css/artist/volume.css";
 import { FaVolumeUp, FaVolumeMute, FaMicrophoneAlt } from "react-icons/fa";
 import { MdQueueMusic, MdPictureInPictureAlt } from "react-icons/md";
@@ -6,11 +6,16 @@ import MusicListDrawer from "../aside/MusicListDrawer";
 import { usePip } from "../../utils/pip";
 import Drawer from "@mui/material/Drawer";
 import Lyrics from "../../pages/lyrics/lyrics";
+import { PlayerContext } from "../context/MusicPlayer";
+import { useNavigate } from "react-router-dom";
 
-const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album,image,playCount,audio ,currentTime,TotalDuration}) => {
+const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album, image, playCount, audio, currentTime, TotalDuration }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isLyricsOpen, setIsLyricsOpen] = useState(false);
   const { togglePip } = usePip();
+  const { playerState } = useContext(PlayerContext);
+  const { is_premium } = playerState;
+  const navigate = useNavigate();
 
   const handleVolumeChange = (e) => {
     onVolumeChange(e);
@@ -38,7 +43,15 @@ const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album,image,pla
       <FaMicrophoneAlt // Sử dụng FaMicrophone thay cho FaMicrophoneAlt
         className="icon-microphone mr-4 text-white"
         title="Mic Karaoke" // Đổi title thành Mic Karaoke
-        onClick={toggleLyricsDrawer(true)} // Mở Drawer khi click
+        onClick={() => {
+          if (is_premium) {
+            toggleLyricsDrawer(false)
+            navigate('/upgrade');
+          } else {
+            toggleLyricsDrawer(true)
+          }
+
+        }}// Mở Drawer khi click
       />
 
       {volume === 0 ? (
@@ -64,7 +77,7 @@ const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album,image,pla
 
       <Drawer
         anchor="bottom"
-        open={isLyricsOpen && lyrics !== "Not Found!"} 
+        open={isLyricsOpen && lyrics !== "Not Found!"}
         onClose={lyrics !== "Not Found!" ? toggleLyricsDrawer(false) : null}
       >
         <Lyrics

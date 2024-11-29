@@ -1,6 +1,7 @@
 import "./App.css";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useContext } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { PipProvider } from "./utils/pip";
 import SideBar from "./components/sidebar/SideBar.component";
 import HomePage from "./pages/homepage/HomePage";
@@ -40,6 +41,10 @@ import LayoutRadio from "./pages/showAll/radios";
 import AllTopranks from "./pages/artist/components/ToprankList";
 import { PlayerContext, PlayerProvider } from "./components/context/MusicPlayer";
 import PlayerControls from "./components/audio/PlayerControls";
+import PaymentPage from "./pages/payment";
+import PricingPlans from "./pages/payment/components/plan";
+import SuccessPay from "./pages/payment/components/sucess";
+import { getPaymentByUser } from "services/payment";
 
 
 function MainLayout({ children }) {
@@ -94,11 +99,31 @@ function AuthRoute({ children }) {
 function Client() {
 
   const [savedSongs, setSavedSongs] = useState([]);
+  const [payment, setPayments] = useState([]);
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const songs = JSON.parse(localStorage.getItem("songs") || "[]");
     setSavedSongs(songs);
   }, []);
+
+  const getPayment = async () => {
+    try {
+      if (user) {
+        const data = await getPaymentByUser();
+        setPayments(data || []);
+      }
+    } catch (error) {
+      console.error("Error fetching payment data", error);
+      setPayments([]);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      getPayment();
+    }
+  }, [user]);
 
   return (
     <PipProvider>
@@ -133,20 +158,25 @@ function Client() {
               <Route path="/forgot" element={<AuthRoute><ForgotPass /></AuthRoute>} />
               <Route path="/reset-password/:token" element={<AuthRoute><ResetPass /></AuthRoute>} />
 
-            {/* Private routes */}
-            <Route path="/library" element={<PrivateRoute><Library /></PrivateRoute>} />
-            <Route path="/playlist" element={<PrivateRoute><Playlist /></PrivateRoute>} />
-            <Route path="/playlist" element={<PrivateRoute><EmptyLayout /></PrivateRoute>}>
-                 <Route path="playlistdetail/:name" element={<PrivateRoute><PlaylistList /></PrivateRoute>} />
-                 <Route path="add" element={<PrivateRoute><AddPlaylist /></PrivateRoute>} />
-                 <Route path="info" element={<PrivateRoute><PlayListInfo /></PrivateRoute>} />
-            </Route>
-            <Route path="/info/:userId" element={<PrivateRoute><InfoClient /></PrivateRoute>} />
-            <Route path="/content" element={<PrivateRoute><Content /></PrivateRoute>} />
-            <Route path='/report' element= {<Report/>}/>
-            <Route path='/event' element={<PrivateRoute><Event /></PrivateRoute>} />
-            <Route path='/event/:id' element={<PrivateRoute><EventDetail /></PrivateRoute>} />
-
+              {/* Private routes */}
+              <Route path="/library" element={<PrivateRoute><Library /></PrivateRoute>} />
+              <Route path="/playlist" element={<PrivateRoute><Playlist /></PrivateRoute>} />
+              <Route path="/playlist" element={<PrivateRoute><EmptyLayout /></PrivateRoute>}>
+                <Route path="playlistdetail/:name" element={<PrivateRoute><PlaylistList /></PrivateRoute>} />
+                <Route path="add" element={<PrivateRoute><AddPlaylist /></PrivateRoute>} />
+                <Route path="info" element={<PrivateRoute><PlayListInfo /></PrivateRoute>} />
+              </Route>
+              <Route path="/info/:userId" element={<PrivateRoute><InfoClient /></PrivateRoute>} />
+              <Route path="/content" element={<PrivateRoute><Content /></PrivateRoute>} />
+              <Route path='/report' element={<Report />} />
+              <Route path='/event' element={<PrivateRoute><Event /></PrivateRoute>} />
+              <Route path='/event/:id' element={<PrivateRoute><EventDetail /></PrivateRoute>} />
+              {!payment.user_id && (
+                <>
+                  <Route path='/payment' element={<PaymentPage />} />
+                  <Route path='/upgrade' element={<PricingPlans />} />
+                </>
+              )}
               <Route path="*" element={<NotFound />} />
             </Routes>
             {savedSongs.length > 0 && <PlayerControls />}
