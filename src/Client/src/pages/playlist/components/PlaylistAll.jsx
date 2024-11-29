@@ -9,7 +9,9 @@ import { handleDeletePlaylistSuccess } from "../../../../../Client/src/component
 
 const PlaylistAll = () => {
   const navigate = useNavigate();
-  const { data, isLoading, error } = useGetUserPlaylistsQuery();
+  const { data, isLoading, error} = useGetUserPlaylistsQuery(undefined, {
+    refetchOnMountOrArgChange: true, // Force refetch when component mounts
+  });
   const [deletePlaylist, { isLoading: isDeleting }] = useDeletePlaylistMutation();
 
   // State để điều khiển dialog

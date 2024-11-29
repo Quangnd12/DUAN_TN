@@ -41,7 +41,7 @@ const AddPlayListInfo = () => {
             handleCreatePlaylistSuccess();
     
             // Chuyển hướng về /playlist
-            navigate(`/playlist`);
+            navigate(`/playlistall`);
         } catch (error) {
             console.error("Failed to create playlist:", error);
         }

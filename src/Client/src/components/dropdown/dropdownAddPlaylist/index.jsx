@@ -1,27 +1,30 @@
 import React, { forwardRef } from 'react';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import AddIcon from '@mui/icons-material/Add';
-import data from '../../../data/fetchSongData';
 import { handleAddPlaylist } from "../../notification";
 import { useNavigate } from 'react-router-dom';
+import { useGetUserPlaylistsQuery } from '../../../../../redux/slice/playlistSlice'; // Import query hook
 
 const AddPlaylistOption = forwardRef(({ onOptionClick }, ref) => {
-    const YourPlaylist = data.playlists.filter((playlist) => playlist.role === 1);
+    const { data: userPlaylists = [] } = useGetUserPlaylistsQuery(); // Fetch user playlists
+    const navigate = useNavigate();
 
-    const AddPlaylistOption = YourPlaylist.map((playlist) => ({
+    const addToPlaylist = { label: 'New playlist', action: 'new_playlist', icon: <AddIcon /> };
+    
+    // Map user playlists to the required format
+    const playlistOptions = userPlaylists.map((playlist) => ({
         label: playlist.name,
         action: 'add_to_playlist',
         icon: <PlaylistAddIcon />,
+        playlistId: playlist.id // Add playlist ID for potential future use
     }));
 
-    const navigate = useNavigate();
-    const addToPlaylist = { label: 'New playlist', action: 'new_playlist', icon: <AddIcon /> };
-    const renderPlaylist = [addToPlaylist, ...AddPlaylistOption];
+    const renderPlaylist = [addToPlaylist, ...playlistOptions];
 
-    const handleNotification = (action) => {
+    const handleNotification = (action, playlistId) => {
         switch (action) {        
             case 'add_to_playlist':
-                handleAddPlaylist();
+                handleAddPlaylist(playlistId);
                 break; 
              case 'new_playlist':
                 navigate('/playlist/add'); 
@@ -31,11 +34,10 @@ const AddPlaylistOption = forwardRef(({ onOptionClick }, ref) => {
         }
     };
 
-
     return (
         <div
             ref={ref}
-            className="absolute z-50 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 "
+            className="absolute z-50 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5"
             style={{ left: '-210px', top: '0' }}
         >
             <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="playlist-options-menu">
@@ -47,7 +49,7 @@ const AddPlaylistOption = forwardRef(({ onOptionClick }, ref) => {
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onOptionClick(option.action);
-                                handleNotification(option.action);
+                                handleNotification(option.action, option.playlistId);
                             }}
                         >
                             <span className="mr-3 flex items-center">{option.icon}</span>
@@ -55,7 +57,7 @@ const AddPlaylistOption = forwardRef(({ onOptionClick }, ref) => {
                                 {option.label}
                             </div>
                         </button>
-                        {/* Thêm thẻ ngang dưới cả icon và label */}
+                        {/* Add a horizontal line under 'New playlist' */}
                         {option.label === 'New playlist' && (
                             <hr className="border-gray-600 my-1" />
                         )}

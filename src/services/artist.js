@@ -34,6 +34,21 @@ const getArtists = async (page , limit) => {
   };
 };
 
+const getAllArtists = async () => {
+  let path = '/api/artists'; // Đường dẫn API lấy tất cả nghệ sĩ
+
+  // Gửi request đến API
+  const res = await request({
+    method: "GET",
+    path: path,
+  });
+
+  // Đảm bảo trả về đối tượng có artists
+  return {
+    artists: res.artists || [], // Nếu không có artists, trả về mảng rỗng
+  };
+};
+
 
 const getArtistById = async (id) => {
   const res = await request({
@@ -95,14 +110,4 @@ const updateArtist = async (id, Artist) => {
   return res;
 };
 
-// services/artist.js
-export const restoreArtist = async (id) => {
-  const response = await request({
-    method: "PUT",
-    path: `/api/artists/restore/${id}`,
-  });
-  return response;
-};
-
-
-export { getArtists, getArtistById, addArtist, deleteArtist, updateArtist, fetcher };
+export { getArtists, getArtistById, addArtist, deleteArtist, updateArtist, fetcher , getAllArtists};
