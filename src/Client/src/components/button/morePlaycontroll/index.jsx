@@ -12,7 +12,7 @@ import LyricModal from '../../lyrics';
 import { PlayerContext } from "../../context/MusicPlayer";
 
 
-const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName, lyrics }) => {
+const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName, lyrics,user_id }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
@@ -26,9 +26,14 @@ const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName, lyrics }
 
     const handleButtonClick = (e) => {
         e.stopPropagation();
-        if (is_premium) {
-            setIsModalOpen(false);
-            navigate('/upgrade');
+        if (is_premium==1) {
+            if(user_id){
+                  setIsModalOpen(true);
+            }
+            else{
+                  setIsModalOpen(false); 
+                   navigate('/upgrade');
+            }
         } else {
             setIsModalOpen(true);
         }

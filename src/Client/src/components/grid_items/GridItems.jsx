@@ -34,7 +34,8 @@ const GridItems = () => {
         album: song.album,
         playCount: song.listens_count,
         TotalDuration:song.duration,
-        songId:song.id
+        songId:song.id,
+        is_premium:song.is_premium
       });
       setClickedIndex(index);
       try {

@@ -1,8 +1,11 @@
 import React from 'react';
 import {MdCheck} from "react-icons/md"
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from "react-redux";
 
 const PricingPlans = () => {
+  const { user,isAuthenticated } = useSelector((state) => state.auth);
+
   return (
 <div className="container mx-auto p-4">
   <div className="flex justify-center items-center">
@@ -25,7 +28,7 @@ const PricingPlans = () => {
           <MdCheck className="mr-2" size={20} />Experience the new album in advance
         </li>
       </ul>
-      <Link to={'/payment'}>
+      <Link to={isAuthenticated? '/payment' : '/login'}>
        <button className="mt-6 w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition">
         Nâng cấp ngay
       </button>

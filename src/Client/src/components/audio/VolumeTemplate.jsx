@@ -9,7 +9,7 @@ import Lyrics from "../../pages/lyrics/lyrics";
 import { PlayerContext } from "../context/MusicPlayer";
 import { useNavigate } from "react-router-dom";
 
-const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album, image, playCount, audio, currentTime, TotalDuration }) => {
+const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album, image, playCount, audio, currentTime, TotalDuration, user_id }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isLyricsOpen, setIsLyricsOpen] = useState(false);
   const { togglePip } = usePip();
@@ -44,9 +44,14 @@ const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album, image, p
         className="icon-microphone mr-4 text-white"
         title="Mic Karaoke" // Đổi title thành Mic Karaoke
         onClick={() => {
-          if (is_premium) {
-            toggleLyricsDrawer(false)
-            navigate('/upgrade');
+          if (is_premium === 1) {
+            if (user_id) {
+              toggleLyricsDrawer(true)
+            }
+            else {
+              toggleLyricsDrawer(false);
+              navigate('/upgrade');
+            }
           } else {
             toggleLyricsDrawer(true)
           }
