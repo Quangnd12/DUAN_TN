@@ -52,17 +52,23 @@ const EditArtist = () => {
     fetchArtist();
   }, [id, setValue]);
 
-  const handleDrop = useCallback((acceptedFiles) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
+  const handleDrop = useCallback(
+    (acceptedFiles) => {
+      const file = acceptedFiles[0];
+      if (!file) return;
 
-    setValue("avatar", file);
-    const objectURL = URL.createObjectURL(file);
-    setAvatarPreview(objectURL);
-    clearErrors("avatar");
-  }, [setValue, clearErrors]);
+      setValue("avatar", file);
+      const objectURL = URL.createObjectURL(file);
+      setAvatarPreview(objectURL);
+      clearErrors("avatar");
+    },
+    [setValue, clearErrors]
+  );
 
-  const { getRootProps: getAvatarRootProps, getInputProps: getAvatarInputProps } = useDropzone({
+  const {
+    getRootProps: getAvatarRootProps,
+    getInputProps: getAvatarInputProps,
+  } = useDropzone({
     onDrop: handleDrop,
     accept: "image/*",
   });
@@ -94,45 +100,45 @@ const EditArtist = () => {
       handleAdd(); // Display success notification
       navigate("/admin/artist"); // Navigate back to artist list after update
     } catch (error) {
-      console.error("Error updating artist:", error.response ? error.response.data : error.message);
+      console.error(
+        "Error updating artist:",
+        error.response ? error.response.data : error.message
+      );
     } finally {
       setLoading(false); // Set loading to false after submission
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+    <div className="max-w-full mx-auto p-6 bg-white shadow-md rounded-lg">
       <LoadingSpinner isLoading={loading} /> {/* Display loading spinner */}
-
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-blue-500">
-          <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Controller
                 name="name"
                 control={control}
                 render={({ field }) => (
-                  <InputField
-                    label="Name"
-                    id="name"
-                    name="name"
-                    {...field}
-                  />
+                  <InputField label="Name" id="name" name="name" {...field} />
                 )}
                 rules={{
                   validate: (value) => {
                     if (!value) return "Name is required";
-                    if (value.length < 1 || value.length > 100) return "Name must be between 1 and 100 characters";
+                    if (value.length < 1 || value.length > 100)
+                      return "Name must be between 1 and 100 characters";
                     const invalidCharacters = /[<>:"/\\|?*]/;
-                    if (invalidCharacters.test(value)) return "Name contains invalid characters";
+                    if (invalidCharacters.test(value))
+                      return "Name contains invalid characters";
                     return true;
-                  }
+                  },
                 }}
               />
+              {errors.name && (
+                <small className="text-red-500">{errors.name.message}</small>
+              )}
             </div>
 
-            {/* Role Select Input */}
             <div>
               <Controller
                 name="role"
@@ -142,7 +148,12 @@ const EditArtist = () => {
                 }}
                 render={({ field }) => (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700" htmlFor="role">Role</label>
+                    <label
+                      className="block text-sm font-medium text-gray-700"
+                      htmlFor="role"
+                    >
+                      Role
+                    </label>
                     <select
                       id="role"
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-base focus:ring-blue-500 focus:border-blue-500"
@@ -152,38 +163,46 @@ const EditArtist = () => {
                       <option value="1">Artist</option>
                       <option value="2">Rapper</option>
                     </select>
-                    {errors.role && <small className="text-red-500">{errors.role.message}</small>}
+                    {errors.role && (
+                      <small className="text-red-500">
+                        {errors.role.message}
+                      </small>
+                    )}
                   </div>
                 )}
               />
             </div>
           </div>
 
-          {/* Biography Input */}
-          <div className="grid grid-cols-1 gap-4 mt-4 w-full max-w-4xl">
-            <div>
-              <Controller
-                name="biography"
-                control={control}
-                render={({ field }) => (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700" htmlFor="biography">Biography</label>
-                    <textarea
-                      id="biography"
-                      name="biography"
-                      {...field}
-                      rows={5}
-                      cols={10}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    {errors.biography && <small className="text-red-500">{errors.biography.message}</small>}
-                  </div>
-                )}
-                rules={{ required: "Biography is required" }}
-              />
-            </div>
+          <div className="col-span-2">
+            <Controller
+              name="biography"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <label
+                    className="block text-sm font-medium text-gray-700"
+                    htmlFor="biography"
+                  >
+                    Biography
+                  </label>
+                  <textarea
+                    id="biography"
+                    name="biography"
+                    {...field}
+                    rows={5}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  {errors.biography && (
+                    <small className="text-red-500">
+                      {errors.biography.message}
+                    </small>
+                  )}
+                </div>
+              )}
+              rules={{ required: "Biography is required" }}
+            />
           </div>
-
         </div>
 
         {/* Avatar Upload Section */}
@@ -196,11 +215,14 @@ const EditArtist = () => {
               render={({ field }) => (
                 <div
                   {...getAvatarRootProps()}
-                  className={`w-full p-6 border-2 border-dashed ${errors.avatar ? 'border-red-600' : 'border-gray-400'} rounded-md cursor-pointer hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500`}
+                  className={`w-full p-6 border-2 border-dashed ${
+                    errors.avatar ? "border-red-600" : "border-gray-400"
+                  } rounded-md cursor-pointer hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500`}
                 >
                   <input {...getAvatarInputProps()} />
                   <p className="text-center text-gray-600">
-                    Drag & drop an avatar image file here, or click to select a file
+                    Drag & drop an avatar image file here, or click to select a
+                    file
                   </p>
                   {field.value && (
                     <p className="text-center text-green-500 mt-2">
@@ -216,7 +238,11 @@ const EditArtist = () => {
                       />
                     </div>
                   )}
-                  {errors.avatar && <small className="text-red-500 mt-2">{errors.avatar.message}</small>}
+                  {errors.avatar && (
+                    <small className="text-red-500 mt-2">
+                      {errors.avatar.message}
+                    </small>
+                  )}
                 </div>
               )}
             />
@@ -244,4 +270,3 @@ const EditArtist = () => {
 };
 
 export default EditArtist;
-

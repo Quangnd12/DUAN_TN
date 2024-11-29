@@ -14,9 +14,13 @@ import { Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
 import { getSongs } from '../../../../../../services/songs';
 import { useAddSongToPlaylistMutation } from '../../../../../../redux/slice/playlistSlice';
 import { useGetPlaylistByIdQuery } from '../../../../../../redux/slice/playlistSlice';
+import { useTheme } from "../../ThemeContext";
+import { translations } from "../../../../components/Translation/translation";
 
 const PlaylistSongSelector = ({ playlistId, onClose }) => {
   const [songs, setSongs] = useState([]);
+  const { language } = useTheme();
+  const t = translations[language].addSongtoPlaylist;
   const [isLoading, setIsLoading] = useState(false);
   const [addingSongs, setAddingSongs] = useState({});
   const [addSongToPlaylist] = useAddSongToPlaylistMutation();
@@ -95,7 +99,7 @@ const PlaylistSongSelector = ({ playlistId, onClose }) => {
         <CloseIcon />
       </CloseButton>
       <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold' }}>
-        Add Songs to Playlist
+       {t.addToSong}
       </Typography>
       
       {isLoading ? (
@@ -107,7 +111,7 @@ const PlaylistSongSelector = ({ playlistId, onClose }) => {
           {availableSongs.length === 0 ? (
             <Grid item xs={12}>
               <Typography variant="body1" align="center" color="text.secondary">
-                No more songs available to add
+               {t.noMore}
               </Typography>
             </Grid>
           ) : (

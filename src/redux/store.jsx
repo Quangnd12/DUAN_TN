@@ -6,6 +6,7 @@ import { apiSlice } from "./slice/apiSlice";
 import notificationReducer from './slice/notificationSlice';
 import { playlistApi } from "./slice/playlistSlice";
 import playerReducer from "./slice/playerSlice";
+import { eventApi } from "./slice/eventSlice";
 
 const persistConfig = {
   key: 'auth', 
@@ -21,13 +22,14 @@ const store = configureStore({
     player: playerReducer,
     [playlistApi.reducerPath]: playlistApi.reducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
+    [eventApi.reducerPath]: eventApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: ['persist/PERSIST'],
       },
-    }).concat(apiSlice.middleware, playlistApi.middleware),
+    }).concat(apiSlice.middleware, playlistApi.middleware, eventApi.middleware),
 });
 
 const persistor = persistStore(store);

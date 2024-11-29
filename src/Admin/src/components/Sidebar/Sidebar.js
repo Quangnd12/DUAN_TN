@@ -12,7 +12,7 @@ import {
   Collapse,
   Box,
 } from "@mui/material";
-import {  useTheme as useMuiTheme } from "@mui/material/styles";
+import { useTheme as useMuiTheme } from "@mui/material/styles";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -38,7 +38,8 @@ import {
   MdAdminPanelSettings,
   MdMusicVideo,
   MdAssessment,
-  MdPublic
+  MdPublic,
+  MdEvent,
 } from "react-icons/md";
 
 const translations = {
@@ -50,21 +51,22 @@ const translations = {
       "Report Pages": "Báo Cáo",
     },
     menuItems: {
-      "Dashboard": "Bảng Điều Khiển",
-      "Home": "Trang Chủ",
-      "User": "Người Dùng",
-      "Song": "Bài Hát",
-      "Genre": "Thể Loại",
-      "Artist": "Nghệ Sĩ",
-      "Album": "Album",
-      "Explore": "Khám Phá",
-      "Trending": "Xu Hướng",
+      Dashboard: "Bảng Điều Khiển",
+      Home: "Trang Chủ",
+      User: "Người Dùng",
+      Song: "Bài Hát",
+      Genre: "Thể Loại",
+      Artist: "Nghệ Sĩ",
+      Album: "Album",
+      Explore: "Khám Phá",
+      Trending: "Xu Hướng",
       "New Releases": "Mới Phát Hành",
-      "Country": "Quốc Gia",
-      "Analytics": "Phân Tích",
-      "Insights": "Thông Tin Chi Tiết",
-      "Report": "Báo Cáo",
-    }
+      Country: "Quốc Gia",
+      Analytics: "Phân Tích",
+      Insights: "Thông Tin Chi Tiết",
+      Report: "Báo Cáo",
+      Event: "Sự kiện",
+    },
   },
   en: {
     title: "Music Heals",
@@ -74,22 +76,23 @@ const translations = {
       "Report Pages": "Report Pages",
     },
     menuItems: {
-      "Dashboard": "Dashboard",
-      "Home": "Home",
-      "User": "User",
-      "Song": "Song",
-      "Genre": "Genre",
-      "Artist": "Artist",
-      "Album": "Album",
-      "Explore": "Explore",
-      "Trending": "Trending",
+      Dashboard: "Dashboard",
+      Home: "Home",
+      User: "User",
+      Song: "Song",
+      Genre: "Genre",
+      Artist: "Artist",
+      Album: "Album",
+      Explore: "Explore",
+      Trending: "Trending",
       "New Releases": "New Releases",
-      "Country": "Country",
-      "Analytics": "Analytics",
-      "Insights": "Insights",
-      "Report": "Report",
-    }
-  }
+      Country: "Country",
+      Analytics: "Analytics",
+      Insights: "Insights",
+      Report: "Report",
+      Event: "Event",
+    },
+  },
 };
 
 export default function Sidebar() {
@@ -132,14 +135,17 @@ export default function Sidebar() {
         to={to}
         selected={isActive(to)}
         sx={{
-          color: theme === 'dark' 
-            ? (isActive(to) ? 'black' : 'rgba(0,0,0,0.7)')
-            : (isActive(to) ? 'white' : 'rgba(255,255,255,0.7)'),
+          color:
+            theme === "dark"
+              ? isActive(to)
+                ? "black"
+                : "rgba(0,0,0,0.7)"
+              : isActive(to)
+              ? "white"
+              : "rgba(255,255,255,0.7)",
           "&:hover": {
-            color: theme === 'dark' ? 'black' : 'white',
-            backgroundColor: theme === 'dark' 
-              ? 'rgba(0,0,0,0.1)' 
-              : 'rgba(255,255,255,0.1)',
+            color: "black",
+            backgroundColor: "rgba(231, 187, 40, 0.51)",
           },
           transition: "all 0.3s",
           borderRadius: "8px",
@@ -147,12 +153,17 @@ export default function Sidebar() {
         }}
       >
         <ListItemIcon>
-          <Icon style={{ 
-            color: theme === 'dark'
-              ? (isActive(to) ? 'black' : 'rgba(0,0,0,0.7)')
-              : (isActive(to) ? 'white' : 'rgba(255,255,255,0.7)'),
-            fontSize: "2rem" 
-          }} />
+          <Icon
+            style={{
+              color:
+                theme === "dark"
+                  ? isActive(to)
+                    ? "black"
+                    : "rgba(0,0,0,0.7)"
+                  : "white",
+              fontSize: "2rem",
+            }}
+          />
         </ListItemIcon>
         {open && <ListItemText primary={t.menuItems[label] || label} />}
       </ListItem>
@@ -171,6 +182,7 @@ export default function Sidebar() {
         { to: "/admin/genre", icon: MdCategory, label: "Genre" },
         { to: "/admin/artist", icon: MdMic, label: "Artist" },
         { to: "/admin/album", icon: MdAlbum, label: "Album" },
+        { to: "/admin/event", icon: MdEvent, label: "Event" },
       ],
     },
     {
@@ -203,9 +215,7 @@ export default function Sidebar() {
       sx={{
         height: isPlayerVisible ? "calc(100% - 86px)" : "100%",
         zIndex: 1,
-        background: theme === 'dark' 
-          ? '#ffffff'
-          : 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+        background: theme === "dark" ? "#ffffff" : "#000000",
         overflow: "auto",
         position: "relative",
         "&::-webkit-scrollbar": {
@@ -216,14 +226,11 @@ export default function Sidebar() {
           webkitBoxShadow: "inset 0 0 6px rgba(0,0,0,0.00)",
         },
         "&::-webkit-scrollbar-thumb": {
-          backgroundColor: theme === 'dark' ? '#999999' : '#424242',
-          borderRadius: "5px",
-          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)",
-          transition: "background-color 0.3s ease, box-shadow 0.3s ease",
+          backgroundColor: theme === "dark" ? "#999999" : "#ffffff",
         },
         "&:hover::-webkit-scrollbar-thumb": {
-          backgroundColor: theme === 'dark' ? 
-            'rgba(0,0,0,.2)' : 'rgba(255,255,255,.2)',
+          backgroundColor:
+            theme === "dark" ? "rgba(0,0,0,.2)" : "rgba(255,255,255,.2)",
         },
       }}
     >
@@ -240,7 +247,7 @@ export default function Sidebar() {
             to="/admin/dashboard"
             style={{
               textDecoration: "none",
-              color: theme === 'dark' ? 'black' : 'white',
+              color: theme === "dark" ? "black" : "white",
               fontWeight: "bold",
               fontSize: "1.2rem",
             }}
@@ -248,9 +255,9 @@ export default function Sidebar() {
             {t.title}
           </NavLink>
         )}
-        <IconButton 
-          onClick={handleDrawerToggle} 
-          sx={{ color: theme === 'dark' ? 'black' : 'white' }}
+        <IconButton
+          onClick={handleDrawerToggle}
+          sx={{ color: theme === "dark" ? "black" : "white" }}
         >
           {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
         </IconButton>
@@ -258,15 +265,18 @@ export default function Sidebar() {
       <List sx={{ pt: 0 }}>
         {categories.map((category, index) => (
           <React.Fragment key={index}>
-            <Tooltip title={t.categories[category.title]} placement="right" arrow>
+            <Tooltip
+              title={t.categories[category.title]}
+              placement="right"
+              arrow
+            >
               <ListItem
                 onClick={() => handleCategoryToggle(category.title)}
                 sx={{
                   cursor: "pointer",
-                  color: theme === 'dark' ? 'black' : 'white',
-                  "&:hover": { 
-                    backgroundColor: theme === 'dark' ? 
-                      'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)' 
+                  color: theme === "dark" ? "black" : "white",
+                  "&:hover": {
+                    backgroundColor: "rgba(231, 187, 40, 0.51)",
                   },
                   transition: "all 0.3s",
                   borderRadius: "5px",
@@ -274,24 +284,28 @@ export default function Sidebar() {
                 }}
               >
                 <ListItemIcon>
-                  <category.icon 
-                    style={{ 
-                      color: theme === 'dark' ? 'black' : 'white',
-                      fontSize: "2rem" 
-                    }} 
+                  <category.icon
+                    style={{
+                      color: theme === "dark" ? "black" : "white",
+                      fontSize: "2rem",
+                    }}
                   />
                 </ListItemIcon>
                 {open && (
                   <ListItemText
                     primary={t.categories[category.title]}
-                    sx={{ color: theme === 'dark' ? 'black' : 'white' }}
+                    sx={{ color: theme === "dark" ? "black" : "white" }}
                   />
                 )}
                 {open &&
                   (openCategories[category.title] ? (
-                    <ExpandLess sx={{ color: theme === 'dark' ? 'black' : 'white' }} />
+                    <ExpandLess
+                      sx={{ color: theme === "dark" ? "black" : "white" }}
+                    />
                   ) : (
-                    <ExpandMore sx={{ color: theme === 'dark' ? 'black' : 'white' }} />
+                    <ExpandMore
+                      sx={{ color: theme === "dark" ? "black" : "white" }}
+                    />
                   ))}
               </ListItem>
             </Tooltip>
@@ -359,7 +373,13 @@ export default function Sidebar() {
           aria-label="open drawer"
           edge="start"
           onClick={handleDrawerToggle}
-          sx={{ mr: 2, position: "absolute", top: 8, left: 8, color: theme === 'dark' ? 'black' : 'white' }}
+          sx={{
+            mr: 2,
+            position: "absolute",
+            top: 8,
+            left: 8,
+            color: theme === "dark" ? "black" : "white",
+          }}
         >
           <MenuIcon />
         </IconButton>

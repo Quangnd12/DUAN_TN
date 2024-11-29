@@ -36,10 +36,9 @@ const AddCountry = () => {
 
 
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+        <div className="max-w-full mx-auto p-6 bg-white shadow-md rounded-lg">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" encType="multipart/form-data">
                 <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-blue-500">
-                    <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
                     <div className="grid grid-cols-2 gap-4">
                     <div className="col-span-2">
                             <Controller

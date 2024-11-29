@@ -99,7 +99,7 @@ export default function Login() {
       const response = await login({
         email: data.email,
         password: data.password,
-        rememberMe,
+        rememberMe: rememberMe 
       }).unwrap();      
       // Update Redux store with both tokens
       dispatch(

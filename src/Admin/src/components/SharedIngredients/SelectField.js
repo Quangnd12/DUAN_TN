@@ -4,7 +4,7 @@ import React, { forwardRef } from "react";
 import Select from "react-select";
 
 const SelectField = forwardRef(({ label, id, name, options, value, onChange, isMulti = false }, ref) => (
-  <div>
+  <div className="z-50">
     <label
       htmlFor={id}
       className="block text-sm font-medium text-gray-700 mb-1"

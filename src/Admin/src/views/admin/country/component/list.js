@@ -105,6 +105,12 @@ const CountryList = () => {
                         value={searchName}
                         onChange={handleSearchChange}
                         placeholder="Search..."
+                        size="small"
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            height: "40px",
+                          },
+                        }}
                     />
                 </div>
 

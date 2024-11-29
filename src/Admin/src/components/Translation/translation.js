@@ -17,7 +17,6 @@ export const translations = {
       pageTitle: "Danh sách phát của tôi",
       createPlaylist: "Tạo danh sách phát mới",
       playlistName: "Tên danh sách phát",
-      description: "Mô tả",
       publicPlaylist: "Danh sách phát công khai",
       uploadImage: "Tải ảnh lên",
       changeImage: "Thay đổi ảnh",
@@ -34,6 +33,43 @@ export const translations = {
       songCount: "bài hát",
       createdAt: "Tạo vào",
     },
+    userProfile: {
+      editProfile: "Chỉnh sửa hồ sơ",
+      saveChanges: "Lưu thay đổi",
+      birthday: "Ngày sinh",
+      clickToChangeAvatar: "Nhấn để thay đổi ảnh đại diện",
+      requiredFields: "Vui lòng điền đầy đủ thông tin",
+      usernameRequired: "Tên người dùng là bắt buộc",
+      birthdayRequired: "Ngày sinh là bắt buộc",
+      updateSuccess: "Cập nhật thông tin thành công",
+      updateFailed: "Cập nhật thông tin thất bại",
+      changesCancelled: "Đã hủy thay đổi",
+      logoutFailed: "Đăng xuất thất bại",
+      favoritesContent: "Nội dung yêu thích",
+      historyContent: "Lịch sử"
+    },
+    playlistDetail: {
+      pageTitle: "Chi tiết danh sách phát",
+      backButton: "Quay lại",
+      addSong: "Thêm bài hát",
+      noSongs: "Không có bài hát trong danh sách phát này",
+      tableHeaders: {
+        number: "#",
+        title: "Tiêu đề",
+        artist: "Ca sĩ",
+        album: "Album",
+        dateAdded: "Ngày thêm",
+        duration: "Thời lượng",
+        actions: "Thao tác"
+      },
+      confirmRemove: "Bạn có chắc chắn muốn xóa bài hát này khỏi danh sách phát?",
+      removeError: "Lỗi khi xóa bài hát khỏi danh sách phát",
+      loadingError: "Lỗi khi tải chi tiết danh sách phát"
+    },
+    addSongtoPlaylist: {
+      addToSong: "Thêm bài hát vào danh sách phát",
+      noMore: "Không còn bài hát nào để thêm"
+    }
   },
   en: {
     notifications: {
@@ -49,7 +85,6 @@ export const translations = {
       pageTitle: "My Playlists",
       createPlaylist: "Create New Playlist",
       playlistName: "Playlist Name",
-      description: "Description",
       publicPlaylist: "Public Playlist",
       uploadImage: "Upload Image",
       changeImage: "Change Image",
@@ -70,5 +105,42 @@ export const translations = {
       profile: "Profile",
       logout: "Logout",
     },
+    userProfile: {
+      editProfile: "Edit Profile",
+      saveChanges: "Save Changes",
+      birthday: "Birthday",
+      clickToChangeAvatar: "Click to change avatar",
+      requiredFields: "Please fill in all required fields",
+      usernameRequired: "Username is required",
+      birthdayRequired: "Birthday is required",
+      updateSuccess: "Profile updated successfully",
+      updateFailed: "Failed to update profile",
+      changesCancelled: "Changes cancelled",
+      logoutFailed: "Logout failed",
+      favoritesContent: "Favorites Content",
+      historyContent: "History Content"
+    },
+    playlistDetail: {
+      pageTitle: "Playlist Details",
+      backButton: "Back",
+      addSong: "Add Song",
+      noSongs: "No songs in this playlist",
+      tableHeaders: {
+        number: "#",
+        title: "Title",
+        artist: "Artist",
+        album: "Album",
+        dateAdded: "Date Added",
+        duration: "Duration",
+        actions: "Actions"
+      },
+      confirmRemove: "Are you sure you want to remove this song from the playlist?",
+      removeError: "Failed to remove song from playlist",
+      loadingError: "Error loading playlist details"
+    },
+    addSongtoPlaylist: {
+      addToSong: "Add Songs to Playlist",
+      noMore: " No more songs available to add"
+    }
   },
 };

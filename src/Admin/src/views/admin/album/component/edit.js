@@ -171,14 +171,13 @@ const EditAlbum = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+    <div className="max-w-full mx-auto p-6 bg-white shadow-md rounded-lg">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-6"
         encType="multipart/form-data"
       >
         <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-blue-500">
-          <h2 className="text-xl font-semibold mb-4">Thông tin Album</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Controller
@@ -250,7 +249,6 @@ const EditAlbum = () => {
         </div>
 
         <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-red-500">
-          <h2 className="text-xl font-semibold mb-4">Ảnh Bìa Album</h2>
           <Controller
             name="image"
             control={control}
@@ -296,7 +294,7 @@ const EditAlbum = () => {
             className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
             disabled={isSubmitting}
           >
-            Hủy
+            Cancel
           </button>
           <button
             type="submit"
@@ -304,7 +302,7 @@ const EditAlbum = () => {
             className={`px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""
               }`}
           >
-            {isSubmitting ? "Đang lưu..." : "Lưu"}
+            {isSubmitting ? "Saving..." : "Save"}
           </button>
         </div>
       </form>

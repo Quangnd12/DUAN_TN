@@ -18,11 +18,18 @@ const DatePickerField = forwardRef(({ label, selected, onChange, id,disabled,min
       onChange={onChange}
       minDate={new Date()} 
       dateFormat="yyyy-MM-dd"
-      className="w-96 px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       id={id}
       name={id}
-      customInput={<input autoComplete="off" />} 
+      customInput={
+        <input 
+          autoComplete="off"
+          className="w-full"
+          style={{ width: '100%' }}
+        />
+      } 
       disabled={disabled}
+      wrapperClassName="w-full"
     />
   </div>
 ));

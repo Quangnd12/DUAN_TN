@@ -67,7 +67,7 @@ const UserDropdown = ({ user }) => {
             border: '2px solid #e5e7eb'
           }}
         />
-        <Typography variant="subtitle1" className="text-gray-700">
+        <Typography variant="subtitle1" className="text-[#d2b48c]">
           {userData.username}
         </Typography>
       </Button>
