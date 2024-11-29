@@ -101,7 +101,7 @@ function Client() {
 
   const [savedSongs, setSavedSongs] = useState([]);
   const [payment, setPayments] = useState([]);
-  const { user } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const songs = JSON.parse(localStorage.getItem("songs") || "[]");
@@ -176,13 +176,13 @@ function Client() {
             <Route path='/report' element= {<Report/>}/>
             <Route path='/event' element={<PrivateRoute><Event /></PrivateRoute>} />
             <Route path='/event/:id' element={<PrivateRoute><EventDetail /></PrivateRoute>} />
-            {!payment.user_id && (
-                <>
+             {isAuthenticated && !payment.user_id &&
                   <Route path='/payment' element={<PaymentPage />} />
+              }         
+              {payment.is_notified===1 || !payment.user_id  && (
                   <Route path='/upgrade' element={<PricingPlans />} />
-                </>
               )}
-
+ 
               <Route path="*" element={<NotFound />} />
             </Routes>
             {savedSongs.length > 0 && <PlayerControls />}

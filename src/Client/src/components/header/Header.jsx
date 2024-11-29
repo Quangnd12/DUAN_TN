@@ -145,7 +145,7 @@ useEffect(() => {
           <div onClick={toggleMenu} className="cursor-pointer flex items-center">
             <p className="px-4 py-2 text-sm text-white hover:text-gray-300 flex items-center">
             {displayUser.username}
-              {payment?.status===1 && ( 
+              {payment.status===1 && ( 
                 <GiCrown className="ml-2 text-yellow-500" size={20} />
               )}
             </p>
@@ -246,7 +246,7 @@ useEffect(() => {
             {isAuthenticated && (
               <>
 
-                {!payment.user_id && (
+                { !payment.user_id && (
                 <Link to="/upgrade">
                   <button className="bg-white text-black text-[16px] font-bold px-3 py-2 rounded-[20px]  mr-6 shrink-0">
                     Premium Upgrade

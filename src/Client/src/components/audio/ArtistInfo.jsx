@@ -4,8 +4,10 @@ import "../../assets/css/artist/artist.css";
 import LikeButton from "../button/favorite";
 import MoreButton from "../button/morePlaycontroll";
 
-export default function ArtistInfo({ title, image, artist,lyrics }) {
+
+export default function ArtistInfo({ title, image, artist,lyrics,user_id }) {
   const [likedSongs, setLikedSongs] = useState({});
+
 
   const handleLikeToggle = (index) => {
     setLikedSongs((prevLikedSongs) => ({
@@ -51,6 +53,7 @@ export default function ArtistInfo({ title, image, artist,lyrics }) {
           songTitle={title}
           artistName={artist}
           lyrics={lyrics}
+          user_id={user_id}
         />
       </div>
     </div>

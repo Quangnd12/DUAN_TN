@@ -33,7 +33,7 @@ const PlayerControls = () => {
 
   const playerRef = useRef(null);
   const { playerState, setPlayerState, Songs, clickedIndex, setClickedIndex } = useContext(PlayerContext);
-  const { audioUrl, title, artist, Image, lyrics, album, playCount, TotalDuration, songId,is_premium } = playerState;
+  const { audioUrl, title, artist, Image, lyrics, album, playCount, TotalDuration, songId, is_premium } = playerState;
   const age = useAge();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
@@ -65,7 +65,7 @@ const PlayerControls = () => {
         is_premium
       }));
     }
-  }, [audioUrl, title, artist, Image, lyrics, album, playCount, TotalDuration,songId,is_premium ,setPlayerState]);
+  }, [audioUrl, title, artist, Image, lyrics, album, playCount, TotalDuration, songId, is_premium, setPlayerState]);
 
   const handlePlayPause = () => {
     if (currentTime >= 30 && !user) {
@@ -73,7 +73,7 @@ const PlayerControls = () => {
       navigate('/login');
       return;
     }
-    if (currentTime >= 30 && user && is_premium && payment.status ===0) {
+    if (currentTime >= 30 && user && is_premium === 1 && !payment.user_id) {
       navigate('/upgrade');
       return;
     }
@@ -82,21 +82,21 @@ const PlayerControls = () => {
 
   const getPayment = async () => {
     try {
-        if (user) {
-            const data = await getPaymentByUser(); 
-            setPayments(data || []); 
-        }
+      if (user) {
+        const data = await getPaymentByUser();
+        setPayments(data || []);
+      }
     } catch (error) {
-        console.error("Error fetching payment data", error);
-        setPayments([]); 
+      console.error("Error fetching payment data", error);
+      setPayments([]);
     }
-};
+  };
 
-useEffect(() => {
+  useEffect(() => {
     if (user) {
-        getPayment();
+      getPayment();
     }
-}, [user]); 
+  }, [user]);
 
   const handleProgress = (state) => {
     setCurrentTime(state.playedSeconds);
@@ -104,33 +104,56 @@ useEffect(() => {
       setIsPlaying(false);
       return;
     }
-    if (is_premium && state.playedSeconds > 30 && user && !payment.user_id) {
-      setIsPlaying(false);
-      navigate('/upgrade');
-      return;
-    }
-    // if (user && state.playedSeconds > 30 && !hasAddedHistory) {
-    //   handleAddHistory(); 
-    // }
+    if (user) {
+      if (is_premium === 1 && state.playedSeconds > 30) {
+        if (payment.user_id) {
+          setIsPlaying(true);
+        } else {
+          setIsPlaying(false);
+          navigate('/upgrade');
+          return;
+        }
+      }
 
+    }
+
+    // const seventyPercent = duration * 0.7;
+    // if (state.playedSeconds > seventyPercent  && !history ) {
+    //   handleAddHistory();  // Gọi API lưu lịch sử
+    // }
     // if (user && state.playedSeconds > 60 && !hasAddedHistory) {
     //   incrementPlayCount(); 
     // }
   };
+
+  // const getHistory = async () => {
+  //   try {
+  //     if (user) {
+  //       const history = await getHistoryById(currentUserId);
+  //       setHistory(history);
+  //     }
+  //   } catch (error) {
+  //     setHistory([]);
+  //   }
+  // }
+
+
+  // useEffect(() => {
+  //   if (user) {
+  //     getHistory();
+  //   }
+  // }, [user])
+
+
   // const handleAddHistory = async () => {
   //   try {
-  //     const today = new Date().toISOString().split("T")[0];
-  //     const HistoryDate = formatDate(history.listeningDate);
-  //     if (history  && HistoryDate === today) {
+  //     if (history) {
   //       return;
   //     }
   //     else {
   //       await addHistory({
-  //         userID: currentUserId,
   //         songID: songId,
-  //         listeningDate: today,
   //       });
-  //       setHasAddedHistory(true);
   //       await getHistory();
   //     }
   //   } catch (error) {
@@ -138,16 +161,8 @@ useEffect(() => {
   //   }
   // };
 
-  // const getHistory = async () => {
-  //   const history = await getHistoryById(currentUserId);
-  //   setHistory(history || []);
-  // }
 
-  // useEffect(() => {
-  //   if (currentUserId) {
-  //     getHistory();
-  //   }
-  // }, [currentUserId])
+
 
   // const incrementPlayCount = async () => {
   //   try {
@@ -170,18 +185,30 @@ useEffect(() => {
   };
 
   const handleSliderChange = (e) => {
-    if (is_premium && payment.status ===1 ) { 
+    if (is_premium === 1) {
+      if (payment.user_id) {
+        const newTime = parseFloat(e.target.value);
+        setCurrentTime(newTime);
+      }
+      else {
+        navigate('/upgrade');
+      }
+    } else {
       const newTime = parseFloat(e.target.value);
       setCurrentTime(newTime);
-    } else {
-      navigate('/upgrade');
     }
   };
+
   const handleSliderMouseUp = () => {
-    if (is_premium && playerRef.current && payment.status ===1) {  
-      playerRef.current.seekTo(currentTime, 'seconds');
+    if (is_premium === 1 && playerRef.current) {
+      if (payment.user_id) {
+        playerRef.current.seekTo(currentTime, 'seconds');
+      }
+      else {
+        navigate('/upgrade');
+      }
     } else {
-      navigate('/upgrade');
+      playerRef.current.seekTo(currentTime, 'seconds');
     }
   };
 
@@ -231,7 +258,7 @@ useEffect(() => {
             playCount: nextSong.listens_count,
             TotalDuration: nextSong.duration,
             songId: nextSong.songId,
-            is_premium:nextSong.is_premium
+            is_premium: nextSong.is_premium
           });
           setClickedIndex(nextIndex);
           return;
@@ -269,12 +296,12 @@ useEffect(() => {
           playCount: prevSong.listens_count,
           TotalDuration: prevSong.duration,
           songId: prevSong.songId,
-          is_premium:prevSong.is_premium
+          is_premium: prevSong.is_premium
         });
         setClickedIndex(prevIndex);
         return;
       }
-      if(is_premium && !payment.user_id){
+      if (is_premium && !payment.user_id) {
         return
       }
       handleWarning();
@@ -295,6 +322,7 @@ useEffect(() => {
           artist={artist}
           image={Image}
           lyrics={lyrics}
+          user_id={payment.user_id}
         />
         <div className="control-buttons">
           <MdRepeat
@@ -320,6 +348,7 @@ useEffect(() => {
             audio={audioUrl}
             currentTime={currentTime}
             TotalDuration={TotalDuration}
+            user_id={payment.user_id}
           />
         </div>
       </div>
