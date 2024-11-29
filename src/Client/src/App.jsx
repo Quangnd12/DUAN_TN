@@ -28,9 +28,10 @@ import Report from "./pages/report/Report";
 import Event from "./pages/event/Event";
 import EventDetail from "./pages/event/Detail-event/Detail-event";
 import PlaylistPublicInfo from "./components/searchResults/Tabs/PlaylistPublic";
+import Mix from "./pages/mix/MixList";
 
-
-
+import MixDetail from "./pages/mix/MixDetail";
+import CreateMix from "./pages/mix/CreateMix";
 import AddPlaylist from "./pages/playlist/components/PlaylistAdd";
 import PlaylistList from "./pages/playlist/sections/playlist";
 import PlayListInfo from "./pages/playlist/components/PlaylistInfo";
@@ -137,6 +138,9 @@ function Client() {
 
             {/* Private routes */}
             <Route path="/library" element={<PrivateRoute><Library /></PrivateRoute>} />
+            <Route path="/mixes" element={<PrivateRoute><Mix /></PrivateRoute>} />
+            <Route path="mixes/mixDetail/:id" element={<PrivateRoute><MixDetail /></PrivateRoute>} />
+            <Route path="mixes/add" element={<PrivateRoute><CreateMix /></PrivateRoute>} />
             <Route path="/playlistall" element={<PrivateRoute><Playlist /></PrivateRoute>} />
             <Route path="/playlist" element={<PrivateRoute><EmptyLayout /></PrivateRoute>}>
                  <Route path="playlistdetail/:name" element={<PrivateRoute><PlaylistList /></PrivateRoute>} />
