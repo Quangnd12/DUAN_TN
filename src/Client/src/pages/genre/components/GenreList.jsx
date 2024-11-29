@@ -66,9 +66,9 @@ const ListSongOfGenres = () => {
         artist: song.artist,
         Image: song.image,
         lyrics: song.lyrics,
-        album: song.album,
+        album: song.albumTitle,
         playCount: song.listens_count,
-        TotalDuration:song.duration
+        TotalDuration: song.duration
       });
       setClickedIndex(index);
       try {
@@ -143,10 +143,10 @@ const ListSongOfGenres = () => {
             </button>
             <div className="ml-6">
               {/* <LikeButton
-                                likedSongs={likedSongs[0]}
-                                handleLikeToggle={() => handleLikeToggle(0)}
+                  likedSongs={likedSongs[0]}
+                  handleLikeToggle={() => handleLikeToggle(0)}
 
-                            /> */}
+              /> */}
             </div>
             <div className="ml-6">
               <MoreButton

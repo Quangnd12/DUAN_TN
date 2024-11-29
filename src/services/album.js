@@ -36,6 +36,7 @@ const getAlbums = async (page, limit, countryID, searchTitle) => {
 
   return res;
 };
+
 const getAlbumById = async (id) => {
   const res = await request({
     method: "GET",
@@ -43,6 +44,7 @@ const getAlbumById = async (id) => {
   });
   return res;
 };
+
 
 const addAlbum = async (album) => {
   try {

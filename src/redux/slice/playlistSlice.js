@@ -13,8 +13,28 @@ export const playlistApi = createApi({
       return headers;
     },
   }),
+  
+
+  
   tagTypes: ["Playlist", "UserPlaylists"],
   endpoints: (builder) => ({
+
+    getPublicPlaylists: builder.query({
+      query: () => "/playlists/discover",
+      transformResponse: (response) => response.data.items,  // Chỉ lấy phần items
+      providesTags: (result) => {
+        // Kiểm tra xem result có phải là một mảng không trước khi sử dụng map
+        if (Array.isArray(result)) {
+          return result.map((playlist) => ({
+            type: "Playlist",
+            id: playlist.id,
+          }));
+        }
+        // Nếu result không phải là mảng, trả về một mảng rỗng hoặc xử lý logic dự phòng
+        return [];
+      },
+    }),
+
     // Get user's playlists
     getUserPlaylists: builder.query({
       query: () => "/playlists/user/me",
@@ -118,7 +138,7 @@ export const playlistApi = createApi({
         url: `/playlists/songs/add`, // Cập nhật endpoint chính xác
         method: "POST",
         body: {
-          playlistId, // Thêm playlistId vào body request
+          playlistId, // Thêm playlistId vào body requestc8
           ...song, // Spread toàn bộ thông tin bài hát
         },
       }),
@@ -141,6 +161,7 @@ export const playlistApi = createApi({
 });
 
 export const {
+  useGetPublicPlaylistsQuery, // Add this hook for public playlists
   useGetUserPlaylistsQuery,
   useGetPlaylistByIdQuery,
   useCreatePlaylistMutation,

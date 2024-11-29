@@ -5,8 +5,8 @@ import RoundCard from "../cards/RoundCard";
 
 
 import PlayPause from "../button/playPause";
-import PlayCircleIcon from "@mui/icons-material/PlayCircle";
-import PauseCircleIcon from "@mui/icons-material/PauseCircle";
+// import PlayCircleIcon from "@mui/icons-material/PlayCircle";
+// import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import {slugify,createAlbumSlug} from "../createSlug";
 
 const RowItems = ({ title, data, rowId, globalPlayingState, setGlobalPlayingState }) => {
@@ -31,7 +31,7 @@ const RowItems = ({ title, data, rowId, globalPlayingState, setGlobalPlayingStat
 
   const renderCard = (item, index, isArtist) => (
     <div key={item.id} className="relative group">
-      <Link to={isArtist ? `/artist/${slugify(item.name)}` : `/album/${createAlbumSlug(item.name,item.title)}`}>
+      <Link to={isArtist ? `/artist/${slugify(item.name)}` : `/album/${item.id}`}>
         {isArtist ? (
           <CircleCard image={item.image} name={item.name} title={item.title} />
         ) : (

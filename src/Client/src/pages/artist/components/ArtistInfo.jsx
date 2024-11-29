@@ -1,17 +1,46 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MdPersonAdd, MdCheck } from "react-icons/md";
 import { useParams } from "react-router-dom";
 import "../../../assets/css/artist/artist.css";
-import data from "../../../data/fetchSongData";
 import MoreButton from "../../../components/button/more";
-import {slugify} from "Client/src/components/createSlug";
+import { slugify } from "Client/src/components/createSlug";
+import { getArtistById, getAllArtists } from "../../../../../../src/services/artist";
 
 const ArtistInfo = () => {
-
+  const [artist, setArtist] = useState(null); // Dữ liệu nghệ sĩ
   const [isFollowing, setIsFollowing] = useState(false);
 
   const { artistName } = useParams();
-  const artist = data.artists.find(artist => slugify(artist.name) === artistName);
+
+  // Lấy dữ liệu nghệ sĩ từ API khi component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Lấy toàn bộ danh sách nghệ sĩ để tìm ID
+        const { artists } = await getAllArtists();
+        const currentArtist = artists.find(
+          (artist) => slugify(artist.name) === artistName
+        );
+
+        if (currentArtist) {
+          // Sử dụng getArtistById để lấy thông tin chi tiết
+          const artistDetails = await getArtistById(currentArtist.id);
+          setArtist(artistDetails);
+        }
+      } catch (error) {
+        console.error("Error fetching artist details:", error);
+        // Xử lý trường hợp không tìm thấy nghệ sĩ
+        setArtist(null);
+      }
+    };
+
+    fetchData();
+  }, [artistName]);
+
+  // Kiểm tra nếu không tìm thấy nghệ sĩ
+  if (!artist) {
+    return <p>Loading artist data...</p>;
+  }
 
   const handleClick = () => {
     setIsFollowing(!isFollowing);
@@ -23,12 +52,12 @@ const ArtistInfo = () => {
   };
 
   return (
-    <div className="relative w-full h-3/5 flex ">
+    <div className="relative w-full h-3/5 flex">
       <div className="w-3/5 h-[400px] artist-bg flex items-center justify-center p-8">
         <div className="flex items-center space-x-4">
           <div className="w-32 h-32 bg-gray-300 rounded-full overflow-hidden">
             <img
-              src={artist.image}
+              src={artist.avatar || "default_image_path.jpg"} 
               alt="Artist Avatar"
               className="w-full h-full object-cover"
             />
@@ -41,7 +70,7 @@ const ArtistInfo = () => {
                   data-encore-id="icon"
                   role="img"
                   aria-hidden="true"
-                  className="h-6 w-6 "
+                  className="h-6 w-6"
                   viewBox="0 0 24 24"
                   style={{ color: '#fff' }}
                 >
@@ -51,7 +80,6 @@ const ArtistInfo = () => {
                   ></path>
                 </svg>
               </div>
-
             </div>
             <p className="text-left text-lg mt-2">1,017,761 followers</p>
             <div className="grid grid-cols-2">
@@ -84,7 +112,7 @@ const ArtistInfo = () => {
 
       <div className="w-full h-[400px] bg-gray-300 overflow-hidden">
         <img
-          src={artist.image}
+          src={artist.avatar || "default_image_path.jpg"}
           alt="Artist Large Image"
           className="w-full h-full object-cover"
         />
