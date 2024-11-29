@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useRef, useEffect, useContext } from 'react';
+import { Link,useNavigate } from 'react-router-dom';
 import { MdMoreHoriz } from 'react-icons/md';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import WifiTetheringIcon from '@mui/icons-material/WifiTethering';
@@ -9,20 +9,29 @@ import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb';
 import ShareOptions from '../share';
 import AddPlaylistOption from '../../dropdown/dropdownAddPlaylist';
 import LyricModal from '../../lyrics';
+import { PlayerContext } from "../../context/MusicPlayer";
 
-const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName,lyrics }) => {
+
+const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName, lyrics }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
     const dropdownRef = useRef(null);
     const shareDropdownRef = useRef(null);
     const playlistDropdownRef = useRef(null);
-
+    const { playerState } = useContext(PlayerContext);
+    const { is_premium } = playerState;
+    const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleButtonClick = (e) => {
-        e.stopPropagation(); // Ngăn chặn sự kiện click lan truyền
-        setIsModalOpen(true); // Mở modal khi click vào button
+        e.stopPropagation();
+        if (is_premium) {
+            setIsModalOpen(false);
+            navigate('/upgrade');
+        } else {
+            setIsModalOpen(true);
+        }
     };
 
     const closeModal = () => {
@@ -58,8 +67,11 @@ const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName,lyrics })
                 setIsOpen(false);
                 break;
             case 'add_to_playlist':
+
                 setIsPlaylistOpen(!isPlaylistOpen);
                 setIsOpen(false);
+
+
                 break;
             default:
                 onOptionSelect(action);

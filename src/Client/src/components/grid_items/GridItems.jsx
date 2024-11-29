@@ -33,7 +33,8 @@ const GridItems = () => {
         lyrics: song.lyrics,
         album: song.album,
         playCount: song.listens_count,
-        TotalDuration:song.duration
+        TotalDuration:song.duration,
+        songId:song.id
       });
       setClickedIndex(index);
       try {

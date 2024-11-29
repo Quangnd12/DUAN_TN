@@ -2,14 +2,13 @@ import axios from "axios";
 import { Cookies } from "react-cookie";
 
 const BASE_URL = "http://localhost:5000";
-const UploadFile="https://storage.googleapis.com/be-musicheals.appspot.com/UploadImage";
 
-const ApiConfig = async ({
+const request = async ({
   method = "GET",
   path = "",
   data = {},
   headers = {},
-  params = {} // Thêm params ở đây
+  params = {}
 }) => {
   try {
     const cookie = new Cookies();
@@ -22,17 +21,20 @@ const ApiConfig = async ({
       data: data,
       headers: {
         ...headers,
-        Authorization: `Bearer ${token}`,
+        Authorization: token ? `Bearer ${token}` : "", 
       },
-      params: params, // Thêm params vào axios config
+      params: params, 
+      withCredentials: true, 
     });
 
     return res.data;
-  } catch (error) {
-    // alert(error?.response?.data?.message || "Error");
-   throw error;
+  }  catch (error) {
+    if (error.response && error.response.status === 401) {
+      console.error("Lỗi xác thực: Token hết hạn hoặc không hợp lệ.");
+    }
+    throw error;
   }
 };
 
-export default ApiConfig;
-export { BASE_URL,UploadFile };
+export default request;
+export { BASE_URL};

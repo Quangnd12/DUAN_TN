@@ -33,6 +33,7 @@ const EditSong = () => {
       releaseDate: null,
       duration: null,
       is_explicit: 0,
+      is_premium:0
     }
   });
 
@@ -63,7 +64,7 @@ const EditSong = () => {
       setExistingReleaseDate(false);
     }
     setValue("is_explicit", data.is_explicit);
-
+    setValue("is_premium", data.is_premium);
     const genreNames = data.genre.split(', ');
     const genreIDs = data.genreID.split(', ');
     const genreValues = genreNames.map((genre, index) => ({
@@ -175,6 +176,7 @@ const EditSong = () => {
     formData.append('releaseDate', releaseDateFormatted);
     formData.append('duration', data.duration);
     formData.append('is_explicit', data.is_explicit ? 1 : 0);
+     formData.append('is_premium', data.is_premium? 1 : 0);
     formData.append('file_song', data.file_song);
     formData.append('image', data.image);
     try {
@@ -370,7 +372,7 @@ const EditSong = () => {
                 )}
               />
             </div>
-            {/* <div>
+            <div>
               <Controller
                 name="is_explicit"
                 control={control}
@@ -383,7 +385,21 @@ const EditSong = () => {
                   />
                 )}
               />
-            </div>   */}
+            </div>  
+            <div>
+              <Controller
+                name="is_premium"
+                control={control}
+                render={({ field }) => (
+                  <SwitchField
+                    label="Premium"
+                    {...field}
+                    checked={field.value}
+                    onChange={() => setValue("is_premium", !field.value)}
+                  />
+                )}
+              />
+            </div>  
           </div>
         </div>
 

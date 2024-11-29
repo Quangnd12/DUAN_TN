@@ -11,7 +11,7 @@ import "../../../assets/css/artist/artist.css";
 import MoreButton from "../../../components/button/more";
 import { handleAddPlaylist, handleWarning } from "../../../components/notification";
 import { getSongs } from '../../../../../services/songs';
-import { useParams } from "react-router-dom";
+import { useParams,useNavigate } from "react-router-dom";
 import { formatDuration } from "Admin/src/components/formatDate";
 import { PlayerContext } from "Client/src/components/context/MusicPlayer";
 import useAge from "Client/src/components/calculateAge";
@@ -29,6 +29,7 @@ const ListSongOfGenres = () => {
   const { id } = useParams();
   const { setPlayerState, clickedIndex, setClickedIndex } = useContext(PlayerContext);
   const age = useAge();
+  const navigate=useNavigate();
 
   const SongData = async (page = 0, limit = 0, search = '', genre = [], minDuration = 0, maxDuration = 0, minListensCount = 0, maxListensCount = 0) => {
     const data = await getSongs(page, limit, search, genre, minDuration, maxDuration, minListensCount, maxListensCount);
@@ -59,7 +60,8 @@ const ListSongOfGenres = () => {
       handleWarning();
       setClickedIndex(null);
       return;
-    } else {
+    } 
+      else {
       setPlayerState({
         audioUrl: song.file_song,
         title: song.title,
@@ -68,7 +70,9 @@ const ListSongOfGenres = () => {
         lyrics: song.lyrics,
         album: song.albumTitle,
         playCount: song.listens_count,
-        TotalDuration: song.duration
+        TotalDuration: song.duration,
+        songId: song.id,
+        is_premium:song.is_premium
       });
       setClickedIndex(index);
       try {
@@ -251,7 +255,16 @@ const ListSongOfGenres = () => {
               />
               <div className="flex flex-grow flex-col ml-3 relative">
                 <div className="flex justify-between items-center">
-                  <p className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-[400px]">{song.title}</p>
+                  <div className="flex items-center w-[400px] whitespace-nowrap overflow-hidden text-ellipsis">
+                    <p className="text-sm font-semibold overflow-hidden text-ellipsis">
+                      {song.title}
+                    </p>
+                    {song.is_premium === 1 && (
+                      <span className="bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded ml-2 shrink-0">
+                        PREMIUM
+                      </span>
+                    )}
+                  </div>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <p className="text-gray-500 text-sm text-center whitespace-nowrap overflow-hidden text-ellipsis w-[430px]">
                       {song.album}

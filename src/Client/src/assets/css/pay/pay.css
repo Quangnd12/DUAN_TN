@@ -1,0 +1,72 @@
+/* pay.css */
+.payment-page {
+  background-color: black; /* Màu nền nhẹ */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px;
+
+}
+
+.payment-page h1 {
+  font-size: 36px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.payment-page p {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.checkout-container {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  width: 100%;
+  max-width: 500px; /* Đảm bảo chiều rộng tối đa cho form */
+}
+
+.checkout-container h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.checkout-container p {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.checkout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.checkout-form button {
+  background-color: #007bff; /* Màu nút */
+  color: white;
+  padding: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.checkout-form button:hover {
+  background-color: #0056b3;
+}
+
+.checkout-form button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}

@@ -1,4 +1,4 @@
-import request from "config";
+import request from "../config";
 import { store } from '../redux/store';
 import { addNotification } from '../redux/slice/notificationSlice';
 
@@ -106,6 +106,19 @@ const updateSong = async (id, song) => {
     throw error;
   }
 };
+const updatePlayCount = async (id, song) => {
+  try {
+    const res = await request({
+      method: "PUT",
+      path: `/api/songs/playcount/${id}`,
+      data: song,
+    });
+    dispatchNotification('Song updated successfully', 'success');
+    return res;
+  } catch (error) {
+    dispatchNotification('Failed to update song', 'error');
+    throw error;
+  }
+};
 
-
-export { getSongs, getSongById, addSong, deleteSong, updateSong };
+export { getSongs, getSongById, addSong, deleteSong, updateSong,updatePlayCount };
