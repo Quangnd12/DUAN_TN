@@ -27,6 +27,7 @@ import Genres from "./genre";
 import Countries from "./country/index.js";
 import AddCountry from "./country/component/add.js";
 import EditCountry from "./country/component/edit.js";
+import Order from "./order/index.js";
 
 const AdminRoutes = (
   <>
@@ -62,7 +63,7 @@ const AdminRoutes = (
     <Route path="insights" element={<UnderDevelopment />} />
     <Route path="report" element={<UnderDevelopment />} />
     <Route path="profile" element={<UnderDevelopment />} />
-
+ <Route path="order" element={<Order />} />
     {/* Route mới cho trang đăng nhập */}
     <Route path="login" element={<Login />} />
 
