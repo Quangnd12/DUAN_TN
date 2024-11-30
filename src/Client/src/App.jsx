@@ -28,9 +28,11 @@ import NotFound from "./pages/notfound/index";
 import Report from "./pages/report/Report";
 import Event from "./pages/event/Event";
 import EventDetail from "./pages/event/Detail-event/Detail-event";
+import PlaylistPublicInfo from "./components/searchResults/Tabs/PlaylistPublic";
+import Mix from "./pages/mix/MixList";
 
-
-
+import MixDetail from "./pages/mix/MixDetail";
+import CreateMix from "./pages/mix/CreateMix";
 import AddPlaylist from "./pages/playlist/components/PlaylistAdd";
 import PlaylistList from "./pages/playlist/sections/playlist";
 import PlayListInfo from "./pages/playlist/components/PlaylistInfo";
@@ -133,7 +135,8 @@ function Client() {
               {/* Public routes */}
               <Route path="/" element={<HomePage />} />
               <Route path="/search" element={<SearchPage />} />
-              <Route path='/artist' element={<EmptyLayout />}>
+              <Route path="/playlistpulic/:id" element={<PlaylistPublicInfo />} />
+              < Route path='/artist' element={<EmptyLayout />}>
                 <Route path=':artistName' element={<Artist />} />
                 <Route path=":artistName/album" element={<AllAlbums />} />
                 <Route path=":artistName/song" element={<AllSong />} />
@@ -143,7 +146,7 @@ function Client() {
                 <Route path="album" element={<LayoutAlbums />} />
                 <Route path="radio" element={<LayoutRadio />} />
               </Route>
-              <Route path='/album/:albumName' element={<Albums />} />
+              <Route path='/album/:id' element={<Albums />} />
               <Route path='/listalbum/:id' element={<Albums />} />
               <Route path="/toprank" element={<AllTopranks />} />
               <Route path="/toprank/:id" element={<TopRank />} />
@@ -157,26 +160,29 @@ function Client() {
               <Route path="/forgot" element={<AuthRoute><ForgotPass /></AuthRoute>} />
               <Route path="/reset-password/:token" element={<AuthRoute><ResetPass /></AuthRoute>} />
 
-              {/* Private routes */}
-              <Route path="/library" element={<PrivateRoute><Library /></PrivateRoute>} />
-              <Route path="/playlist" element={<PrivateRoute><Playlist /></PrivateRoute>} />
-              <Route path="/playlist" element={<PrivateRoute><EmptyLayout /></PrivateRoute>}>
-                <Route path="playlistdetail/:name" element={<PrivateRoute><PlaylistList /></PrivateRoute>} />
-                <Route path="add" element={<PrivateRoute><AddPlaylist /></PrivateRoute>} />
-                <Route path="info" element={<PrivateRoute><PlayListInfo /></PrivateRoute>} />
-              </Route>
-              <Route path="/info/:userId" element={<PrivateRoute><InfoClient /></PrivateRoute>} />
-              <Route path="/content" element={<PrivateRoute><Content /></PrivateRoute>} />
-              <Route path='/report' element={<Report />} />
-              <Route path='/event' element={<PrivateRoute><Event /></PrivateRoute>} />
-              <Route path='/event/:id' element={<PrivateRoute><EventDetail /></PrivateRoute>} />
+            {/* Private routes */}
+            <Route path="/library" element={<PrivateRoute><Library /></PrivateRoute>} />
+            <Route path="/mixes" element={<PrivateRoute><Mix /></PrivateRoute>} />
+            <Route path="mixes/mixDetail/:id" element={<PrivateRoute><MixDetail /></PrivateRoute>} />
+            <Route path="mixes/add" element={<PrivateRoute><CreateMix /></PrivateRoute>} />
+            <Route path="/playlistall" element={<PrivateRoute><Playlist /></PrivateRoute>} />
+            <Route path="/playlist" element={<PrivateRoute><EmptyLayout /></PrivateRoute>}>
+                 <Route path="playlistdetail/:name" element={<PrivateRoute><PlaylistList /></PrivateRoute>} />
+                 <Route path="add" element={<PrivateRoute><AddPlaylist /></PrivateRoute>} />
+                 <Route path="info" element={<PrivateRoute><PlayListInfo /></PrivateRoute>} />
+            </Route>
+            <Route path="/info/:userId" element={<PrivateRoute><InfoClient /></PrivateRoute>} />
+            <Route path="/content" element={<PrivateRoute><Content /></PrivateRoute>} />
+            <Route path='/report' element= {<Report/>}/>
+            <Route path='/event' element={<PrivateRoute><Event /></PrivateRoute>} />
+            <Route path='/event/:id' element={<PrivateRoute><EventDetail /></PrivateRoute>} />
+             {isAuthenticated && !payment.user_id &&
+                  <Route path='/payment' element={<PaymentPage />} />
+              }         
               {payment.is_notified===1 || !payment.user_id  && (
                   <Route path='/upgrade' element={<PricingPlans />} />
               )}
-
-              {isAuthenticated && !payment.user_id &&
-                  <Route path='/payment' element={<PaymentPage />} />
-              }             
+ 
               <Route path="*" element={<NotFound />} />
             </Routes>
             {savedSongs.length > 0 && <PlayerControls />}

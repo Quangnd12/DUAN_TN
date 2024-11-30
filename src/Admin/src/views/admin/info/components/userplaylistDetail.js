@@ -5,6 +5,8 @@ import {
   useGetPlaylistByIdQuery,
   useRemoveSongFromPlaylistMutation,
 } from "../../../../../../redux/slice/playlistSlice";
+import { useTheme } from "../../ThemeContext";
+import { translations } from "../../../../components/Translation/translation";
 import PlaylistSongSelector from "./userAddSong";
 import {
   Box,
@@ -30,6 +32,8 @@ import {
 const PlaylistDetail = () => {
   const { playlistId } = useParams();
   const navigate = useNavigate();
+  const { language } = useTheme();
+  const t = translations[language].playlistDetail;
   const {
     data: playlist,
     isLoading,
@@ -53,13 +57,12 @@ const PlaylistDetail = () => {
         songId,
       }).unwrap();
     } catch (err) {
-      console.error("Failed to remove song:", err);
+      console.error(t.removeError, err);
     }
   };
 
   if (isLoading) return <CircularProgress />;
-  if (error)
-    return <Alert severity="error">Error loading playlist details</Alert>;
+  if (error) return <Alert severity="error">{t.loadingError}</Alert>;
 
   return (
     <Box
@@ -91,7 +94,7 @@ const PlaylistDetail = () => {
             backgroundColor: "white",
           }}
         >
-          <IconButton onClick={() => navigate(-1)}>
+          <IconButton onClick={() => navigate(-1)} aria-label={t.backButton}>
             <BackIcon />
           </IconButton>
           <Typography variant="h4" sx={{ ml: 2, fontWeight: "bold" }}>
@@ -99,6 +102,7 @@ const PlaylistDetail = () => {
           </Typography>
           <IconButton
             onClick={() => setIsSongSelectorOpen(true)}
+            aria-label={t.addSong}
             sx={{
               ml: "auto",
               backgroundColor: "#00796b",
@@ -117,13 +121,13 @@ const PlaylistDetail = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell>#</TableCell>
-                <TableCell>Title</TableCell>
-                <TableCell>Artist</TableCell>
-                <TableCell>Album</TableCell>
-                <TableCell>Ngày thêm</TableCell>
-                <TableCell>Duration</TableCell>
-                <TableCell>Actions</TableCell>
+              <TableCell>{t.tableHeaders.number}</TableCell>
+                <TableCell>{t.tableHeaders.title}</TableCell>
+                <TableCell>{t.tableHeaders.artist}</TableCell>
+                <TableCell>{t.tableHeaders.album}</TableCell>
+                <TableCell>{t.tableHeaders.dateAdded}</TableCell>
+                <TableCell>{t.tableHeaders.duration}</TableCell>
+                <TableCell>{t.tableHeaders.actions}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -131,7 +135,7 @@ const PlaylistDetail = () => {
                 <TableRow>
                   <TableCell colSpan={7} align="center" >
                     <Typography variant="body1" color="text.secondary">
-                      No songs in this playlist
+                    {t.noSongs}
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -169,7 +173,7 @@ const PlaylistDetail = () => {
                       </Box>
                     </TableCell>
                     <TableCell>{song.artistNames}</TableCell>
-                    <TableCell>{song.albumName || "N/A"}</TableCell>
+                    <TableCell>{song.albumNames || "N/A"}</TableCell>
                     <TableCell>
                       {format(new Date(song.addedAt), "MMM d, yyyy")}
                     </TableCell>
@@ -179,6 +183,7 @@ const PlaylistDetail = () => {
                         color="error"
                         onClick={() => handleRemoveSong(song.id)}
                         disabled={isRemoving}
+                        aria-label={t.confirmRemove}
                         sx={{
                           "&:hover": { color: "#d32f2f" },
                           position: "relative",

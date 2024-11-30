@@ -4,21 +4,49 @@ import { API_BASE_URL } from "../../config/Api_url";
 import { setCredentials, logout }  from "./authSlice"
 import { addNotification }  from "./notificationSlice"
 
+const baseQuery = fetchBaseQuery({
+  baseUrl: API_BASE_URL,
+  prepareHeaders: (headers, { getState }) => {
+    const token = getState().auth.token;
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+    return headers;
+  },
+  credentials: "include",
+});
+
+const baseQueryWithReauth = async (args, api, extraOptions) => {
+  let result = await baseQuery(args, api, extraOptions);
+
+  if (result?.error?.status === 401) {
+    // Thử refresh token
+    const refreshResult = await baseQuery(
+      '/auth/refresh-token',
+      api,
+      extraOptions
+    );
+
+    if (refreshResult?.data) {
+      // Lưu token mới
+      api.dispatch(setCredentials({ 
+        token: refreshResult.data.accessToken 
+      }));
+
+      // Thử lại request ban đầu
+      result = await baseQuery(args, api, extraOptions);
+    } else {
+      // Refresh token failed
+      api.dispatch(logout());
+    }
+  }
+
+  return result;
+};
+
 export const apiSlice = createApi({
   reducerPath: "api",
-  baseQuery: fetchBaseQuery({
-    baseUrl: API_BASE_URL,
-    prepareHeaders: (headers, { getState }) => {
-      const token = getState().auth.token;
-      
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-    credentials: "include",
-  }),
-  tagTypes: ['User'], 
+  baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
     // Thêm endpoint refresh token
     refreshToken: builder.mutation({

@@ -8,6 +8,10 @@ import Info from "./info/index.js";
 import PlaylistDetail from "./info/components/userplaylistDetail.js";
 import Songs from "./song";
 import Users from "./user";
+import Events from "./event"
+import EventAdd from "./event/component/add.js"
+import EventEdit from "./event/component/edit.js"
+import EventDetail from "./event/component/detail.js"
 import AddSong from "./song/component/add";
 import EditSong from "./song/component/edit";
 import Artists from "./artist";
@@ -28,6 +32,8 @@ import Countries from "./country/index.js";
 import AddCountry from "./country/component/add.js";
 import EditCountry from "./country/component/edit.js";
 import Order from "./order/index.js";
+import ShowAllEvents from "./showAllEvent.js";
+
 
 const AdminRoutes = (
   <>
@@ -50,6 +56,11 @@ const AdminRoutes = (
     <Route path="genre" element={<Genres />} />
     <Route path="genre/add" element={<AddGenre />} />
     <Route path="genre/edit/:id" element={<EditGenre />} />
+    <Route path="event" element={<Events />} />
+    <Route path="event/add" element={<EventAdd />} />
+    <Route path="event/edit/:id" element={<EventEdit />} />
+    <Route path="event/detail/:id" element={<EventDetail />} />
+    <Route path="event/show-all" element={<ShowAllEvents />} />
     {/* Thêm routes mới cho các trang đang phát triển */}
 
     <Route path="playlist" element={<UnderDevelopment />} />

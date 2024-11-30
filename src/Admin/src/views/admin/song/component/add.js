@@ -152,11 +152,10 @@ const AddSong = () => {
 
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+    <div className="max-w-full mx-auto p-6 bg-white shadow-md rounded-lg">
         <LoadingSpinner isLoading={loading} />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" encType="multipart/form-data">
         <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-blue-500">
-          <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Controller
@@ -248,7 +247,6 @@ const AddSong = () => {
           </div>
         </div>
         <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-green-500">
-          <h2 className="text-xl font-semibold mb-4">Detailed Information</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="grid-cols-2">
               <Controller
@@ -302,7 +300,6 @@ const AddSong = () => {
         </div>
 
         <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-red-500">
-          <h2 className="text-xl font-semibold mb-4">Media Upload</h2>
           <div className="grid grid-cols-2 gap-4">
             <Controller
               name="file_song"

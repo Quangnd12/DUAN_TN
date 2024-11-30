@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Collapse from "@mui/material/Collapse";
-
 import {
   Table,
   TableBody,
@@ -21,13 +20,14 @@ import {
   Box,
   Chip,
   Avatar,
-  Select,
-  FormControl,
-  InputLabel,
 } from "@mui/material";
-import { MoreVert as MoreVertIcon, KeyboardArrowUp, KeyboardArrowDown } from "@mui/icons-material";
+import {
+  MoreVert as MoreVertIcon,
+  KeyboardArrowUp,
+  KeyboardArrowDown,
+} from "@mui/icons-material";
 import { MdEdit, MdDelete } from "react-icons/md";
-import { fetcher } from "../../../../../../services/artist"; 
+import { fetcher } from "../../../../../../services/artist";
 import DeleteArtist from "./delete";
 import LoadingSpinner from "Admin/src/components/LoadingSpinner";
 
@@ -45,6 +45,7 @@ const ArtistList = () => {
   const [artists, setArtists] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [totalPages, setTotalPages] = useState(0);
 
   // Debounce search input
   useEffect(() => {
@@ -61,6 +62,7 @@ const ArtistList = () => {
       try {
         const response = await fetcher(page, itemsPerPage, debouncedSearchTerm);
         setArtists(response.artists);
+        setTotalPages(response.totalPages);
       } catch (err) {
         setError(err);
       } finally {
@@ -70,10 +72,13 @@ const ArtistList = () => {
     fetchData();
   }, [debouncedSearchTerm, page, itemsPerPage]);
 
-  const handleChangePage = (event, newPage) => setPage(newPage);
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
 
   const handleItemsPerPageChange = (event) => {
-    setItemsPerPage(event.target.value);
+    const newItemsPerPage = parseInt(event.target.value, 10);
+    setItemsPerPage(newItemsPerPage);
     setPage(1); // Reset to first page when items per page changes
   };
 
@@ -114,20 +119,36 @@ const ArtistList = () => {
 
   const handleDeleteSuccess = () => {
     setShowDeleteModal(false);
-    setArtists(artists.filter((artist) => artist.id !== artistToDelete.id));
+    // Refresh the current page after deletion
+    const fetchData = async () => {
+      try {
+        const response = await fetcher(page, itemsPerPage, debouncedSearchTerm);
+        setArtists(response.artists);
+        setTotalPages(response.totalPages);
+        
+        // If current page is empty and it's not the first page, go to previous page
+        if (response.artists.length === 0 && page > 1) {
+          setPage(page - 1);
+        }
+      } catch (err) {
+        setError(err);
+      }
+    };
+    fetchData();
   };
 
-  // Error handling and rendering loading state
   if (error) {
-    return <Typography color="error">Error: {error.message || "Failed to fetch artists"}</Typography>;
+    return (
+      <Typography color="error">
+        Error: {error.message || "Failed to fetch artists"}
+      </Typography>
+    );
   }
 
   return (
     <div className="p-4">
-      {/* Loading Spinner */}
       <LoadingSpinner isLoading={loading} />
 
-      {/* Top section with search and add button */}
       <div className="flex justify-between mb-4">
         <TextField
           label="Search"
@@ -137,6 +158,12 @@ const ArtistList = () => {
           className="w-64"
           placeholder="Search..."
           disabled={loading}
+          size="small"
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              height: "40px",
+            },
+          }}
         />
         <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2 justify-end">
           <button
@@ -163,40 +190,65 @@ const ArtistList = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {artists.map((artistItem) => (
+                {artists.map((artistItem, index) => (
                   <React.Fragment key={artistItem.id}>
-                    <TableRow sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}>
+                    <TableRow
+                      sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}
+                    >
                       <TableCell>
                         <IconButton
                           aria-label="expand row"
                           size="small"
                           onClick={() => toggleRow(artistItem.id)}
                         >
-                          {openRow[artistItem.id] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                          {openRow[artistItem.id] ? (
+                            <KeyboardArrowUp />
+                          ) : (
+                            <KeyboardArrowDown />
+                          )}
                         </IconButton>
                       </TableCell>
-                      <TableCell>{artistItem.id}</TableCell>
+                      <TableCell>{(page - 1) * itemsPerPage + index + 1}</TableCell>
                       <TableCell>
                         <Avatar src={artistItem.avatar} alt={artistItem.name} />
                       </TableCell>
                       <TableCell>{artistItem.name || "No name"}</TableCell>
                       <TableCell>
                         <Chip
-                          label={artistItem.role === 1 ? "Artist" : artistItem.role === 2 ? "Rapper" : "Unknown"}
+                          label={
+                            artistItem.role === 1
+                              ? "Artist"
+                              : artistItem.role === 2
+                              ? "Rapper"
+                              : "Unknown"
+                          }
                           color="primary"
                         />
                       </TableCell>
                       <TableCell>
-                        <IconButton onClick={(event) => handleOpenMenu(event, artistItem)}>
+                        <IconButton
+                          onClick={(event) => handleOpenMenu(event, artistItem)}
+                        >
                           <MoreVertIcon />
                         </IconButton>
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                        <Collapse in={openRow[artistItem.id]} timeout="auto" unmountOnExit>
+                      <TableCell
+                        style={{ paddingBottom: 0, paddingTop: 0 }}
+                        colSpan={6}
+                      >
+                        <Collapse
+                          in={openRow[artistItem.id]}
+                          timeout="auto"
+                          unmountOnExit
+                        >
                           <Box margin={1}>
-                            <Typography variant="h6" gutterBottom component="div">
+                            <Typography
+                              variant="h6"
+                              gutterBottom
+                              component="div"
+                            >
                               Biography: {artistItem.biography}
                             </Typography>
                           </Box>
@@ -209,32 +261,50 @@ const ArtistList = () => {
             </Table>
           </TableContainer>
 
-          <Menu anchorEl={anchorEl} open={Boolean(anchorEl) && selectedArtist !== null} onClose={handleCloseMenu}>
-            <MenuItem onClick={() => handleEditArtist(selectedArtist.id)} sx={{ color: "blue" }}>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl) && selectedArtist !== null}
+            onClose={handleCloseMenu}
+          >
+            <MenuItem
+              onClick={() => handleEditArtist(selectedArtist.id)}
+              sx={{ color: "blue" }}
+            >
               <MdEdit className="mr-1" /> Edit
             </MenuItem>
-            <MenuItem onClick={() => handleDeleteClick(selectedArtist)} sx={{ color: "red" }}>
+            <MenuItem
+              onClick={() => handleDeleteClick(selectedArtist)}
+              sx={{ color: "red" }}
+            >
               <MdDelete className="mr-1" /> Delete
             </MenuItem>
           </Menu>
 
-          {/* Rows per page selector and pagination */}
           <div className="flex justify-between items-center mt-4">
-            <FormControl variant="outlined" sx={{ minWidth: 120 }}>
-              <InputLabel>Rows per page</InputLabel>
-              <Select
+            <div className="flex items-center space-x-2">
+              <label htmlFor="limit">Show items:</label>
+              <select
+                id="limit"
                 value={itemsPerPage}
                 onChange={handleItemsPerPageChange}
-                label="Rows per page"
+                className="border border-gray-300 rounded p-1"
               >
-                <MenuItem value={5}>5</MenuItem>
-                <MenuItem value={10}>10</MenuItem>
-                <MenuItem value={20}>20</MenuItem>
-              </Select>
-            </FormControl>
+                <option value={5}>Show 5</option>
+                <option value={10}>Show 10</option>
+                <option value={15}>Show 15</option>
+              </select>
+            </div>
 
             <Stack spacing={2} direction="row" alignItems="center">
-              <Pagination count={2} page={page} onChange={handleChangePage} color="primary" shape="rounded" />
+              {totalPages > 0 && (
+                <Pagination
+                  count={totalPages}
+                  page={page}
+                  onChange={handleChangePage}
+                  color="primary"
+                  shape="rounded"
+                />
+              )}
             </Stack>
           </div>
         </>

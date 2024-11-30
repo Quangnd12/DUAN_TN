@@ -92,7 +92,7 @@ const SideBar = () => {
         isOpen={isOpen}
       />
       <NavItem
-        to="/playlist"
+        to="/playlistall"
         icon={<QueueMusicIcon />}
         text="Playlist"
         isOpen={isOpen}

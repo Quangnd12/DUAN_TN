@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { BiX, BiImage } from "react-icons/bi";
-import { handleUpdatePlaylistSuccess } from "../../../../../Client/src/components/notification"; // Import hàm thông báo
+import { handleUpdatePlaylistSuccess } from "../../../../../Client/src/components/notification";
 
 const ImageUploadModalDetail = ({ isOpen, onClose, onImageSelect, initialData }) => {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -16,8 +16,7 @@ const ImageUploadModalDetail = ({ isOpen, onClose, onImageSelect, initialData })
             setTitle(initialData.name || "");
             setDescription(initialData.description || "");
             setIsPublic(initialData.isPublic || 0);
-            
-            // Handle existing image preview
+
             if (initialData.image) {
                 if (initialData.image instanceof File) {
                     setImagePreview(URL.createObjectURL(initialData.image));
@@ -43,13 +42,11 @@ const ImageUploadModalDetail = ({ isOpen, onClose, onImageSelect, initialData })
     const handleSubmit = () => {
         const fileToSubmit = selectedFile instanceof File ? selectedFile : null;
         onImageSelect(fileToSubmit, title, description, isPublic);
-        
-        // Gọi thông báo cập nhật thành công
-        handleUpdatePlaylistSuccess();
 
+        handleUpdatePlaylistSuccess();
         onClose();
     };
-    
+
     const handleOutsideClick = (event) => {
         if (modalRef.current && !modalRef.current.contains(event.target)) {
             onClose();
@@ -62,7 +59,6 @@ const ImageUploadModalDetail = ({ isOpen, onClose, onImageSelect, initialData })
         } else {
             document.removeEventListener("mousedown", handleOutsideClick);
         }
-
         return () => {
             document.removeEventListener("mousedown", handleOutsideClick);
         };
@@ -133,16 +129,34 @@ const ImageUploadModalDetail = ({ isOpen, onClose, onImageSelect, initialData })
                             />
 
                             {/* Visibility Toggle */}
-                            <div className="flex items-center">
-                                <input 
-                                    type="checkbox" 
-                                    id="isPublic" 
-                                    checked={isPublic === 1}
-                                    onChange={() => setIsPublic(isPublic === 1 ? 0 : 1)}
-                                    className="mr-2 h-4 w-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
-                                />
-                                <label htmlFor="isPublic" className="text-white">
-                                    Make this playlist public
+                            <div className="flex space-x-4">
+                                <label 
+                                    className={`flex-1 p-3 text-center rounded-lg cursor-pointer 
+                                    ${isPublic === 1 
+                                        ? 'bg-green-600 text-white' 
+                                        : 'bg-[#2A2A2A] text-gray-400'}`}
+                                >
+                                    <input
+                                        type="radio"
+                                        className="hidden"
+                                        checked={isPublic === 1}
+                                        onChange={() => setIsPublic(1)}
+                                    />
+                                    Public
+                                </label>
+                                <label 
+                                    className={`flex-1 p-3 text-center rounded-lg cursor-pointer 
+                                    ${isPublic === 0 
+                                        ? 'bg-gray-600 text-white' 
+                                        : 'bg-[#2A2A2A] text-gray-400'}`}
+                                >
+                                    <input
+                                        type="radio"
+                                        className="hidden"
+                                        checked={isPublic === 0}
+                                        onChange={() => setIsPublic(0)}
+                                    />
+                                    Private
                                 </label>
                             </div>
                         </div>

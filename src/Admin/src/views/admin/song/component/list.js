@@ -373,7 +373,7 @@ const SongList = () => {
                     >
 
                       <TableCell>
-                        {index + 1}
+                      {(currentPage - 1) * limit + index + 1}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center">

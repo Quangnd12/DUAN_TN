@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { 
   Paper,
   Grid,
@@ -10,9 +11,12 @@ import {
   Box,
   CircularProgress,
   Alert,
-  Snackbar
+  Snackbar,
 } from '@mui/material';
+import { Edit as EditIcon, Save as SaveIcon, Cancel as CancelIcon } from '@mui/icons-material';
 import { setCredentials } from '../../../../../../redux/slice/authSlice';
+import { useTheme } from '../../ThemeContext'; // Import useTheme hook
+import { translations } from '../../../../components/Translation/translation';
 import { 
   useUpdateUserMutation,
   useGetUserQuery,
@@ -24,14 +28,22 @@ import UserPlaylist from './userPlaylist';
 
 const UserProfileForm = ({ user }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [logout] = useLogoutMutation();
+  const { language } = useTheme(); 
+  const t = translations[language];
   
-  // State for dialog
+  // State for dialog and editing mode
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
-  
-  // State for tabs
+  const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
+  
+  // Validation states
+  const [validationErrors, setValidationErrors] = useState({
+    username: false,
+    birthday: false
+  });
   
   const [formData, setFormData] = useState({
     username: user?.username || '',
@@ -53,6 +65,7 @@ const UserProfileForm = ({ user }) => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewImage, setPreviewImage] = useState(user?.avatar || '/default-avatar.png');
 
   const { refetch } = useGetUserQuery(user?.id, {
     skip: !user?.id
@@ -69,19 +82,32 @@ const UserProfileForm = ({ user }) => {
       };
       setFormData(prev => ({ ...prev, ...userData }));
       setInitialFormData(userData);
+      setPreviewImage(user.avatar || '/default-avatar.png');
     }
   }, [user]);
 
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
+  const validateForm = () => {
+    const errors = {
+      username: !formData.username.trim(),
+      birthday: !formData.birthday
+    };
+
+    setValidationErrors(errors);
+
+    if (errors.username || errors.birthday) {
+      setSnackbar({
+        open: true,
+        message: t.userProfile.requiredFields,
+        severity: 'error'
+      });
+      return false;
+    }
+
+    return true;
   };
 
-  const hasChanges = () => {
-    return (
-      formData.username !== initialFormData.username ||
-      formData.birthday !== initialFormData.birthday ||
-      formData.avatarFile !== null
-    );
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
   };
 
   const handleInputChange = (event) => {
@@ -90,10 +116,19 @@ const UserProfileForm = ({ user }) => {
       ...prev,
       [name]: value
     }));
+    // Clear validation error
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [name]: false
+      }));
+    }
   };
 
   const handleAvatarClick = () => {
-    fileInputRef.current.click();
+    if (isEditing) {
+      fileInputRef.current.click();
+    }
   };
 
   const handleFileChange = (event) => {
@@ -101,9 +136,9 @@ const UserProfileForm = ({ user }) => {
     if (file) {
       setFormData(prev => ({
         ...prev,
-        avatarFile: file,
-        avatar: URL.createObjectURL(file)
+        avatarFile: file
       }));
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
 
@@ -112,10 +147,16 @@ const UserProfileForm = ({ user }) => {
   };
 
   const handleCancel = () => {
+    setIsEditing(false);
     setFormData(initialFormData);
+    setPreviewImage(initialFormData.avatar || '/default-avatar.png');
+    setValidationErrors({
+      username: false,
+      birthday: false
+    });
     setSnackbar({
       open: true,
-      message: 'Changes cancelled',
+      message: t.userProfile.changesCancelled,
       severity: 'info'
     });
   };
@@ -123,21 +164,26 @@ const UserProfileForm = ({ user }) => {
   const handleLogout = async () => {
     try {
       await logout().unwrap();
-      // Additional logout logic if needed
+      // Clear any stored data
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
+      
+      // Navigate to admin login
+      navigate('/auth/login', { replace: true });
     } catch (error) {
       console.error('Logout failed:', error);
+      setSnackbar({
+        open: true,
+        message: t.userProfile.logoutFailed,
+        severity: 'error'
+      });
     }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     
-    if (!hasChanges()) {
-      setSnackbar({
-        open: true,
-        message: 'No changes detected',
-        severity: 'info'
-      });
+    if (!validateForm()) {
       return;
     }
   
@@ -145,8 +191,8 @@ const UserProfileForm = ({ user }) => {
       setIsSubmitting(true);
   
       const submitData = new FormData();
-      submitData.append('username', formData.username || '');
-      submitData.append('birthday', formData.birthday || '');
+      submitData.append('username', formData.username.trim());
+      submitData.append('birthday', formData.birthday);
       if (formData.avatarFile) {
         submitData.append('avatar', formData.avatarFile);
       }
@@ -176,13 +222,25 @@ const UserProfileForm = ({ user }) => {
         ...prev,
         avatarFile: null
       }));
+
+      setIsEditing(false);
       
-      // Show logout dialog instead of success snackbar
-      setShowLogoutDialog(true);
+      // Show success message before logout dialog
+      setSnackbar({
+        open: true,
+        message: t.userProfile.updateSuccess,
+        severity: 'success'
+      });
+
+      // Delay showing logout dialog
+      setTimeout(() => {
+        setShowLogoutDialog(true);
+      }, 1500);
+      
     } catch (error) {
       setSnackbar({
         open: true,
-        message: error.message || 'Failed to update profile',
+        message: error.message || t.userProfile.updateFailed,
         severity: 'error'
       });
     } finally {
@@ -190,85 +248,117 @@ const UserProfileForm = ({ user }) => {
     }
   };
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 0: // About tab
-        return (
-          <form onSubmit={handleSubmit}>
-            <Grid container spacing={4}>
-              <Grid item xs={12} className="flex justify-center">
-                <Box className="text-center">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                  />
-                  <Avatar
-                    src={formData.avatar || '/default-avatar.png'}
-                    alt={formData.username || 'User'}
-                    className="w-32 h-32 cursor-pointer mx-auto mb-4"
-                    onClick={handleAvatarClick}
-                  />
-                  <Typography variant="caption" className="text-gray-600">
-                    Click to change avatar
-                  </Typography>
-                </Box>
-              </Grid>
+  const renderProfileContent = () => (
+    <Box className="relative">
+      {isSubmitting && (
+        <Box className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg z-10">
+          <CircularProgress size={50} />
+        </Box>
+      )}
+      
+      <Grid container spacing={4}>
+        <Grid item xs={12} className="flex justify-center">
+          <Box className="text-center relative">
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleFileChange}
+              disabled={!isEditing}
+            />
+            <Avatar
+              src={previewImage}
+              alt={formData.username || 'User'}
+              className={`w-32 h-32 mx-auto mb-4 ${isEditing ? 'cursor-pointer hover:opacity-80' : ''}`}
+              onClick={handleAvatarClick}
+              sx={{ width: 128, height: 128 }}
+            />
+            {isEditing && (
+              <Typography variant="caption" className="text-gray-600">
+               {t.userProfile.clickToChangeAvatar}
+              </Typography>
+            )}
+          </Box>
+        </Grid>
 
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Username"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  disabled={isSubmitting}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Birthday"
-                  name="birthday"
-                  type="date"
-                  value={formData.birthday ? new Date(formData.birthday).toISOString().split('T')[0] : ''}
-                  onChange={handleInputChange}
-                  disabled={isSubmitting}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label={t.userDropdown.profile}
+            name="username"
+            value={formData.username}
+            onChange={handleInputChange}
+            disabled={!isEditing || isSubmitting}
+            error={validationErrors.username}
+            helperText={validationErrors.username ? t.userProfile.usernameRequired : ''}
+            required
+          />
+        </Grid>
+        
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label={t.userProfile.birthday}
+            name="birthday"
+            type="date"
+            value={formData.birthday ? new Date(formData.birthday).toISOString().split('T')[0] : ''}
+            onChange={handleInputChange}
+            disabled={!isEditing || isSubmitting}
+            error={validationErrors.birthday}
+            helperText={validationErrors.birthday ? t.userProfile.birthdayRequired : ''}
+            InputLabelProps={{ shrink: true }}
+            required
+          />
+        </Grid>
 
-              <Grid item xs={12} className="flex justify-end space-x-4">
+        <Grid item xs={12}>
+          <Box className="flex justify-end space-x-4">
+            {!isEditing ? (
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<EditIcon />}
+                onClick={() => setIsEditing(true)}
+              >
+                 {t.userProfile.editProfile}
+              </Button>
+            ) : (
+              <>
                 <Button
                   variant="outlined"
+                  startIcon={<CancelIcon />}
                   onClick={handleCancel}
-                  disabled={!hasChanges() || isSubmitting}
+                  disabled={isSubmitting}
                 >
-                  Cancel
+                    {t.playlist.cancel}
                 </Button>
                 <Button
-                  type="submit"
                   variant="contained"
                   color="primary"
-                  disabled={!hasChanges() || isSubmitting}
+                  startIcon={<SaveIcon />}
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
                 >
-                  {isSubmitting ? (
-                    <CircularProgress size={24} className="text-white" />
-                  ) : (
-                    'Save Changes'
-                  )}
+                   {t.userProfile.saveChanges}
                 </Button>
-              </Grid>
-            </Grid>
-          </form>
-        );
-      case 1: // Playlists tab
-        return <UserPlaylist/>;
-      case 2: // Favorites tab
+              </>
+            )}
+          </Box>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 0:
+        return renderProfileContent();
+      case 1:
+        return <UserPlaylist />;
+      case 2:
         return <div>Favorites Content</div>;
-      case 3: // History tab
+      case 3:
         return <div>History Content</div>;
       default:
         return null;
@@ -285,7 +375,10 @@ const UserProfileForm = ({ user }) => {
 
       <LogoutDialog
         open={showLogoutDialog}
-        onClose={() => setShowLogoutDialog(false)}
+        onClose={() => {
+          setShowLogoutDialog(false);
+          navigate('/admin/dashboard', { replace: true });
+        }}
         onLogout={handleLogout}
       />
 

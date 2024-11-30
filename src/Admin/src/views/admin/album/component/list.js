@@ -176,6 +176,12 @@ const AlbumList = () => {
             }}
             className="w-64"
             placeholder="Search by album name..."
+            size="small"
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                height: "40px",
+              },
+            }}
           />
         </div>
 

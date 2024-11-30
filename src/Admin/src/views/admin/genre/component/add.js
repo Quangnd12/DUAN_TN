@@ -27,12 +27,10 @@ const AddGenre = () => {
     ];
 
     const OptionGenre = options.sort();
-
     const navigate = useNavigate();
     const [coverImagePreview, setCoverImagePreview] = useState(null);
     const [Country, setCountry] = useState([]);
     const [loading, setLoading] = useState(false);
-   
 
     const CountryData = async () => {
         try {
@@ -43,7 +41,7 @@ const AddGenre = () => {
         }
     };
 
- useEffect(() => {
+    useEffect(() => {
         CountryData();
     }, []);
     
@@ -54,18 +52,16 @@ const AddGenre = () => {
             return;
         }
         if (name === "image") {
-            setValue("image", file); // Store the file in the form value
+            setValue("image", file);
             try {
                 const objectURL = URL.createObjectURL(file);
-                setCoverImagePreview(objectURL); // Display the preview
+                setCoverImagePreview(objectURL);
             } catch (error) {
                 console.error("Failed to create object URL:", error);
             }
-            clearErrors("image"); // Clear any existing image error
+            clearErrors("image");
         }
     }, [setValue, clearErrors]);
-
-
 
     const { getRootProps: getImageRootProps, getInputProps: getImageInputProps } =
         useDropzone({
@@ -89,8 +85,7 @@ const AddGenre = () => {
         formData.append('name', nameValue);       
 
         if (data.image) {
-            formData.append('image', data.image); 
-
+            formData.append('image', data.image);
         } else {
             console.log("image is required");
             setError("image", { type: "manual", message: "image is required" });
@@ -106,17 +101,14 @@ const AddGenre = () => {
         }
         finally {
             setLoading(false);
-          }
+        }
     };
 
-
-
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
-             <LoadingSpinner isLoading={loading} />
+        <div className="max-w-full mx-auto p-6 bg-white shadow-md rounded-lg">
+            <LoadingSpinner isLoading={loading} />
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" encType="multipart/form-data">
                 <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-blue-500">
-                    <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Controller
@@ -170,8 +162,7 @@ const AddGenre = () => {
                 </div>
 
                 <div className="bg-gray-100 p-4 rounded-lg border-t-4 border-red-500">
-                    <h2 className="text-xl font-semibold mb-4">Media Upload</h2>
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="grid grid-cols-1 gap-4">
                         <Controller
                             name="image"
                             control={control}
@@ -206,7 +197,7 @@ const AddGenre = () => {
                     </div>
                 </div>
 
-                <div className="flex justify-end">
+                <div className="flex justify-end my-4">
                     <button
                         type="button"
                         onClick={handleCancel}
