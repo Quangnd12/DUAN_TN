@@ -180,13 +180,13 @@ const ArtistList = () => {
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
-                <TableRow sx={{ backgroundColor: "#18181b" }}>
-                  <TableCell />
+                <TableRow sx={{ backgroundColor: "#18181b" }}>                
                   <TableCell sx={{ color: "white" }}>#</TableCell>
                   <TableCell sx={{ color: "white" }}>Avatar</TableCell>
                   <TableCell sx={{ color: "white" }}>Artist Name</TableCell>
                   <TableCell sx={{ color: "white" }}>Role</TableCell>
-                  <TableCell sx={{ color: "white" }}>Action</TableCell>
+                  <TableCell sx={{ color: "white",width: "50px" }}>Action</TableCell> 
+                  <TableCell sx={{ color: "white", width: "50px", textAlign: "center" }} />
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -195,19 +195,7 @@ const ArtistList = () => {
                     <TableRow
                       sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}
                     >
-                      <TableCell>
-                        <IconButton
-                          aria-label="expand row"
-                          size="small"
-                          onClick={() => toggleRow(artistItem.id)}
-                        >
-                          {openRow[artistItem.id] ? (
-                            <KeyboardArrowUp />
-                          ) : (
-                            <KeyboardArrowDown />
-                          )}
-                        </IconButton>
-                      </TableCell>
+                    
                       <TableCell>{(page - 1) * itemsPerPage + index + 1}</TableCell>
                       <TableCell>
                         <Avatar src={artistItem.avatar} alt={artistItem.name} />
@@ -230,6 +218,19 @@ const ArtistList = () => {
                           onClick={(event) => handleOpenMenu(event, artistItem)}
                         >
                           <MoreVertIcon />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          aria-label="expand row"
+                          size="small"
+                          onClick={() => toggleRow(artistItem.id)}
+                        >
+                          {openRow[artistItem.id] ? (
+                            <KeyboardArrowUp />
+                          ) : (
+                            <KeyboardArrowDown />
+                          )}
                         </IconButton>
                       </TableCell>
                     </TableRow>

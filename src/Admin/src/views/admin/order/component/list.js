@@ -114,7 +114,7 @@ const OrderList = () => {
                                     <TableCell sx={{ color: "white" }}>Date of purchase</TableCell>
                                     <TableCell sx={{ color: "white" }}>Expiration date</TableCell>
                                     <TableCell sx={{ color: "white" }}>Status</TableCell>
-                                    <TableCell />
+                                    <TableCell sx={{ color: "white", width: "50px", textAlign: "center" }} />
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -179,13 +179,12 @@ const OrderList = () => {
                             </select>
                         </div>
                         <div>
-                            <Stack spacing={2}>
+                            <Stack spacing={2} direction="row" alignItems="center">
                                 <Pagination
                                     count={totalPages || 1}
                                     page={currentPage}
                                     onChange={handleChangePage}
                                     color="primary"
-                                    variant="outlined"
                                     shape="rounded"
                                 />
                             </Stack>
