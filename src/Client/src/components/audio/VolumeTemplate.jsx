@@ -9,13 +9,15 @@ import Lyrics from "../../pages/lyrics/lyrics";
 import { PlayerContext } from "../context/MusicPlayer";
 import { useNavigate } from "react-router-dom";
 
-const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album, image, playCount, audio, currentTime, TotalDuration, user_id }) => {
+const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album, image, playCount, audio, currentTime, TotalDuration, user_id, isPlaying }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isLyricsOpen, setIsLyricsOpen] = useState(false);
   const { togglePip } = usePip();
   const { playerState } = useContext(PlayerContext);
   const { is_premium } = playerState;
   const navigate = useNavigate();
+  const [showLyrics, setShowLyrics] = useState(false);
+  const [isLyricsModalOpen, setIsLyricsModalOpen] = useState(false);
 
   const handleVolumeChange = (e) => {
     onVolumeChange(e);
@@ -33,6 +35,18 @@ const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album, image, p
     setDrawerOpen(false);
   };
 
+  const handleLyricsClick = () => {
+    if (is_premium === 1) {
+      if (user_id) {
+        setIsLyricsModalOpen(true);
+      } else {
+        navigate('/upgrade');
+      }
+    } else {
+      setIsLyricsModalOpen(true);
+    }
+  };
+
   return (
     <div className="volume-container">
       <MdPictureInPictureAlt
@@ -40,23 +54,10 @@ const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album, image, p
         title="Restore"
         onClick={togglePip}
       />
-      <FaMicrophoneAlt // Sử dụng FaMicrophone thay cho FaMicrophoneAlt
+      <FaMicrophoneAlt
         className="icon-microphone mr-4 text-white"
-        title="Mic Karaoke" // Đổi title thành Mic Karaoke
-        onClick={() => {
-          if (is_premium === 1) {
-            if (user_id) {
-              toggleLyricsDrawer(true)
-            }
-            else {
-              toggleLyricsDrawer(false);
-              navigate('/upgrade');
-            }
-          } else {
-            toggleLyricsDrawer(true)
-          }
-
-        }}// Mở Drawer khi click
+        title="Mic Karaoke"
+        onClick={handleLyricsClick}
       />
 
       {volume === 0 ? (
@@ -80,24 +81,27 @@ const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album, image, p
       />
       <MusicListDrawer open={drawerOpen} onClose={handleDrawerClose} />
 
-      <Drawer
-        anchor="bottom"
-        open={isLyricsOpen && lyrics !== "Not Found!"}
-        onClose={lyrics !== "Not Found!" ? toggleLyricsDrawer(false) : null}
-      >
-        <Lyrics
-          onClose={toggleLyricsDrawer(false)}
-          lyrics={lyrics}
-          title={title}
-          artist={artist}
-          album={album}
-          image={image}
-          playCount={playCount}
-          audioElement={audio}
-          currentTime={currentTime}
-          TotalDuration={TotalDuration}
-        />
-      </Drawer>
+      {isLyricsModalOpen && (
+        <Drawer
+          anchor="bottom"
+          open={isLyricsModalOpen}
+          onClose={() => setIsLyricsModalOpen(false)}
+        >
+          <Lyrics
+            onClose={() => setIsLyricsModalOpen(false)}
+            lyrics={lyrics}
+            title={title}
+            artist={artist}
+            album={album}
+            image={image}
+            playCount={playCount}
+            audioElement={audio}
+            currentTime={currentTime}
+            TotalDuration={TotalDuration}
+            isPlaying={isPlaying}
+          />
+        </Drawer>
+      )}
     </div>
   );
 };

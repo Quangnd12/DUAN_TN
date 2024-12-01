@@ -338,7 +338,9 @@ const PlayerControls = () => {
           <MdShuffle className={`icon-custom ${isShuffle ? 'text-blue-500' : ''}`} title="Shuffle" onClick={handleShuffleToggle} />
         </div>
         <div className="parent-container">
-          <Volume volume={volume} onVolumeChange={(e) => setVolume(parseFloat(e.target.value))}
+          <Volume 
+            volume={volume} 
+            onVolumeChange={(e) => setVolume(parseFloat(e.target.value))}
             lyrics={lyrics}
             title={title}
             artist={artist}
