@@ -47,6 +47,10 @@ const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album, image, p
     }
   };
 
+  const handleVolumeIconClick = () => {
+    onVolumeChange({ target: { value: volume === 0 ? 0.5 : 0 } });
+  };
+
   return (
     <div className="volume-container">
       <MdPictureInPictureAlt
@@ -61,9 +65,9 @@ const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album, image, p
       />
 
       {volume === 0 ? (
-        <FaVolumeMute className="icon" />
+        <FaVolumeMute className="icon" onClick={handleVolumeIconClick} />
       ) : (
-        <FaVolumeUp className="icon" />
+        <FaVolumeUp className="icon" onClick={handleVolumeIconClick} />
       )}
       <input
         type="range"

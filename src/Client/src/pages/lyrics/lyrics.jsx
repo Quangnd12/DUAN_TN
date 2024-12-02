@@ -3,10 +3,16 @@ import { MdClose } from 'react-icons/md';
 import MoreButton from "Client/src/components/button/more";
 import "../../assets/css/lyric.css";
 
-const Lyrics = ({ onClose, lyrics, title, artist, album, image, playCount, currentTime, TotalDuration, isPlaying }) => {
+const Lyrics = ({ onClose, lyrics, title, artist, album, image, playCount, currentTime, TotalDuration, isPlaying, audioElement, onNext, onPrevious, onPlayPause }) => {
     const lyricsContainerRef = useRef(null);
     const [lines, setLines] = useState([]);
     const [currentLine, setCurrentLine] = useState(0);
+    const [activeLyricIndex, setActiveLyricIndex] = useState(0);
+    const [lyricsOffset, setLyricsOffset] = useState(0);
+    const [timeOffset, setTimeOffset] = useState(0);
+
+    // Thêm một khoảng thời gian nhỏ để lyrics hiển thị sớm hơn một chút
+    const PRE_BUFFER_TIME = 0.2; // 200ms
 
     // Xử lý lyrics với timestamp
     useEffect(() => {
@@ -66,8 +72,10 @@ const Lyrics = ({ onClose, lyrics, title, artist, album, image, playCount, curre
     useEffect(() => {
         if (!lines.length || currentTime === undefined) return;
 
+        const adjustedTime = currentTime + lyricsOffset + PRE_BUFFER_TIME;
+
         const newCurrentLine = lines.findIndex(
-            line => currentTime >= line.startTime && currentTime < line.endTime
+            line => adjustedTime >= line.startTime && adjustedTime < line.endTime
         );
 
         if (newCurrentLine !== -1 && newCurrentLine !== currentLine) {
@@ -83,7 +91,27 @@ const Lyrics = ({ onClose, lyrics, title, artist, album, image, playCount, curre
                 });
             }
         }
-    }, [currentTime, lines, currentLine]);
+    }, [currentTime, lines, currentLine, timeOffset]);
+
+    useEffect(() => {
+        if (!lyrics?.timestamps) return;
+
+        // Tìm dòng lyrics hiện tại dựa vào currentTime
+        const currentIndex = lyrics.timestamps.findIndex((lyric, index) => {
+            const nextTime = lyrics.timestamps[index + 1]?.time || Infinity;
+            return currentTime >= lyric.time && currentTime < nextTime;
+        });
+
+        if (currentIndex !== -1) {
+            setActiveLyricIndex(currentIndex);
+        }
+    }, [currentTime, lyrics]);
+
+    // Thêm nút điều chỉnh timing
+    const adjustTiming = (direction) => {
+        const newOffset = timeOffset + (direction * 0.1); // Điều chỉnh 100ms
+        setTimeOffset(newOffset);
+    };
 
     return (
         <div className="bg-zinc-900 text-white p-4 shadow-lg max-w-full h-[900px] relative">
@@ -93,6 +121,21 @@ const Lyrics = ({ onClose, lyrics, title, artist, album, image, playCount, curre
             >
                 <MdClose className="h-7 w-7 transition-transform duration-300 hover:scale-110" />
             </button>
+
+            <div className="flex justify-center mb-4">
+                <button
+                    className="text-gray-400 hover:text-white transition-colors duration-300 mx-2"
+                    onClick={onPrevious}
+                >
+                    Lùi
+                </button>
+                <button
+                    className="text-gray-400 hover:text-white transition-colors duration-300 mx-2"
+                    onClick={onNext}
+                >
+                    Tiếp theo
+                </button>
+            </div>
 
             <div className="flex items-center mb-4 pl-52 mt-5">
                 <h1 className="text-4xl font-bold mr-10">{title}</h1>
@@ -107,17 +150,17 @@ const Lyrics = ({ onClose, lyrics, title, artist, album, image, playCount, curre
             </div>
 
             <div className="flex mb-4 pl-52">
-                <img src={image} alt="Album cover" className="w-96 h-96 rounded-lg mr-4" />
+                <img src={image} alt="Album cover" className="album-cover mr-4" />
                 <div className="text-lg flex flex-col justify-center space-y-7 pl-40">
                     <div className="lyrics-container" ref={lyricsContainerRef}>
                         {lines.map((line, index) => (
                             <div
                                 key={index}
                                 className={`lyric ${index === currentLine
-                                        ? "active"
-                                        : index < currentLine
-                                            ? "past"
-                                            : "future"
+                                    ? "active"
+                                    : index < currentLine
+                                        ? "past"
+                                        : "future"
                                     }`}
                             >
                                 {line.text}

@@ -20,7 +20,7 @@ import { getPaymentByUser } from "services/payment";
 
 
 const PlayerControls = () => {
-  const [isPlaying, setIsPlaying] = useState(null)
+  const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.8);
@@ -44,10 +44,12 @@ const PlayerControls = () => {
   useEffect(() => {
     if (audioUrl) {
       setIsPlaying(true);
-    } else {
-      setIsPlaying(false);
     }
   }, [audioUrl]);
+
+  useEffect(() => {
+    setIsPlaying(false);
+  }, []);
 
   useEffect(() => {
     if (audioUrl) {
@@ -99,31 +101,16 @@ const PlayerControls = () => {
   }, [user]);
 
   const handleProgress = (state) => {
-    setCurrentTime(state.playedSeconds);
-    if (!user && state.playedSeconds > 30) {
-      setIsPlaying(false);
-      return;
+    const currentTime = state.playedSeconds;
+    setCurrentTime(currentTime);
+    
+    if (playerRef.current) {
+      const audioElement = playerRef.current.getInternalPlayer();
+      setPlayerState(prev => ({
+        ...prev,
+        currentTime: currentTime
+      }));
     }
-    if (user) {
-      if (is_premium === 1 && state.playedSeconds > 30) {
-        if (payment.user_id) {
-          setIsPlaying(true);
-        } else {
-          setIsPlaying(false);
-          navigate('/upgrade');
-          return;
-        }
-      }
-
-    }
-
-    // const seventyPercent = duration * 0.7;
-    // if (state.playedSeconds > seventyPercent  && !history ) {
-    //   handleAddHistory();  // Gọi API lưu lịch sử
-    // }
-    // if (user && state.playedSeconds > 60 && !hasAddedHistory) {
-    //   incrementPlayCount(); 
-    // }
   };
 
   // const getHistory = async () => {
@@ -214,10 +201,7 @@ const PlayerControls = () => {
 
   const handleTrackEnd = () => {
     if (isRepeat) {
-      setPlayerState({
-        ...playerState,
-        audioUrl: playerState.audioUrl,
-      });
+      playerRef.current.seekTo(0);
       setIsPlaying(true);
     } else {
       nextSong();
@@ -225,7 +209,7 @@ const PlayerControls = () => {
   };
 
   const handleRepeatToggle = () => {
-    setIsRepeat((prevState) => !prevState);
+    setIsRepeat(prev => !prev);
   };
 
   const handleShuffleToggle = () => {
@@ -235,41 +219,37 @@ const PlayerControls = () => {
   const currentIndex = clickedIndex !== null ? clickedIndex : Songs.findIndex((song) => song.file_song === playerState.audioUrl);
 
   const nextSong = () => {
-    let nextIndex = currentIndex;
-    let checkedSongs = 0;
+    let nextIndex;
+    
+    if (isShuffle) {
+      do {
+        nextIndex = Math.floor(Math.random() * Songs.length);
+      } while (nextIndex === currentIndex && Songs.length > 1);
+    } else {
+      nextIndex = (currentIndex + 1) % Songs.length;
+    }
 
-    const findNextValidSong = () => {
-      while (checkedSongs < Songs.length) {
-        if (isShuffle) {
-          nextIndex = Math.floor(Math.random() * Songs.length);
-        } else {
-          nextIndex = (nextIndex + 1) % Songs.length;
-        }
-        const nextSong = Songs[nextIndex];
-        checkedSongs++;
-        if (nextSong.is_explicit === 0 || age >= 18) {
-          setPlayerState({
-            audioUrl: nextSong.file_song,
-            title: nextSong.title,
-            artist: nextSong.artist,
-            Image: nextSong.image,
-            lyrics: nextSong.lyrics,
-            album: nextSong.album,
-            playCount: nextSong.listens_count,
-            TotalDuration: nextSong.duration,
-            songId: nextSong.songId,
-            is_premium: nextSong.is_premium
-          });
-          setClickedIndex(nextIndex);
-          return;
-        }
-        // if(is_premium && !payment.user_id){
-        //   return
-        // }
-        handleWarning();
-      }
-    };
-    findNextValidSong();
+    const nextSong = Songs[nextIndex];
+    
+    if (nextSong.is_explicit === 0 || age >= 18) {
+      setPlayerState({
+        audioUrl: nextSong.file_song,
+        title: nextSong.title,
+        artist: nextSong.artist,
+        Image: nextSong.image,
+        lyrics: nextSong.lyrics,
+        album: nextSong.album,
+        playCount: nextSong.listens_count,
+        TotalDuration: nextSong.duration,
+        songId: nextSong.songId,
+        is_premium: nextSong.is_premium
+      });
+      setClickedIndex(nextIndex);
+      setIsPlaying(true);
+    } else {
+      handleWarning();
+      nextSong();
+    }
   };
 
 
@@ -313,6 +293,12 @@ const PlayerControls = () => {
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
+
+  useEffect(() => {
+    if (playerRef.current) {
+      playerRef.current.playing = isPlaying;
+    }
+  }, [isRepeat]);
 
   return (
     <div className="container-controls">

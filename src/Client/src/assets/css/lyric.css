@@ -77,3 +77,17 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
+/* Định dạng ảnh album */
+.album-cover {
+    width: 100%;
+    height: auto;
+    max-width: 400px; /* Giới hạn chiều rộng tối đa */
+    border-radius: 10px; /* Bo tròn góc */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Đổ bóng */
+    transition: transform 0.3s ease; /* Hiệu ứng khi hover */
+}
+
+.album-cover:hover {
+    transform: scale(1.05); /* Phóng to khi hover */
+}
