@@ -14,6 +14,7 @@ const InfoClientCard = ({ id, title, artist, duration, imageUrl }) => {
             className="object-cover w-full h-full"
             src={imageUrl}
             alt={title}
+            onError={(e) => e.target.src = '/images/music.png'}
           />
         </div>
         <div className="ml-4">

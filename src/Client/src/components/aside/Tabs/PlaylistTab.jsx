@@ -26,7 +26,7 @@ const PlaylistTab = () => {
         album: song.album,
         playCount: song.listens_count,
         TotalDuration:song.duration,
-        songId: song.id,
+         songId:song.songId,
         is_premium:song.is_premium
       });
       setClickedIndex(index);

@@ -9,7 +9,7 @@ import {
 import data from "../../data/fetchSongData";
 import { usePip } from "../../utils/pip";
 
-const PictureInPicturePlayer = (audioUrl, title, artist, Image, lyrics, album, playCount, TotalDuration) => {
+const PictureInPicturePlayer = () => {
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const { isPipOpen, togglePip, position, updatePosition } = usePip();
