@@ -17,7 +17,6 @@ import { getHistoryById } from "services/history";
 import { formatDate } from "../format";
 import { getPaymentByUser } from "services/payment";
 
-
 const PlayerControls = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -29,29 +28,44 @@ const PlayerControls = () => {
   const [hasAddedHistory, setHasAddedHistory] = useState(false);
   const [history, setHistory] = useState([]);
   const [payment, setPayments] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
 
   const playerRef = useRef(null);
-  const { playerState, setPlayerState, Songs, clickedIndex, setClickedIndex } = useContext(PlayerContext);
-  const { audioUrl, title, artist, Image, lyrics, album, playCount, TotalDuration, songId, is_premium } = playerState;
+  const { playerState, setPlayerState, Songs, clickedIndex, setClickedIndex } =
+    useContext(PlayerContext);
+  const {
+    audioUrl,
+    title,
+    artist,
+    Image,
+    lyrics,
+    album,
+    playCount,
+    TotalDuration,
+    songId,
+    is_premium,
+  } = playerState;
   const age = useAge();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
-  const userData = JSON.parse(localStorage.getItem('user'));
+  const userData = JSON.parse(localStorage.getItem("user"));
   const user_id = userData ? userData.id : null;
 
   useEffect(() => {
-    if (audioUrl) {
-      setIsPlaying(true);
-    }
-  }, [audioUrl]);
-
-  useEffect(() => {
-    setIsPlaying(false);
+    setIsPlaying(false); // Luôn set là false khi load lại trang
   }, []);
 
   useEffect(() => {
     if (audioUrl) {
-      setPlayerState(prevState => ({
+      setIsPlaying(true); // Tự động phát khi có bài hát mới
+    } else {
+      setIsPlaying(false);
+    }
+  }, [audioUrl]);
+
+  useEffect(() => {
+    if (audioUrl) {
+      setPlayerState((prevState) => ({
         ...prevState,
         audioUrl,
         title,
@@ -62,22 +76,34 @@ const PlayerControls = () => {
         playCount,
         TotalDuration,
         songId,
-        is_premium
+        is_premium,
       }));
     }
-  }, [audioUrl, title, artist, Image, lyrics, album, playCount, TotalDuration, songId, is_premium, setPlayerState]);
+  }, [
+    audioUrl,
+    title,
+    artist,
+    Image,
+    lyrics,
+    album,
+    playCount,
+    TotalDuration,
+    songId,
+    is_premium,
+    setPlayerState,
+  ]);
 
   const handlePlayPause = () => {
     if (currentTime >= 30 && !user) {
       handleWarningUser();
-      navigate('/login');
+      navigate("/login");
       return;
     }
     if (currentTime >= 30 && user && is_premium === 1 && !payment.user_id) {
-      navigate('/upgrade');
+      navigate("/upgrade");
       return;
     }
-    setIsPlaying(prev => !prev);
+    setIsPlaying((prev) => !prev);
   };
 
   const getPayment = async () => {
@@ -107,106 +133,103 @@ const PlayerControls = () => {
     } catch (error) {
       setHistory([]);
     }
-  }
+  };
 
   useEffect(() => {
     if (user) {
       getHistory();
     }
-  }, [user])
-
+  }, [user]);
 
   const handleAddHistory = async () => {
     try {
-      const historyForSong = history.find(item => item.songId === songId);
-      if (!historyForSong) {
+      if (!user || !songId || !user_id) {
+        return;
+      }
+
+      const historyForSong =
+        Array.isArray(history) &&
+        history.find((item) => item.songID === songId);
+
+      if (!historyForSong && !hasAddedHistory) {
         await addHistory(user_id, songId);
         setHasAddedHistory(true);
-        await getHistory();
+        localStorage.setItem(`history_${songId}`, "true");
+        const updatedHistory = await getHistoryById(user_id);
+        if (Array.isArray(updatedHistory)) {
+          setHistory(updatedHistory);
+        }
       }
-      return;
-
-    } catch (error) {
-      console.error("Failed to add history:", error);
-    }
+    } catch (error) {}
   };
 
   const handleProgress = (state) => {
     const currentTime = state.playedSeconds;
-    setCurrentTime(currentTime);
-    
-    if (playerRef.current) {
-      const audioElement = playerRef.current.getInternalPlayer();
-      setPlayerState(prev => ({
-        ...prev,
-        currentTime: currentTime
-      }));
-    }
-    if (user) {
-      if (is_premium === 1 && state.playedSeconds > 30) {
-        if (payment.user_id) {
-          setIsPlaying(true);
-        } else {
-          setIsPlaying(false);
-          navigate('/upgrade');
-          return;
-        }
-      }
+
+    if (!isDragging) {
+      setCurrentTime(currentTime);
     }
 
-    const seventyPercent = duration * 0.7;
-    if (state.playedSeconds > seventyPercent && !hasAddedHistory) {
-      handleAddHistory();
-      setHasAddedHistory(true);
+    if (playerRef.current) {
+      const audioElement = playerRef.current.getInternalPlayer();
+      setPlayerState((prev) => ({
+        ...prev,
+        currentTime: currentTime,
+      }));
     }
-    if (user && state.playedSeconds > seventyPercent && !hasListened) {
-      incrementPlayCount(); 
-      setHasListened(true);
+
+    if (!user && currentTime > 30) {
+      setIsPlaying(false);
+      return;
+    }
+
+    const fifteenSeconds = 15;
+    // Thêm lịch sử khi nghe đủ 15 giây (chỉ 1 lần)
+    if (currentTime > fifteenSeconds && !hasAddedHistory && !isDragging) {
+      handleAddHistory();
+    }
+
+    // Tăng lượt nghe khi nghe đủ 15 giây (mỗi ngày 1 lần)
+    if (currentTime > fifteenSeconds && !hasListened && !isDragging) {
+      incrementPlayCount();
     }
   };
 
-
   const incrementPlayCount = async () => {
     try {
-      const today = new Date().toISOString().split("T")[0]; // Lấy ngày hiện tại theo định dạng YYYY-MM-DD
-      const historyForSong = history.find(item => item.songId === songId); // Kiểm tra xem bài hát này đã có trong lịch sử chưa
-      
-      if (historyForSong) {
-        const historyDate = formatDate(historyForSong.listeningDate); // Định dạng lại ngày lịch sử
-        if (historyDate !== today) { // Nếu ngày lịch sử khác ngày hiện tại, tính lượt nghe
-          const updatedPlayCount = await updatePlayCount(songId);
-          setPlayerState(prevState => ({
-            ...prevState,
-            playCount: updatedPlayCount, // Cập nhật lượt nghe mới
-          }));
-          setHasListened(true); // Đánh dấu là đã tính lượt nghe
-        }
-      } else {
-        // Nếu bài hát chưa có trong lịch sử, tính lượt nghe mới
+      const today = new Date().toISOString().split("T")[0];
+
+      const listenedToday = history.find(
+        (item) =>
+          item.songID === songId && formatDate(item.listeningDate) === today
+      );
+
+      if (!listenedToday && !hasListened) {
         const updatedPlayCount = await updatePlayCount(songId);
-        setPlayerState(prevState => ({
+        setPlayerState((prevState) => ({
           ...prevState,
           playCount: updatedPlayCount,
         }));
         setHasListened(true);
+        localStorage.setItem(`listen_${songId}_${today}`, "true");
       }
     } catch (error) {
       console.error("Error updating play count:", error);
     }
   };
-  
+
   const handleDuration = (duration) => {
     setDuration(duration);
   };
 
   const handleSliderChange = (e) => {
+    setIsDragging(true);
     if (is_premium === 1) {
       if (payment.user_id) {
         const newTime = parseFloat(e.target.value);
         setCurrentTime(newTime);
-      }
-      else {
-        navigate('/upgrade');
+      } else {
+        navigate("/upgrade");
       }
     } else {
       const newTime = parseFloat(e.target.value);
@@ -215,15 +238,15 @@ const PlayerControls = () => {
   };
 
   const handleSliderMouseUp = () => {
+    setIsDragging(false);
     if (is_premium === 1 && playerRef.current) {
       if (payment.user_id) {
-        playerRef.current.seekTo(currentTime, 'seconds');
-      }
-      else {
-        navigate('/upgrade');
+        playerRef.current.seekTo(currentTime, "seconds");
+      } else {
+        navigate("/upgrade");
       }
     } else {
-      playerRef.current.seekTo(currentTime, 'seconds');
+      playerRef.current.seekTo(currentTime, "seconds");
     }
   };
 
@@ -237,18 +260,21 @@ const PlayerControls = () => {
   };
 
   const handleRepeatToggle = () => {
-    setIsRepeat(prev => !prev);
+    setIsRepeat((prev) => !prev);
   };
 
   const handleShuffleToggle = () => {
     setIsShuffle((prevState) => !prevState);
   };
 
-  const currentIndex = clickedIndex !== null ? clickedIndex : Songs.findIndex((song) => song.file_song === playerState.audioUrl);
+  const currentIndex =
+    clickedIndex !== null
+      ? clickedIndex
+      : Songs.findIndex((song) => song.file_song === playerState.audioUrl);
 
   const nextSong = () => {
     let nextIndex;
-    
+
     if (isShuffle) {
       do {
         nextIndex = Math.floor(Math.random() * Songs.length);
@@ -258,7 +284,7 @@ const PlayerControls = () => {
     }
 
     const nextSong = Songs[nextIndex];
-    
+
     if (nextSong.is_explicit === 0 || age >= 18) {
       setPlayerState({
         audioUrl: nextSong.file_song,
@@ -270,7 +296,7 @@ const PlayerControls = () => {
         playCount: nextSong.listens_count,
         TotalDuration: nextSong.duration,
         songId: nextSong.songId,
-        is_premium: nextSong.is_premium
+        is_premium: nextSong.is_premium,
       });
       setClickedIndex(nextIndex);
       setIsPlaying(true);
@@ -279,7 +305,6 @@ const PlayerControls = () => {
       nextSong();
     }
   };
-
 
   const prevSong = () => {
     if (currentIndex === 0) {
@@ -304,13 +329,13 @@ const PlayerControls = () => {
           playCount: prevSong.listens_count,
           TotalDuration: prevSong.duration,
           songId: prevSong.songId,
-          is_premium: prevSong.is_premium
+          is_premium: prevSong.is_premium,
         });
         setClickedIndex(prevIndex);
         return;
       }
       if (is_premium && !payment.user_id) {
-        return
+        return;
       }
       handleWarning();
     }
@@ -319,14 +344,18 @@ const PlayerControls = () => {
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
   useEffect(() => {
-    if (playerRef.current) {
-      playerRef.current.playing = isPlaying;
-    }
-  }, [isRepeat]);
+    const storedHistory = localStorage.getItem(`history_${songId}`);
+    const storedListen = localStorage.getItem(
+      `listen_${songId}_${new Date().toISOString().split("T")[0]}`
+    );
+
+    setHasAddedHistory(storedHistory === "true");
+    setHasListened(storedListen === "true");
+  }, [songId]);
 
   return (
     <div className="container-controls">
@@ -340,20 +369,28 @@ const PlayerControls = () => {
         />
         <div className="control-buttons">
           <MdRepeat
-            className={`icon-custom ${isRepeat ? 'text-blue-500' : ''}`}
+            className={`icon-custom ${isRepeat ? "text-blue-500" : ""}`}
             title="Repeat"
-            onClick={handleRepeatToggle}  // Toggle Repeat
+            onClick={handleRepeatToggle} // Toggle Repeat
           />
           <CgPlayTrackPrev className="icon" onClick={prevSong} />
           <div className="state" onClick={handlePlayPause}>
-            {isPlaying ? <BsFillPauseCircleFill className="icon" /> : <BsFillPlayCircleFill className="icon" />}
+            {isPlaying ? (
+              <BsFillPauseCircleFill className="icon" />
+            ) : (
+              <BsFillPlayCircleFill className="icon" />
+            )}
           </div>
           <CgPlayTrackNext className="icon" onClick={nextSong} />
-          <MdShuffle className={`icon-custom ${isShuffle ? 'text-blue-500' : ''}`} title="Shuffle" onClick={handleShuffleToggle} />
+          <MdShuffle
+            className={`icon-custom ${isShuffle ? "text-blue-500" : ""}`}
+            title="Shuffle"
+            onClick={handleShuffleToggle}
+          />
         </div>
         <div className="parent-container">
-          <Volume 
-            volume={volume} 
+          <Volume
+            volume={volume}
             onVolumeChange={(e) => setVolume(parseFloat(e.target.value))}
             lyrics={lyrics}
             title={title}

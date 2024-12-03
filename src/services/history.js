@@ -1,32 +1,66 @@
 import request from "../config";
-import { store } from "../redux/store"; // Import store
-import { addNotification } from "../redux/slice/notificationSlice";
-
-// const dispatchNotification = (message, type = "default") => {
-//   store.dispatch(addNotification({ message, type }));
-// };
 
 const getHistoryById = async (id) => {
-  const res = await request({
-    method: "GET",
-    path: `/api/histories/${id}`,
-  });
-  return res;
+  try {
+    const res = await request({
+      method: "GET",
+      path: `/api/histories/${id}`,
+    });
+    return res.data || [];
+  } catch (error) {
+    return [];
+  }
 };
 
-const addHistory = async (history) => {
+const addHistory = async (userId, songId) => {
+  try {
+    const historyData = {
+      userID: userId,
+      songID: songId,
+      listeningDate: new Date().toISOString()
+    };
 
     const res = await request({
       method: "POST",
       path: "/api/histories",
-      data:history,
+      data: historyData,
     });
 
-    return res;
-
-
+    if (res.success) {
+      return res.data;
+    } else {
+      throw new Error(res.message || "Không thể thêm lịch sử");
+    }
+  } catch (error) {
+    console.error("Lỗi khi thêm lịch sử:", error);
+    throw error;
+  }
 };
 
+const deleteHistory = async (id) => {
+  try {
+    const res = await request({
+      method: "DELETE",
+      path: `/api/histories/${id}`,
+    });
+    return res || [];
+  } catch (error) {
+    console.error("Lỗi khi lấy lịch sử:", error);
+    return [];
+  }
+};
 
+const deleteAllHistory = async (id) => {
+  try {
+    const res = await request({
+      method: "DELETE",
+      path: `/api/histories/user/${id}`,
+    });
+    return res || [];
+  } catch (error) {
+    console.error("Lỗi khi lấy lịch sử:", error);
+    return [];
+  }
+};
 
-export { getHistoryById, addHistory };
+export { getHistoryById, addHistory,deleteHistory,deleteAllHistory };

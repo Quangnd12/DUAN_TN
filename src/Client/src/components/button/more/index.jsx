@@ -20,6 +20,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
 import NoAccountsIcon from '@mui/icons-material/NoAccounts';
 import AddPlaylistOption from '../../dropdown/dropdownAddPlaylist';
+import { FaTrash } from "react-icons/fa";
 
 const MoreButton = ({ type, onOptionSelect }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -54,6 +55,9 @@ const MoreButton = ({ type, onOptionSelect }) => {
             { label: 'Remove from your interest profile', action: 'remove_from_profile', icon: <NoAccountsIcon /> },
             { label: 'Report', action: 'report', icon: <ReportIcon /> }, // Changed action to 'report'
             { label: 'Share', action: 'share', icon: <ShareIcon /> },
+        ],
+        history: [
+            { label: 'Delete all history', action: 'delete_all', icon: <FaTrash /> },
         ],
     };
 
