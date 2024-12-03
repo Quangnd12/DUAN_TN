@@ -204,28 +204,19 @@ const AlbumList = () => {
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
-                <TableRow sx={{ backgroundColor: "#18181b" }}>
-                  <TableCell />
+                <TableRow sx={{ backgroundColor: "#18181b" }}>          
                   <TableCell sx={{ color: "white" }}>#</TableCell>
                   <TableCell sx={{ color: "white" }}>Album</TableCell>
                   <TableCell sx={{ color: "white" }}>Artist</TableCell>
                   <TableCell sx={{ color: "white" }}>Release Date</TableCell>
                   <TableCell sx={{ width: "70px", color: "white" }}>Action</TableCell>
+                  <TableCell sx={{ color: "white", width: "50px", textAlign: "center" }} />
                 </TableRow>
               </TableHead>
               <TableBody>
                 {albums.map((album, index) => (
                   <React.Fragment key={album.id}>
-                    <TableRow sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}>
-                      <TableCell>
-                        <IconButton
-                          aria-label="expand row"
-                          size="small"
-                          onClick={() => toggleRow(album.id)}
-                        >
-                          {openRow[album.id] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                        </IconButton>
-                      </TableCell>
+                    <TableRow sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}>                 
                       <TableCell>{(currentPage - 1) * limit + index + 1}</TableCell>
                       <TableCell>
                         <div className="flex items-center">
@@ -276,6 +267,15 @@ const AlbumList = () => {
                             <span style={{ color: "blue" }}>Edit</span>
                           </MenuItem>
                         </Menu>
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          aria-label="expand row"
+                          size="small"
+                          onClick={() => toggleRow(album.id)}
+                        >
+                          {openRow[album.id] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                        </IconButton>
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -346,13 +346,12 @@ const AlbumList = () => {
               </select>
             </div>
             <div>
-              <Stack spacing={2}>
+              <Stack spacing={2} direction="row" alignItems="center">
                 <Pagination
                   count={totalPages || 1}
                   page={currentPage}
                   onChange={handleChangePage}
                   color="primary"
-                  variant="outlined"
                   shape="rounded"
                 />
               </Stack>

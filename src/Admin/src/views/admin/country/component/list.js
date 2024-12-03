@@ -188,13 +188,12 @@ const CountryList = () => {
                             </select>
                         </div>
                         <div>
-                            <Stack spacing={2}>
+                            <Stack spacing={2} direction="row" alignItems="center">
                                 <Pagination
                                     count={totalPages || 1}
                                     page={currentPage}
                                     onChange={handleChangePage}
                                     color="primary"
-                                    variant="outlined"
                                     shape="rounded"
                                 />
                             </Stack>

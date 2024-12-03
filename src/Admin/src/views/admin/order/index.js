@@ -1,13 +1,14 @@
 import React from "react";
+import OrderList from "./component/list";
 
-const TopChart = () => {
+const Order = () => {
     return (
         <div className="flex flex-wrap">
             <div className="w-full mb-12 px-4">
-               {/* {'import component list vào '} */}
+             <OrderList/>
             </div>                  
         </div>
     )
 }
 
-export default TopChart;
+export default Order;

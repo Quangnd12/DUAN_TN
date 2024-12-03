@@ -14,7 +14,6 @@ import { handleWarning, handleWarningUser } from "../notification";
 import { updatePlayCount } from "services/songs";
 import { addHistory } from "services/history";
 import { getHistoryById } from "services/history";
-import { async } from "@firebase/util";
 import { formatDate } from "../format";
 import { getPaymentByUser } from "services/payment";
 
@@ -37,9 +36,8 @@ const PlayerControls = () => {
   const age = useAge();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
-  const currentUserId = user ? user.id : null;
-
-
+  const userData = JSON.parse(localStorage.getItem('user'));
+  const user_id = userData ? userData.id : null;
 
   useEffect(() => {
     if (audioUrl) {
@@ -98,6 +96,39 @@ const PlayerControls = () => {
     }
   }, [user]);
 
+  const getHistory = async () => {
+    try {
+      if (user) {
+        const history = await getHistoryById(user_id);
+        setHistory(history);
+      }
+    } catch (error) {
+      setHistory([]);
+    }
+  }
+
+  useEffect(() => {
+    if (user) {
+      getHistory();
+    }
+  }, [user])
+
+
+  const handleAddHistory = async () => {
+    try {
+      const historyForSong = history.find(item => item.songId === songId);
+      if (!historyForSong) {
+        await addHistory(user_id, songId);
+        setHasAddedHistory(true);
+        await getHistory();
+      }
+      return;
+
+    } catch (error) {
+      console.error("Failed to add history:", error);
+    }
+  };
+
   const handleProgress = (state) => {
     setCurrentTime(state.playedSeconds);
     if (!user && state.playedSeconds > 30) {
@@ -114,72 +145,49 @@ const PlayerControls = () => {
           return;
         }
       }
-
     }
 
-    // const seventyPercent = duration * 0.7;
-    // if (state.playedSeconds > seventyPercent  && !history ) {
-    //   handleAddHistory();  // Gọi API lưu lịch sử
-    // }
-    // if (user && state.playedSeconds > 60 && !hasAddedHistory) {
-    //   incrementPlayCount(); 
-    // }
+    const seventyPercent = duration * 0.7;
+    if (state.playedSeconds > seventyPercent && !hasAddedHistory) {
+      handleAddHistory();
+      setHasAddedHistory(true);
+    }
+    if (user && state.playedSeconds > seventyPercent && !hasListened) {
+      incrementPlayCount(); 
+      setHasListened(true);
+    }
   };
 
-  // const getHistory = async () => {
-  //   try {
-  //     if (user) {
-  //       const history = await getHistoryById(currentUserId);
-  //       setHistory(history);
-  //     }
-  //   } catch (error) {
-  //     setHistory([]);
-  //   }
-  // }
 
-
-  // useEffect(() => {
-  //   if (user) {
-  //     getHistory();
-  //   }
-  // }, [user])
-
-
-  // const handleAddHistory = async () => {
-  //   try {
-  //     if (history) {
-  //       return;
-  //     }
-  //     else {
-  //       await addHistory({
-  //         songID: songId,
-  //       });
-  //       await getHistory();
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to add history:", error);
-  //   }
-  // };
-
-
-
-
-  // const incrementPlayCount = async () => {
-  //   try {
-  //     const today = new Date().toISOString().split("T")[0];
-  //     const HistoryDate = formatDate(history.listeningDate);
-  //     if (!history && HistoryDate !== today) {
-  //       const updatedPlayCount = await updatePlayCount(songId);
-  //       setPlayerState((prevState) => ({
-  //         ...prevState,
-  //         playCount: updatedPlayCount,
-  //       }));
-  //     }
-  //   } catch (error) {
-  //     console.error("Error updating play count:", error);
-  //   }
-  // };
-
+  const incrementPlayCount = async () => {
+    try {
+      const today = new Date().toISOString().split("T")[0]; // Lấy ngày hiện tại theo định dạng YYYY-MM-DD
+      const historyForSong = history.find(item => item.songId === songId); // Kiểm tra xem bài hát này đã có trong lịch sử chưa
+      
+      if (historyForSong) {
+        const historyDate = formatDate(historyForSong.listeningDate); // Định dạng lại ngày lịch sử
+        if (historyDate !== today) { // Nếu ngày lịch sử khác ngày hiện tại, tính lượt nghe
+          const updatedPlayCount = await updatePlayCount(songId);
+          setPlayerState(prevState => ({
+            ...prevState,
+            playCount: updatedPlayCount, // Cập nhật lượt nghe mới
+          }));
+          setHasListened(true); // Đánh dấu là đã tính lượt nghe
+        }
+      } else {
+        // Nếu bài hát chưa có trong lịch sử, tính lượt nghe mới
+        const updatedPlayCount = await updatePlayCount(songId);
+        setPlayerState(prevState => ({
+          ...prevState,
+          playCount: updatedPlayCount,
+        }));
+        setHasListened(true);
+      }
+    } catch (error) {
+      console.error("Error updating play count:", error);
+    }
+  };
+  
   const handleDuration = (duration) => {
     setDuration(duration);
   };

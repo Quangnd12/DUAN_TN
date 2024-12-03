@@ -261,6 +261,7 @@ const InfoClient = () => {
             <img
               className="w-48 h-48 sm:w-56 sm:h-56 border-2 border-gray-300 object-cover mb-4 sm:mb-0 sm:mr-6 cursor-pointer transition-transform duration-300 hover:scale-105"
               src={formData.avatar}
+              onError={(e) => e.target.src = '/images/avatar.jpg'}
               alt="User avatar"
               onClick={handleImageClick}
             />

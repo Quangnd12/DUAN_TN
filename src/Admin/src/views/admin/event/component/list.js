@@ -74,15 +74,6 @@ const CollapsibleRow = ({
   return (
     <>
       <TableRow>
-        <TableCell>
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={() => setOpen(!open)}
-          >
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
         <TableCell>{(page - 1) * itemsPerPage + index + 1}</TableCell>
         <TableCell>
           <div className="flex items-center">
@@ -159,6 +150,15 @@ const CollapsibleRow = ({
               Delete
             </MenuItem>
           </Menu>
+        </TableCell>
+        <TableCell>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
         </TableCell>
       </TableRow>
       <TableRow>
@@ -347,28 +347,7 @@ const EventList = () => {
                 height: "40px",
               },
             }}
-          />
-
-          <FormControl variant="outlined" className="w-48" size="small">
-            <Select
-              value={itemsPerPage}
-              onChange={handleItemsPerPageChange}
-              disabled={isLoading}
-              displayEmpty
-              sx={{
-                height: "40px",
-                "& .MuiSelect-select": {
-                  paddingTop: "6px",
-                  paddingBottom: "6px",
-                },
-              }}
-            >
-              <MenuItem value={5}>5 per page</MenuItem>
-              <MenuItem value={10}>10 per page</MenuItem>
-              <MenuItem value={15}>15 per page</MenuItem>
-              <MenuItem value={20}>20 per page</MenuItem>
-            </Select>
-          </FormControl>
+          />        
         </div>
 
         <button
@@ -383,7 +362,6 @@ const EventList = () => {
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: "#18181b" }}>
-              <TableCell width="5%" sx={{ color: "white" }}></TableCell>
               <TableCell width="5%" sx={{ color: "white" }}>
                 #
               </TableCell>
@@ -402,9 +380,10 @@ const EventList = () => {
               <TableCell width="10%" sx={{ color: "white" }}>
                 End Date
               </TableCell>
-              <TableCell width="10%" sx={{ color: "white" }}>
+              <TableCell width="1%" sx={{ color: "white" }}>
                 Actions
               </TableCell>
+              <TableCell sx={{ color: "white", width: "1%", textAlign: "center" }} />
             </TableRow>
           </TableHead>
           <TableBody>
@@ -424,7 +403,19 @@ const EventList = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <label htmlFor="limit">Show items:</label>
+          <select id="limit"
+            value={itemsPerPage}
+            onChange={handleItemsPerPageChange}
+            disabled={isLoading}
+            className="border border-gray-300 rounded p-1">
+            <option value={5}>Show 5</option>
+            <option value={10}>Show 10</option>
+            <option value={15}>Show 15</option>
+          </select>
+        </div>
       {data?.totalPages > 1 && (
         <div className="flex justify-end items-center mt-4">
           <Stack spacing={2}>
@@ -445,7 +436,8 @@ const EventList = () => {
           eventToDelete={eventToDelete}
         />
       )}
-    </div>
+    </div>   
+     </div>
   );
 };
 

@@ -16,6 +16,33 @@ const Payment = async (payData) => {
     return res;
 
 };
+
+const getAllPayment = async (page, limit,searchName) => {
+  let path = '/api/payment/all';
+  
+  let query = [];
+
+  if (page && limit) {
+    query.push(`page=${page}`);
+    query.push(`limit=${limit}`);
+  }
+
+  if (searchName) {
+    query.push(`searchName=${encodeURIComponent(searchName)}`);
+  }
+
+  if (query.length > 0) {
+    path += `?${query.join('&')}`;
+  }
+
+  const res = await request({
+    method: "GET",
+    path: path,
+  });
+
+  return res; 
+};
+
 const CheckPayment = async () => {
     const res = await request({
       method: "GET",
@@ -55,4 +82,4 @@ const RenewPayment = async (payData) => {
 
 };
 
-export {  Payment,addPayment,CheckPayment ,getPaymentByUser,RenewPayment};
+export {  Payment,addPayment,CheckPayment ,getPaymentByUser,RenewPayment,getAllPayment};

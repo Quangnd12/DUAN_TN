@@ -44,19 +44,12 @@ const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album, image, p
         className="icon-microphone mr-4 text-white"
         title="Mic Karaoke" // Đổi title thành Mic Karaoke
         onClick={() => {
-          if (is_premium === 1) {
-            if (user_id) {
-              toggleLyricsDrawer(true)
-            }
-            else {
-              toggleLyricsDrawer(false);
-              navigate('/upgrade');
-            }
+          if (is_premium === 1 && !user_id) {
+            navigate('/upgrade');
           } else {
-            toggleLyricsDrawer(true)
+            toggleLyricsDrawer(true)();
           }
-
-        }}// Mở Drawer khi click
+        }}
       />
 
       {volume === 0 ? (

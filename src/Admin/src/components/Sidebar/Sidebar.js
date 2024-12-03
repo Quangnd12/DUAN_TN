@@ -39,6 +39,7 @@ import {
   MdMusicVideo,
   MdAssessment,
   MdPublic,
+  MdShoppingBag
   MdEvent,
 } from "react-icons/md";
 
@@ -182,6 +183,7 @@ export default function Sidebar() {
         { to: "/admin/genre", icon: MdCategory, label: "Genre" },
         { to: "/admin/artist", icon: MdMic, label: "Artist" },
         { to: "/admin/album", icon: MdAlbum, label: "Album" },
+        { to: "/admin/order", icon: MdShoppingBag, label: "Order" },
         { to: "/admin/event", icon: MdEvent, label: "Event" },
       ],
     },

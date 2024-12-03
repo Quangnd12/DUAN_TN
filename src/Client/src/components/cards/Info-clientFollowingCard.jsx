@@ -12,6 +12,7 @@ const InfoClientFollowingCard = ({id, imageUrl,name }) => {
                 className="w-40 h-40 rounded-full mb-2 object-cover transition-transform duration-300 hover:scale-110"
                 src={imageUrl}
                 alt="Avatar"
+                onError={(e) => e.target.src = '/images/avatar.jpg'}
               />
               <span className="text-white block mb-2">{name}</span>
               <h6 className="text-gray-400">Profile</h6>

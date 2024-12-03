@@ -96,26 +96,7 @@ const UserList = () => {
           }}
         />
 
-        <FormControl variant="outlined" className="w-48" size="small">
-          <Select
-            value={itemsPerPage}
-            onChange={handleItemsPerPageChange}
-            disabled={isLoading}
-            displayEmpty
-            sx={{
-              height: "40px",
-              "& .MuiSelect-select": {
-                paddingTop: "6px",
-                paddingBottom: "6px",
-              },
-            }}
-          >
-            <MenuItem value={5}>5 per page</MenuItem>
-            <MenuItem value={10}>10 per page</MenuItem>
-            <MenuItem value={15}>15 per page</MenuItem>
-            <MenuItem value={20}>20 per page</MenuItem>
-          </Select>
-        </FormControl>
+
       </div>
 
       <TableContainer component={Paper}>
@@ -143,7 +124,7 @@ const UserList = () => {
               <TableCell width="15%" sx={{ color: "white" }}>
                 Birthday
               </TableCell>
-              <TableCell  width="15%" sx={{ color: "white" }}>
+              <TableCell width="15%" sx={{ color: "white" }}>
                 Created At
               </TableCell>
             </TableRow>
@@ -181,21 +162,34 @@ const UserList = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
-      {data?.pagination && (
-        <div className="flex justify-end items-center mt-4">
-          <Stack spacing={2}>
-            <Pagination
-              count={Math.ceil(data.pagination.total / itemsPerPage)}
-              page={page}
-              onChange={handlePageChange}
-              color="primary"
-              disabled={isLoading}
-              shape="rounded"
-            />
-          </Stack>
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <label htmlFor="limit">Show items:</label>
+          <select id="limit"
+            value={itemsPerPage}
+            onChange={handleItemsPerPageChange}
+            disabled={isLoading}
+            className="border border-gray-300 rounded p-1">
+            <option value={5}>Show 5</option>
+            <option value={10}>Show 10</option>
+            <option value={15}>Show 15</option>
+          </select>
         </div>
-      )}
+        {data?.pagination && (
+          <div className="flex justify-end items-center mt-4">
+            <Stack spacing={2}>
+              <Pagination
+                count={Math.ceil(data.pagination.total / itemsPerPage)}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+                disabled={isLoading}
+                shape="rounded"
+              />
+            </Stack>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
