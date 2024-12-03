@@ -23,7 +23,7 @@ import {
   Menu,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import EditIcon from "@mui/icons-material/Edit";
+// import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -53,7 +53,7 @@ const CollapsibleRow = ({
   itemsPerPage,
   index,
   formatDate,
-  onEdit,
+  // onEdit,
   onDelete,
   onDetail,
 }) => {
@@ -140,7 +140,7 @@ const CollapsibleRow = ({
               <VisibilityIcon fontSize="small" className="mr-2 text-zinc-500" />{" "}
               Detail
             </MenuItem>
-            <MenuItem
+            {/* <MenuItem
               onClick={() => {
                 onEdit(event);
                 handleMenuClose();
@@ -148,7 +148,7 @@ const CollapsibleRow = ({
             >
               <EditIcon fontSize="small" className="mr-2 text-orange-400" />{" "}
               Edit
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem
               onClick={() => {
                 onDelete(event);
@@ -309,9 +309,9 @@ const EventList = () => {
     navigate("/admin/event/add");
   };
 
-  const handleEditEvent = (event) => {
-    navigate(`/admin/event/edit/${event.id}`);
-  };
+  // const handleEditEvent = (event) => {
+  //   navigate(`/admin/event/edit/${event.id}`);
+  // };
 
   const handleDeleteEvent = (event) => {
     setEventToDelete(event);
@@ -416,7 +416,7 @@ const EventList = () => {
                 itemsPerPage={itemsPerPage}
                 index={index}
                 formatDate={formatDate}
-                onEdit={handleEditEvent}
+                // onEdit={handleEditEvent}
                 onDelete={handleDeleteEvent}
                 onDetail={handleDetailEvent}
               />

@@ -1,4 +1,11 @@
 import request from "config";
+import { store } from '../redux/store';
+import { addNotification } from '../redux/slice/notificationSlice';
+
+const dispatchNotification = (message, type = 'default') => {
+  store.dispatch(addNotification({ message, type }));
+};
+
 
 const getCountry = async (page, limit,searchName) => {
   let path = '/api/countries';
@@ -41,6 +48,7 @@ const addCountry = async (genre) => {
     path: "/api/countries",
     data: genre,
   });
+  dispatchNotification("Country added successfully", "success");
   return res;
 };
 
@@ -49,6 +57,7 @@ const deleteCountry = async (id) => {
     method: "DELETE",
     path: `/api/countries/${id}`,
   });
+  dispatchNotification("Country delete successfully", "success");
   return res;
 };
 
@@ -58,6 +67,7 @@ const updateCountry = async (id, genre) => {
     path: `/api/countries/${id}`,
     data: genre,
   });
+  dispatchNotification("Country update successfully", "success");
   return res;
 };
 

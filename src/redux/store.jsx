@@ -7,6 +7,7 @@ import notificationReducer from './slice/notificationSlice';
 import { playlistApi } from "./slice/playlistSlice";
 import playerReducer from "./slice/playerSlice";
 import { eventApi } from "./slice/eventSlice";
+import artistAuthReducer from "./slice/artistAuthSlice";
 
 const persistConfig = {
   key: 'auth', 
@@ -17,7 +18,8 @@ const persistedAuthReducer = persistReducer(persistConfig, authReducer);
 
 const store = configureStore({
   reducer: {
-    auth: persistedAuthReducer, // Giữ duy nhất persistedReducer cho auth
+    auth: persistedAuthReducer,
+    artistAuth: artistAuthReducer, // Thay đổi ở đây
     notifications: notificationReducer,
     player: playerReducer,
     [playlistApi.reducerPath]: playlistApi.reducer,

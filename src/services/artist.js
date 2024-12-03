@@ -1,4 +1,10 @@
 import request from "config";
+import { store } from '../redux/store';
+import { addNotification } from '../redux/slice/notificationSlice';
+
+const dispatchNotification = (message, type = 'default') => {
+  store.dispatch(addNotification({ message, type }));
+};
 
 const getArtists = async (page , limit) => {
   let path = '/api/artists';
@@ -65,8 +71,10 @@ const addArtist = async (Artist) => {
       path: "/api/artists",
       data: Artist,
     });
+    dispatchNotification("Artist added successfully", "success");
     return res;
   } catch (error) {
+    dispatchNotification("Failed to add artist", "error");
     if (error.response) {
       throw new Error(error.response.data.message);  // Throw the backend error message
     }
@@ -95,8 +103,10 @@ const deleteArtist = async (id) => {
       method: "DELETE",
       path: `/api/artists/${id}`,
     });
+    dispatchNotification("Artist deleted successfully", "success");
     return res;
   } catch (error) {
+    dispatchNotification("Failed to delete artist", "error");
     throw new Error(`Lỗi khi xóa artist: ${error.message}`);
   }
 };
@@ -107,6 +117,7 @@ const updateArtist = async (id, Artist) => {
     path: `/api/artists/${id}`,
     data: Artist,
   });
+  dispatchNotification("Artist update successfully", "success");
   return res;
 };
 

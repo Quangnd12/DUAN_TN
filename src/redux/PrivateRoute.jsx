@@ -17,9 +17,14 @@ export const ProtectedRoute = ({ children, requiredRole = null }) => {
 
   useEffect(() => {
     // Kiểm tra quyền truy cập mỗi khi location thay đổi
-    if (isAuthenticated && role === 'user' && location.pathname.startsWith('/admin')) {
-      // Force logout nếu user cố truy cập admin
-      dispatch({ type: 'auth/logout' });
+    if (isAuthenticated) {
+      if (
+        (role === 'user' && location.pathname.startsWith('/admin')) ||
+        (role === 'artist' && location.pathname.startsWith('/admin'))
+      ) {
+        // Force logout nếu user hoặc artist cố truy cập admin
+        dispatch({ type: 'auth/logout' });
+      }
     }
   }, [location, isAuthenticated, role, dispatch]);
 
@@ -35,7 +40,9 @@ export const ProtectedRoute = ({ children, requiredRole = null }) => {
    // Kiểm tra role nếu được yêu cầu
    if (requiredRole && role !== requiredRole) {
     // Redirect về trang phù hợp với role
-    return <Navigate to={role === 'admin' ? '/admin' : '/'} replace />;
+    if (role === 'admin') return <Navigate to="/admin" replace />;
+    if (role === 'artist') return <Navigate to="/artist" replace />;
+    return <Navigate to="/" replace />;
   }
   return children;
 };

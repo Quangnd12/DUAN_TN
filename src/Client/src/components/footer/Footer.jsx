@@ -29,7 +29,10 @@ const Footer = () => {
             <h3 className="text-lg font-bold">Community</h3>
             <ul className="space-y-2 mt-2">
               <li>
-                <Link href="#" className="hover:underline">
+                <Link
+                  to="/artist-portal/auth/login"
+                  className="hover:underline"
+                >
                   For Artists
                 </Link>
               </li>
