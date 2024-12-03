@@ -36,9 +36,10 @@ const SideBar = () => {
 
   return (
     <div
-      className={`flex flex-col h-screen transition-all mr-1 duration-300 ease-in-out ${isOpen ? "w-72" : "w-16"
-        } bg-zinc-900 p-2 rounded-md`}
-    >
+    className={`flex flex-col h-[calc(100vh-90px)] transition-all mr-1 duration-300 ease-in-out ${
+      isOpen ? "w-72" : "w-16"
+    } bg-zinc-900 p-2 rounded-md sticky top-0`}
+  >
       <div className="flex items-center justify-start mb-4">
         <Link to={"/"}>
           <img

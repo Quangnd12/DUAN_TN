@@ -72,7 +72,7 @@ function MainLayout({ children }) {
       <div>{!isMobile && <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />}</div>
       <div className={`flex-1 flex flex-col ${isSidebarOpen ? 'ml-0' : 'ml-16'} transition-all duration-300`}>
         <Header toggleSidebar={toggleSidebar} />
-        <div className="overflow-y-auto scrollbar-custom" style={{ height: "620px" }}>
+        <div className="overflow-y-auto scrollbar-custom" style={{ height: "calc(100vh - 190px)" }}>
           {children}
         </div>
       </div>
@@ -160,29 +160,29 @@ function Client() {
               <Route path="/forgot" element={<AuthRoute><ForgotPass /></AuthRoute>} />
               <Route path="/reset-password/:token" element={<AuthRoute><ResetPass /></AuthRoute>} />
 
-            {/* Private routes */}
-            <Route path="/library" element={<PrivateRoute><Library /></PrivateRoute>} />
-            <Route path="/mixes" element={<PrivateRoute><Mix /></PrivateRoute>} />
-            <Route path="mixes/mixDetail/:id" element={<PrivateRoute><MixDetail /></PrivateRoute>} />
-            <Route path="mixes/add" element={<PrivateRoute><CreateMix /></PrivateRoute>} />
-            <Route path="/playlistall" element={<PrivateRoute><Playlist /></PrivateRoute>} />
-            <Route path="/playlist" element={<PrivateRoute><EmptyLayout /></PrivateRoute>}>
-                 <Route path="playlistdetail/:name" element={<PrivateRoute><PlaylistList /></PrivateRoute>} />
-                 <Route path="add" element={<PrivateRoute><AddPlaylist /></PrivateRoute>} />
-                 <Route path="info" element={<PrivateRoute><PlayListInfo /></PrivateRoute>} />
-            </Route>
-            <Route path="/info/:userId" element={<PrivateRoute><InfoClient /></PrivateRoute>} />
-            <Route path="/content" element={<PrivateRoute><Content /></PrivateRoute>} />
-            <Route path='/report' element= {<Report/>}/>
-            <Route path='/event' element={<PrivateRoute><Event /></PrivateRoute>} />
-            <Route path='/event/:id' element={<PrivateRoute><EventDetail /></PrivateRoute>} />
-             {isAuthenticated && !payment.user_id &&
-                  <Route path='/payment' element={<PaymentPage />} />
-              }         
-              {payment.is_notified===1 || !payment.user_id  && (
-                  <Route path='/upgrade' element={<PricingPlans />} />
+              {/* Private routes */}
+              <Route path="/library" element={<PrivateRoute><Library /></PrivateRoute>} />
+              <Route path="/mixes" element={<PrivateRoute><Mix /></PrivateRoute>} />
+              <Route path="mixes/mixDetail/:id" element={<PrivateRoute><MixDetail /></PrivateRoute>} />
+              <Route path="mixes/add" element={<PrivateRoute><CreateMix /></PrivateRoute>} />
+              <Route path="/playlistall" element={<PrivateRoute><Playlist /></PrivateRoute>} />
+              <Route path="/playlist" element={<PrivateRoute><EmptyLayout /></PrivateRoute>}>
+                <Route path="playlistdetail/:name" element={<PrivateRoute><PlaylistList /></PrivateRoute>} />
+                <Route path="add" element={<PrivateRoute><AddPlaylist /></PrivateRoute>} />
+                <Route path="info" element={<PrivateRoute><PlayListInfo /></PrivateRoute>} />
+              </Route>
+              <Route path="/info/:userId" element={<PrivateRoute><InfoClient /></PrivateRoute>} />
+              <Route path="/content" element={<PrivateRoute><Content /></PrivateRoute>} />
+              <Route path='/report' element={<Report />} />
+              <Route path='/event' element={<PrivateRoute><Event /></PrivateRoute>} />
+              <Route path='/event/:id' element={<PrivateRoute><EventDetail /></PrivateRoute>} />
+              {isAuthenticated && !payment.user_id &&
+                <Route path='/payment' element={<PaymentPage />} />
+              }
+              {payment.is_notified === 1 || !payment.user_id && (
+                <Route path='/upgrade' element={<PricingPlans />} />
               )}
- 
+
               <Route path="*" element={<NotFound />} />
             </Routes>
             {savedSongs.length > 0 && <PlayerControls />}
