@@ -38,8 +38,8 @@ body {
   background: var(--black-color);
   display: grid;
   grid-column: 3;
-  /* grid-template-columns: 20% 30% 50%;; */
   padding: 8px;
+  padding-bottom: 90px; /* Thêm padding bottom để tránh bị che bởi thanh nhạc */
 }
 
 .rowItemTitle {

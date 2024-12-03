@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
-import { Link,useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MdMoreHoriz } from 'react-icons/md';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import WifiTetheringIcon from '@mui/icons-material/WifiTethering';
@@ -12,7 +12,7 @@ import LyricModal from '../../lyrics';
 import { PlayerContext } from "../../context/MusicPlayer";
 
 
-const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName, lyrics,user_id }) => {
+const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName, lyrics, user_id }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
@@ -26,13 +26,12 @@ const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName, lyrics,u
 
     const handleButtonClick = (e) => {
         e.stopPropagation();
-        if (is_premium==1) {
-            if(user_id){
-                  setIsModalOpen(true);
-            }
-            else{
-                  setIsModalOpen(false); 
-                   navigate('/upgrade');
+        if (is_premium === 1) {
+            if (user_id) {
+                setIsModalOpen(true);
+            } else {
+                setIsModalOpen(false);
+                navigate('/upgrade');
             }
         } else {
             setIsModalOpen(true);
@@ -122,7 +121,7 @@ const MoreButton = ({ onOptionSelect, songImage, songTitle, artistName, lyrics,u
                                     <LyricModal onClose={closeModal} lyrics={lyrics}>
                                         <div className="p-4">
                                             <h2 className="text-xl">Lyrics Content</h2>
-                                            <p>Here are the lyrics...</p>
+                                            <p>{lyrics}</p> {/* Hiển thị lyrics thực tế */}
                                         </div>
                                     </LyricModal>
                                 )}

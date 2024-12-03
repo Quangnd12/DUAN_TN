@@ -1,44 +1,116 @@
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { MdClose } from 'react-icons/md';
 import MoreButton from "Client/src/components/button/more";
 import "../../assets/css/lyric.css";
 
-const Lyrics = ({ onClose, lyrics, title, artist, album, image, playCount, currentTime,TotalDuration }) => {
-    const lyricsContainerRef = useRef(null); 
-    const lyricsArray = lyrics.split('\n').map((lyric, index) => ({
-        text: lyric,
-        time: (index * TotalDuration) / lyrics.split('\n').length, 
-    }));
+const Lyrics = ({ onClose, lyrics, title, artist, album, image, playCount, currentTime, TotalDuration, isPlaying, audioElement, onNext, onPrevious, onPlayPause }) => {
+    const lyricsContainerRef = useRef(null);
+    const [lines, setLines] = useState([]);
+    const [currentLine, setCurrentLine] = useState(0);
+    const [activeLyricIndex, setActiveLyricIndex] = useState(0);
+    const [lyricsOffset, setLyricsOffset] = useState(0);
+    const [timeOffset, setTimeOffset] = useState(0);
 
-    const [currentLyricIndex, setCurrentLyricIndex] = useState(0);
+    // Thêm một khoảng thời gian nhỏ để lyrics hiển thị sớm hơn một chút
+    const PRE_BUFFER_TIME = 0.2; // 200ms
 
-console.log(currentTime);
+    // Xử lý lyrics với timestamp
     useEffect(() => {
-        const index = lyricsArray.findIndex((lyric, idx) => {
-            return currentTime >= lyric.time && currentTime < (lyricsArray[idx + 1]?.time || Number.MAX_SAFE_INTEGER);
-        });
+        if (!lyrics) return;
 
-        if (index !== -1) {
-            setCurrentLyricIndex(index);  // Cập nhật index của lyric hiện tại
+        try {
+            // Kiểm tra nếu lyrics có định dạng [mm:ss.xx]
+            const hasTimestamps = /^\[\d{2}:\d{2}\.\d{2}\]/.test(lyrics);
+
+            if (hasTimestamps) {
+                // Xử lý lyrics có timestamp
+                const processedLines = lyrics
+                    .split('\n')
+                    .filter(line => line.trim())
+                    .map(line => {
+                        const timeMatch = line.match(/\[(\d{2}):(\d{2})\.(\d{2})\](.*)/);
+                        if (timeMatch) {
+                            const [_, minutes, seconds, milliseconds] = timeMatch;
+                            const startTime = parseInt(minutes) * 60 + parseInt(seconds) + parseInt(milliseconds) / 100;
+                            return {
+                                text: timeMatch[4].trim(),
+                                startTime,
+                                endTime: 0 // Sẽ được cập nhật ở bước tiếp theo
+                            };
+                        }
+                        return null;
+                    })
+                    .filter(line => line !== null);
+
+                // Cập nhật endTime cho mỗi dòng
+                for (let i = 0; i < processedLines.length; i++) {
+                    processedLines[i].endTime = i < processedLines.length - 1
+                        ? processedLines[i + 1].startTime
+                        : TotalDuration;
+                }
+
+                setLines(processedLines);
+            } else {
+                // Xử lý lyrics không có timestamp
+                const rawLines = lyrics.split('\n').filter(line => line.trim());
+                const averageTime = TotalDuration / rawLines.length;
+
+                const processedLines = rawLines.map((line, index) => ({
+                    text: line,
+                    startTime: index * averageTime,
+                    endTime: (index + 1) * averageTime
+                }));
+
+                setLines(processedLines);
+            }
+        } catch (error) {
+            console.error("Error processing lyrics:", error);
         }
-    }, [currentTime, lyricsArray]);
+    }, [lyrics, TotalDuration]);
 
-    // Hàm cuộn lyrics đến dòng hiện tại
+    // Cập nhật dòng hiện tại và cuộn
     useEffect(() => {
-        if (lyricsContainerRef.current) {
-            const currentLyricElement = lyricsContainerRef.current.children[currentLyricIndex];
-            if (currentLyricElement) {
-                currentLyricElement.scrollIntoView({
-                    behavior: "smooth", // Cuộn mượt mà
-                    block: "center", // Đưa dòng hiện tại vào giữa container
+        if (!lines.length || currentTime === undefined) return;
+
+        const adjustedTime = currentTime + lyricsOffset + PRE_BUFFER_TIME;
+
+        const newCurrentLine = lines.findIndex(
+            line => adjustedTime >= line.startTime && adjustedTime < line.endTime
+        );
+
+        if (newCurrentLine !== -1 && newCurrentLine !== currentLine) {
+            setCurrentLine(newCurrentLine);
+
+            // Cuộn đến dòng hiện tại
+            const element = lyricsContainerRef.current?.children[newCurrentLine];
+            if (element) {
+                element.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                    inline: "nearest"
                 });
             }
         }
-    }, [currentLyricIndex]);
+    }, [currentTime, lines, currentLine, timeOffset]);
 
-    // Hàm xử lý chọn các tùy chọn
-    const handleOptionSelect = (action) => {
-        console.log('Selected action:', action);
+    useEffect(() => {
+        if (!lyrics?.timestamps) return;
+
+        // Tìm dòng lyrics hiện tại dựa vào currentTime
+        const currentIndex = lyrics.timestamps.findIndex((lyric, index) => {
+            const nextTime = lyrics.timestamps[index + 1]?.time || Infinity;
+            return currentTime >= lyric.time && currentTime < nextTime;
+        });
+
+        if (currentIndex !== -1) {
+            setActiveLyricIndex(currentIndex);
+        }
+    }, [currentTime, lyrics]);
+
+    // Thêm nút điều chỉnh timing
+    const adjustTiming = (direction) => {
+        const newOffset = timeOffset + (direction * 0.1); // Điều chỉnh 100ms
+        setTimeOffset(newOffset);
     };
 
     return (
@@ -50,9 +122,26 @@ console.log(currentTime);
                 <MdClose className="h-7 w-7 transition-transform duration-300 hover:scale-110" />
             </button>
 
+            <div className="flex justify-center mb-4">
+                <button
+                    className="text-gray-400 hover:text-white transition-colors duration-300 mx-2"
+                    onClick={onPrevious}
+                >
+                    Lùi
+                </button>
+                <button
+                    className="text-gray-400 hover:text-white transition-colors duration-300 mx-2"
+                    onClick={onNext}
+                >
+                    Tiếp theo
+                </button>
+            </div>
+
             <div className="flex items-center mb-4 pl-52 mt-5">
                 <h1 className="text-4xl font-bold mr-10">{title}</h1>
-                <span className="bg-zinc-900 border-2 border-blue-500 text-blue-500 text-xs font-bold px-2 py-1 rounded mt-2">MUSIC HEALS</span>
+                <span className="bg-zinc-900 border-2 border-blue-500 text-blue-500 text-xs font-bold px-2 py-1 rounded mt-2">
+                    MUSIC HEALS
+                </span>
             </div>
 
             <div className="flex text-sm mb-6 space-x-10 pl-52">
@@ -61,38 +150,38 @@ console.log(currentTime);
             </div>
 
             <div className="flex mb-4 pl-52">
-                <img src={image} alt="Album cover" className="w-96 h-96 rounded-lg mr-4" />
+                <img src={image} alt="Album cover" className="album-cover mr-4" />
                 <div className="text-lg flex flex-col justify-center space-y-7 pl-40">
-                <p className="text-gray-300 lyrics-container" ref={lyricsContainerRef}>
-                        {lyricsArray.map((lyric, index) => (
+                    <div className="lyrics-container" ref={lyricsContainerRef}>
+                        {lines.map((line, index) => (
                             <div
                                 key={index}
-                                className={`lyric ${index === currentLyricIndex ? "active" : "inactive"}`}
+                                className={`lyric ${index === currentLine
+                                    ? "active"
+                                    : index < currentLine
+                                        ? "past"
+                                        : "future"
+                                    }`}
                             >
-                                {lyric.text}
+                                {line.text}
                             </div>
                         ))}
-                    </p>
+                    </div>
                 </div>
             </div>
 
             <div className="flex justify-between items-center pl-52">
                 <div className="flex space-x-4 items-center">
-                    <MoreButton
-                        type="lyrics"
-                        onOptionSelect={handleOptionSelect}
-                    />
+                    <MoreButton type="lyrics" onOptionSelect={() => { }} />
                 </div>
             </div>
 
-            <br />
             <div className="flex flex-col pl-52 mb-4">
                 <div className="flex justify-between items-center">
                     <div className="text-lg font-bold mt-10">Plays</div>
                 </div>
                 <div className="flex justify-between items-center">
                     <div className="text-lg font-bold">{playCount}</div>
-
                 </div>
             </div>
         </div>

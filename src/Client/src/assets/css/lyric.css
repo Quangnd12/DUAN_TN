@@ -1,61 +1,93 @@
 /* Định nghĩa container của lyrics */
 .lyrics-container {
-    max-height: 350px; /* Giới hạn chiều cao của phần hiển thị lyrics */
-    overflow-y: scroll; /* Cho phép cuộn theo chiều dọc */
-    position: relative;
+    max-height: 350px;
+    overflow-y: auto;
     padding: 20px;
-    font-family: 'Arial', sans-serif;
-    color: #fff;
-}
-
-/* Ẩn thanh cuộn */
-.lyrics-container::-webkit-scrollbar {
-    width: 0; /* Ẩn thanh cuộn ngang */
-    height: 0; /* Ẩn thanh cuộn dọc */
-}
-
-.lyrics-container {
-    scrollbar-width: none; /* Cho phép cuộn nhưng ẩn thanh cuộn trên Firefox */
-}
-
-/* Định nghĩa cho wrapper bao quanh lyrics */
-.lyric-wrapper {
-    display: block;
+    text-align: center;
     position: relative;
-    height: auto; /* Đảm bảo wrapper có chiều cao đủ lớn để cuộn */
-    padding-bottom: 20px; /* Đảm bảo các dòng lyric không bị cắt */
+    scroll-behavior: smooth;
+    mask-image: linear-gradient(
+        to bottom,
+        transparent,
+        black 20%,
+        black 80%,
+        transparent
+    );
 }
 
 /* Định nghĩa cho từng dòng lyric */
 .lyric {
-    opacity: 0.5; /* Các dòng lyric không phải là dòng hiện tại sẽ mờ dần */
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; /* Hiệu ứng mờ dần và cuộn */
+    padding: 12px 0;
+    transition: all 0.3s ease;
+    position: relative;
     font-size: 1.2rem;
-    padding: 6px 0; /* Khoảng cách giữa các dòng lyrics */
-    line-height: 1.6;
-    text-align: center;
-    font-weight: 400; /* Độ đậm mặc định */
+    line-height: 1.5;
+    opacity: 0.6;
 }
 
 /* Dòng lyric đang phát (active) */
 .lyric.active {
-    opacity: 1; /* Dòng hiện tại có độ mờ đầy đủ */
-    font-weight: 700; /* Tăng độ đậm cho dòng hiện tại */
-    color: #3b82f6; /* Màu sắc nổi bật cho dòng hiện tại */
+    color: #3b82f6;
+    font-weight: bold;
+    transform: scale(1.05);
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
 }
 
-/* Dòng lyric đã phát xong (hidden) */
-.lyric.hidden {
-    opacity: 0.3; /* Dòng đã phát xong sẽ mờ đi */
-    transform: translateY(20px); /* Dòng đã qua sẽ bị dịch chuyển nhẹ xuống */
+/* Dòng lyric đã phát (past) */
+.lyric.past {
+    opacity: 0.4;
+    transform: translateY(-2px);
 }
 
-/* Hiệu ứng cuộn cho lyrics */
-@keyframes scrollLyrics {
-    0% {
-        transform: translateY(0); /* Bắt đầu ở vị trí ban đầu */
-    }
-    100% {
-        transform: translateY(-100%); /* Cuộn lên hết */
-    }
+/* Dòng lyric chưa phát (future) */
+.lyric.future {
+    opacity: 0.6;
+    transform: translateY(0);
+}
+
+/* Hiệu ứng gradient cho container */
+.lyrics-container::before,
+.lyrics-container::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 50px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.lyrics-container::before {
+    top: 0;
+    background: linear-gradient(to bottom, rgba(24, 24, 27, 1) 0%, rgba(24, 24, 27, 0) 100%);
+}
+
+.lyrics-container::after {
+    bottom: 0;
+    background: linear-gradient(to top, rgba(24, 24, 27, 1) 0%, rgba(24, 24, 27, 0) 100%);
+}
+
+/* Ẩn thanh cuộn */
+.lyrics-container::-webkit-scrollbar {
+    display: none;
+}
+
+.lyrics-container {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Định dạng ảnh album */
+.album-cover {
+    width: 100%;
+    height: auto;
+    max-width: 400px; /* Giới hạn chiều rộng tối đa */
+    border-radius: 10px; /* Bo tròn góc */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Đổ bóng */
+    transition: transform 0.3s ease; /* Hiệu ứng khi hover */
+}
+
+.album-cover:hover {
+    transform: scale(1.05); /* Phóng to khi hover */
 }

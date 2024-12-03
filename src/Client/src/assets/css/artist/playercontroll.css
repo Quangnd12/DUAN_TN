@@ -11,6 +11,8 @@
   background-color: #181818;
   padding: 0.5rem 0;
   z-index: 1500;
+  margin-bottom: 0;
+  padding-bottom: 0.5rem;
 }
 
 .controls {
@@ -36,12 +38,14 @@
   cursor: pointer;
   transition: color 0.2s ease-in-out;
 }
+
 .icon-custom {
   color: #b3b3b3;
   font-size: 1.5rem;
   cursor: pointer;
   transition: color 0.2s ease-in-out;
 }
+
 .control-buttons .icon:hover {
   color: white;
 }
@@ -88,8 +92,11 @@
   color: white;
   font-size: 0.875rem;
 }
+
 .parent-container {
   display: flex;
-  justify-content: flex-end; /* Đẩy nội dung về bên phải */
-  width: 100%; /* Đảm bảo có đủ không gian */
+  justify-content: flex-end;
+  /* Đẩy nội dung về bên phải */
+  width: 100%;
+  /* Đảm bảo có đủ không gian */
 }
