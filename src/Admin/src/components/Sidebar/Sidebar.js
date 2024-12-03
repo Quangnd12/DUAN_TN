@@ -39,7 +39,7 @@ import {
   MdMusicVideo,
   MdAssessment,
   MdPublic,
-  MdShoppingBag
+  MdShoppingBag,
   MdEvent,
 } from "react-icons/md";
 

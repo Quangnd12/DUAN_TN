@@ -60,8 +60,9 @@ const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album, image, p
       />
       <FaMicrophoneAlt
         className="icon-microphone mr-4 text-white"
-        title="Mic Karaoke" // Đổi title thành Mic Karaoke
+        title="Mic Karaoke"
         onClick={() => {
+          handleLyricsClick();
           if (is_premium === 1 && !user_id) {
             navigate('/upgrade');
           } else {

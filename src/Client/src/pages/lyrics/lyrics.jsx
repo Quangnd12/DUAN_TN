@@ -122,21 +122,6 @@ const Lyrics = ({ onClose, lyrics, title, artist, album, image, playCount, curre
                 <MdClose className="h-7 w-7 transition-transform duration-300 hover:scale-110" />
             </button>
 
-            <div className="flex justify-center mb-4">
-                <button
-                    className="text-gray-400 hover:text-white transition-colors duration-300 mx-2"
-                    onClick={onPrevious}
-                >
-                    Lùi
-                </button>
-                <button
-                    className="text-gray-400 hover:text-white transition-colors duration-300 mx-2"
-                    onClick={onNext}
-                >
-                    Tiếp theo
-                </button>
-            </div>
-
             <div className="flex items-center mb-4 pl-52 mt-5">
                 <h1 className="text-4xl font-bold mr-10">{title}</h1>
                 <span className="bg-zinc-900 border-2 border-blue-500 text-blue-500 text-xs font-bold px-2 py-1 rounded mt-2">
