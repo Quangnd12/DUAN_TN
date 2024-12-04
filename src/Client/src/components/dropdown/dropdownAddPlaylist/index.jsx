@@ -5,16 +5,16 @@ import { handleAddPlaylist } from "../../notification";
 import { useNavigate } from 'react-router-dom';
 import { useGetUserPlaylistsQuery } from '../../../../../redux/slice/playlistSlice'; // Import query hook
 
-const AddPlaylistOption = forwardRef(({ onOptionClick }, ref) => {
+const AddPlaylistOption = forwardRef(({ onOptionClick, songId }, ref) => {
     const { data: userPlaylists = [] } = useGetUserPlaylistsQuery(); // Fetch user playlists
     const navigate = useNavigate();
 
     const addToPlaylist = { label: 'New playlist', action: 'new_playlist', icon: <AddIcon /> };
-    
+
     // Map user playlists to the required format
     const playlistOptions = userPlaylists.map((playlist) => ({
         label: playlist.name,
-        action: 'add_to_playlist',
+        action: 'add_to_playlist_confirm',
         icon: <PlaylistAddIcon />,
         playlistId: playlist.id // Add playlist ID for potential future use
     }));
@@ -22,13 +22,13 @@ const AddPlaylistOption = forwardRef(({ onOptionClick }, ref) => {
     const renderPlaylist = [addToPlaylist, ...playlistOptions];
 
     const handleNotification = (action, playlistId) => {
-        switch (action) {        
-            case 'add_to_playlist':
-                handleAddPlaylist(playlistId);
-                break; 
-             case 'new_playlist':
-                navigate('/playlist/add'); 
-                break;             
+        switch (action) {
+            case 'add_to_playlist_confirm':
+                onOptionClick(action, playlistId, songId);
+                break;
+            case 'new_playlist':
+                navigate('/playlist/add');
+                break;
             default:
                 console.log("Action not handled:", action);
         }
@@ -48,7 +48,6 @@ const AddPlaylistOption = forwardRef(({ onOptionClick }, ref) => {
                             role="menuitem"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                onOptionClick(option.action);
                                 handleNotification(option.action, option.playlistId);
                             }}
                         >

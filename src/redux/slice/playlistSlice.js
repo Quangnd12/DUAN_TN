@@ -35,6 +35,15 @@ export const playlistApi = createApi({
       },
     }),
 
+    getPublicPlaylistById: builder.query({
+      query: (playlistId) => `/playlists/public/${playlistId}`,
+      transformResponse: (response) => response.data,
+      providesTags: (result, error, playlistId) => [
+        { type: "Playlist", id: playlistId },
+      ],
+    }),
+    
+
     // Get user's playlists
     getUserPlaylists: builder.query({
       query: () => "/playlists/user/me",
@@ -134,18 +143,13 @@ export const playlistApi = createApi({
     // Add song to playlist
     // Trong file playlistSlice.js
     addSongToPlaylist: builder.mutation({
-      query: ({ playlistId, song }) => ({
-        url: `/playlists/songs/add`, // Cập nhật endpoint chính xác
-        method: "POST",
-        body: {
-          playlistId, // Thêm playlistId vào body requestc8
-          ...song, // Spread toàn bộ thông tin bài hát
-        },
+      query: ({ playlistId, songId }) => ({
+          url: `/playlists/songs/add`,
+          method: 'POST',
+          body: { playlistId, songId },
       }),
-      invalidatesTags: (result, error, { playlistId }) => [
-        { type: "Playlist", id: playlistId },
-      ],
-    }),
+  }),
+
 
     // Remove song from playlist
     removeSongFromPlaylist: builder.mutation({
@@ -162,6 +166,7 @@ export const playlistApi = createApi({
 
 export const {
   useGetPublicPlaylistsQuery, // Add this hook for public playlists
+  useGetPublicPlaylistByIdQuery, // Export new hook here
   useGetUserPlaylistsQuery,
   useGetPlaylistByIdQuery,
   useCreatePlaylistMutation,

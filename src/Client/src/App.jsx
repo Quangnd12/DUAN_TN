@@ -33,6 +33,7 @@ import PlaylistPublicInfo from "./components/searchResults/Tabs/PlaylistPublic";
 
 import AddPlaylist from "./pages/playlist/components/PlaylistAdd";
 import PlaylistList from "./pages/playlist/sections/playlist";
+import PlaylistListPublic from "./components/searchResults/Tabs";
 import PlayListInfo from "./pages/playlist/components/PlaylistInfo";
 import EmptyLayout from "./layouts";
 import LayoutArtist from "./pages/showAll/artists";
@@ -110,7 +111,7 @@ function Client() {
               {/* Public routes */}
               <Route path="/" element={<HomePage />} />
               <Route path="/search" element={<SearchPage />} />
-              <Route path="/playlistpulic/:id" element={<PlaylistPublicInfo />} />
+              <Route path="/playlistpulic/:id" element={<PlaylistListPublic />} />
               < Route path='/artist' element={<EmptyLayout />}>
                 <Route path=':artistName' element={<Artist />} />
                 <Route path=":artistName/album" element={<AllAlbums />} />

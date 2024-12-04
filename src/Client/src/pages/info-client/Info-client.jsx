@@ -308,9 +308,7 @@ const InfoClient = () => {
         <div className="mt-8">
           <h3 className="text-2xl font-bold mb-4 text-left">Following</h3>
           <div className="flex flex-wrap gap-6">
-            {followingArtists.map((artist, index) => (
-              <InfoClientFollowingCard key={index} {...artist} />
-            ))}
+     <InfoClientFollowingCard/>
           </div>
         </div>
 

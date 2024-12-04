@@ -15,6 +15,7 @@ import { useParams } from "react-router-dom";
 import { formatDuration } from "Admin/src/components/formatDate";
 import { PlayerContext } from "Client/src/components/context/MusicPlayer";
 import useAge from "Client/src/components/calculateAge";
+import LikeButton from "../../../components/button/favorite";
 
 
 const ListSongOfGenres = () => {
@@ -258,6 +259,9 @@ const ListSongOfGenres = () => {
                     </p>
                   </div>
                   <div className="absolute inset-0 flex items-center justify-end">
+                    <div className="mr-10">
+                      <LikeButton songId={song.id} />
+                    </div>
                     <p
                       className={`text-gray-500 text-sm w-20 text-right ${hoveredIndex === index ? "opacity-0" : ""
                         }`}

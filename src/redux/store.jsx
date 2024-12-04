@@ -5,7 +5,11 @@ import authReducer from "./slice/authSlice";
 import { apiSlice } from "./slice/apiSlice";
 import notificationReducer from './slice/notificationSlice';
 import { playlistApi } from "./slice/playlistSlice";
+import { followApi } from './slice/followSlice'; // Đảm bảo đúng đường dẫn
+import { favoriteApi } from './slice/favoriets'; // Import favoriteApi
 import playerReducer from "./slice/playerSlice";
+import { ratingApi } from './slice/ratingSlice'; // Thêm import
+
 
 const persistConfig = {
   key: 'auth', 
@@ -21,13 +25,22 @@ const store = configureStore({
     player: playerReducer,
     [playlistApi.reducerPath]: playlistApi.reducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
+    [followApi.reducerPath]: followApi.reducer,  // Thêm reducer của followApi
+    [favoriteApi.reducerPath]: favoriteApi.reducer, // Thêm reducer của favoriteApi
+    [ratingApi.reducerPath]: ratingApi.reducer, // Thêm reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: ['persist/PERSIST'],
       },
-    }).concat(apiSlice.middleware, playlistApi.middleware),
+    }).concat(
+      apiSlice.middleware, 
+      playlistApi.middleware, 
+      followApi.middleware, 
+      favoriteApi.middleware,
+      ratingApi.middleware // Thêm middleware
+    ),
 });
 
 const persistor = persistStore(store);
