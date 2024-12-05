@@ -21,9 +21,11 @@ import {
   Schedule as ScheduleIcon
 } from '@mui/icons-material';
 import ArtistHeader from '../../components/Header/Header';
+import { useNavigate } from 'react-router-dom';
 
 const ArtistDashboard = () => {
   const { artist } = useSelector((state) => state.artistAuth);
+  const navigate = useNavigate();
 
   const dashboardStats = [
     {
@@ -61,7 +63,8 @@ const ArtistDashboard = () => {
       icon: <CloudUploadIcon />,
       title: 'Upload Track',
       description: 'Share your latest music',
-      color: 'from-purple-500 to-blue-500'
+      color: 'from-purple-500 to-blue-500',
+      onClick: () => navigate('/artist-portal/songs')
     },
     {
       icon: <PlaylistAddIcon />,
@@ -160,6 +163,7 @@ const ArtistDashboard = () => {
             <Grid item xs={12} sm={6} md={3} key={index}>
               <Button
                 fullWidth
+                onClick={action.onClick}
                 className={`h-full normal-case bg-gradient-to-r ${action.color} 
                            hover:shadow-lg transform transition-all duration-300 hover:scale-105`}
                 sx={{
