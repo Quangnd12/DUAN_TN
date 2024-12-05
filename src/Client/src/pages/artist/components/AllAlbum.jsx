@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link ,useParams} from "react-router-dom";
 import data from "../../../data/fetchSongData";
 import {createAlbumSlug} from "../../../components/createSlug";
+
 const AllAlbums = () => {
 
     return (

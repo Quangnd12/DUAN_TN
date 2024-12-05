@@ -1,4 +1,4 @@
-    import React, { useState, useRef, useEffect, useContext } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
     import { Link, useParams } from "react-router-dom";
     import { 
         MdPlayArrow, 
@@ -8,9 +8,7 @@
     } from "react-icons/md";
 
     import SongItem from "../../../components/dropdown/dropdownMenu";
-    import PlayerControls from "../../../components/audio/PlayerControls";
     import LikeButton from "Client/src/components/button/favorite";
-    import MoreButton from "Client/src/components/button/more";
     import { getArtistById, getAllArtists } from "../../../../../../src/services/artist";
     import { slugify } from "Client/src/components/createSlug";
     import { PlayerContext } from "Client/src/components/context/MusicPlayer";
@@ -22,7 +20,6 @@
         const [dropdownIndex, setDropdownIndex] = useState(null);
         const [showShareOptions, setShowShareOptions] = useState(false);
         const [likedSongs, setLikedSongs] = useState({});
-        const [clickedIndex, setClickedIndex] = useState(null);
         const [selectedCheckboxes, setSelectedCheckboxes] = useState(new Set());
         const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
         const [artistSongs, setArtistSongs] = useState([]);
@@ -30,7 +27,7 @@
 
         const { artistName } = useParams();
         const dropdownRefs = useRef({});
-        const { setPlayerState } = useContext(PlayerContext);
+        const { setPlayerState, clickedIndex, setClickedIndex } = useContext(PlayerContext);
         const age = useAge();
 
         useEffect(() => {
@@ -80,8 +77,8 @@
                 Image: song.songImage,
                 lyrics: song.songLyrics,
                 album: song.songTitle,
-                playCount: 0,
-                TotalDuration: 0
+                playCount: song.listens_count || 0,
+                TotalDuration: song.duration || 0
             });
             setClickedIndex(index);
             
@@ -121,8 +118,12 @@
             }
         };
 
+        const isAnyCheckboxSelected = () => {
+            return selectedCheckboxes.size > 0;
+        };
+
         const handleCheckboxToggle = (index) => {
-            setSelectedCheckboxes((prevSelectedCheckboxes) => {
+            setSelectedCheckboxes(prevSelectedCheckboxes => {
                 const updatedCheckboxes = new Set(prevSelectedCheckboxes);
                 if (updatedCheckboxes.has(index)) {
                     updatedCheckboxes.delete(index);
@@ -130,16 +131,26 @@
                     updatedCheckboxes.add(index);
                 }
 
-                setIsSelectAllChecked(updatedCheckboxes.size === artistSongs.length);
+                if (updatedCheckboxes.size === artistSongs.length) {
+                    setIsSelectAllChecked(true);
+                } else if (updatedCheckboxes.size === 0) {
+                    setIsSelectAllChecked(false);
+                } else {
+                    setIsSelectAllChecked(false);
+                }
+
                 return updatedCheckboxes;
             });
         };
 
         const handleSelectAll = () => {
+            if (isSelectAllChecked) {
+                setSelectedCheckboxes(new Set());
+            } else {
+                const allIndices = artistSongs.map((_, idx) => idx);
+                setSelectedCheckboxes(new Set(allIndices));
+            }
             setIsSelectAllChecked(!isSelectAllChecked);
-            setSelectedCheckboxes(
-                isSelectAllChecked ? new Set() : new Set(artistSongs.map((_, idx) => idx))
-            );
         };
 
         const handleLikeToggle = (index) => {
@@ -188,7 +199,7 @@
 
                         {/* Phần hiển thị checkbox và các nút chức năng */}
                         <div className="flex items-center">
-                            {selectedCheckboxes.size > 0 && (
+                            {isAnyCheckboxSelected() && (
                                 <div
                                     className="relative flex items-center p-2 rounded-lg mb-2 cursor-pointer"
                                     onClick={handleSelectAll}
@@ -213,18 +224,8 @@
                                 </div>
                             )}
 
-                            {selectedCheckboxes.size > 0 && (
+                            {selectedCheckboxes.size > 0 && artistSongs.length > 0 && (
                                 <div className="flex ml-4 mb-2 items-center">
-                                    <LikeButton
-                                        likedSongs={likedSongs[0]}
-                                        handleLikeToggle={() => handleLikeToggle(0)}
-                                    />
-                                    <div className="ml-6">
-                                        <MoreButton 
-                                            type="albumPlaylist" 
-                                            onOptionSelect={handleOptionSelect} 
-                                        />
-                                    </div>
                                 </div>
                             )}
                         </div>
@@ -275,15 +276,16 @@
                                     />
                                     <div className="flex flex-grow flex-col ml-3">
                                         <div className="flex justify-between items-center">
-                                            <p className="text-sm font-semibold w-48 whitespace-nowrap overflow-hidden text-ellipsis w-[370px]">
+                                            <p className="text-sm font-semibold w-48 whitespace-nowrap overflow-hidden text-ellipsis w-[370px] flex items-center justify-between">
                                                 {song.songTitle}
                                             </p>
                                             <div className="absolute top-[25px] justify-end right-[200px]">
-                                                <Link to={"/listalbum/2"}>
-                                                    <p className="text-gray-500 text-sm text-center whitespace-nowrap overflow-hidden text-ellipsis w-[370px] hover:text-blue-500 hover:underline no-underline">
-                                                        {"Sky tour"}
-                                                    </p>
-                                                </Link>
+                                            <span className="ml-auto">
+                                                    <LikeButton
+                                                        songId={song.songID}
+                                                        className="inline-block"
+                                                    />
+                                                </span>
                                             </div>
                                             <div className="absolute top-[25px] justify-end right-[10px]">
                                                 <p
@@ -306,7 +308,11 @@
                                         </div>
                                         
                                         <SongItem
-                                            song={song}
+                                            key={index}
+                                            song={{
+                                                ...song,
+                                                id: song.songID
+                                            }}
                                             index={index}
                                             hoveredIndex={hoveredIndex}
                                             clickedIndex={clickedIndex}

@@ -1,22 +1,23 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
-import { Link, useParams } from "react-router-dom";
-import {
-    MdPlayArrow,
-    MdShuffle,
-    MdCheckBoxOutlineBlank,
-    MdCheck
+import React, { useState, useRef, useContext, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { 
+    MdPlayArrow, 
+    MdShuffle, 
+    MdCheckBoxOutlineBlank, 
+    MdCheck 
 } from "react-icons/md";
-import { getAlbumById } from "../../../../../services/album";
+import { useGetPlaylistByIdQuery } from "../../../../../redux/slice/playlistSlice";
 import { PlayerContext } from "Client/src/components/context/MusicPlayer";
 import SongItem from "../../../components/dropdown/dropdownMenu";
 import "../../../assets/css/artist/artist.css";
 import useAge from "Client/src/components/calculateAge";
 import { formatDuration } from "Admin/src/components/formatDate";
 import { handleWarning } from "../../../components/notification";
+import { useParams } from "react-router-dom";
 import LikeButton from "../../../components/button/favorite";
 
-const ListSongOfAlbums = () => {
-    const [album, setAlbum] = useState(null);
+const ListSongOfPublicPlaylist = () => {
+    const [playlist, setPlaylist] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -27,25 +28,26 @@ const ListSongOfAlbums = () => {
     const [showShareOptions, setShowShareOptions] = useState(false);
 
     const { id } = useParams();
+    const { data, isLoading: isQueryLoading, error: queryError } = useGetPlaylistByIdQuery(id);
     const dropdownRefs = useRef({});
     const { setPlayerState, clickedIndex, setClickedIndex } = useContext(PlayerContext);
     const age = useAge();
 
-    // Fetch album details
+    // Update playlist state when data is fetched
     useEffect(() => {
-        const fetchAlbumDetails = async () => {
-            try {
-                const response = await getAlbumById(id);
-                setAlbum(response);
-                setIsLoading(false);
-            } catch (err) {
-                setError(err.message);
-                setIsLoading(false);
-            }
-        };
+        if (data) {
+            setPlaylist(data);
+            setIsLoading(false);
+        }
+    }, [data]);
 
-        fetchAlbumDetails();
-    }, [id]);
+    // Handle any query loading or error states
+    useEffect(() => {
+        if (queryError) {
+            setError(queryError.message);
+            setIsLoading(false);
+        }
+    }, [queryError]);
 
     // Song row click handler
     const handleRowClick = (song, index) => {
@@ -55,12 +57,11 @@ const ListSongOfAlbums = () => {
             return;
         } else {
             setPlayerState({
-                audioUrl: song.file,
+                audioUrl: song.file_song,
                 title: song.title,
-                artist: album.artistName,
+                artistNames: song.artistNames,
                 Image: song.image,
                 lyrics: song.lyrics,
-                album: album.title,
                 playCount: song.listens_count,
                 TotalDuration: song.duration
             });
@@ -78,7 +79,7 @@ const ListSongOfAlbums = () => {
                 updatedCheckboxes.add(index);
             }
 
-            if (updatedCheckboxes.size === album.songs.length) {
+            if (updatedCheckboxes.size === playlist.songs.length) {
                 setIsSelectAllChecked(true);
             } else if (updatedCheckboxes.size === 0) {
                 setIsSelectAllChecked(false);
@@ -94,7 +95,7 @@ const ListSongOfAlbums = () => {
         if (isSelectAllChecked) {
             setSelectedCheckboxes(new Set());
         } else {
-            const allIndices = album.songs.map((_, idx) => idx);
+            const allIndices = playlist.songs.map((_, idx) => idx);
             setSelectedCheckboxes(new Set(allIndices));
         }
         setIsSelectAllChecked(!isSelectAllChecked);
@@ -117,11 +118,10 @@ const ListSongOfAlbums = () => {
 
     if (isLoading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
-    if (!album) return <p>No album found</p>;
+    if (!playlist) return <p>No playlist found</p>;
 
     return (
         <div className="w-full text-white">
-            {/* Song List */}
             <div className="pt-4 w-full">
                 <div className="flex flex-col">
                     {/* Play and Control Buttons */}
@@ -163,7 +163,7 @@ const ListSongOfAlbums = () => {
 
                     {/* Song List */}
                     <div className="flex flex-col gap-4 pt-2">
-                        {album.songs.map((song, index) => (
+                        {playlist.songs.map((song, index) => (
                             <div
                                 key={index}
                                 className={`relative flex items-center p-2 rounded-lg transition-colors hover:bg-gray-700 
@@ -214,33 +214,32 @@ const ListSongOfAlbums = () => {
                                 />
 
                                 {/* Song Details */}
-                                <div className="flex flex-grow flex-col ml-3 relative">
+                                <div className="flex flex-grow flex-col ml-3">
                                     <div className="flex justify-between items-center">
                                         <p className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-[400px]">
                                             {song.title}
                                         </p>
 
                                         <div className="absolute inset-0 flex items-center justify-end">
-                                            <div className="absolute right-[250px]">
+                                            <div className="absolute right-[200px]">
                                                 <LikeButton songId={song.id} />
                                             </div>
                                             
-                                            <p
-                                                className={`text-gray-500 text-sm w-20 text-right ${hoveredIndex === index ? "opacity-0" : ""
-                                                    }`}
-                                            >
+                                            <p className={`text-gray-500 text-sm w-20 text-right ${
+                                                hoveredIndex === index ? "opacity-0" : ""
+                                            }`}>
                                                 {formatDuration(song.duration)}
                                             </p>
                                         </div>
                                     </div>
 
                                     <p className="text-gray-400 text-sm mt-1 whitespace-nowrap overflow-hidden text-ellipsis w-[430px]">
-                                        {album.artistName}
+                                        {song.artistNames}
                                     </p>
 
                                     <SongItem
                                         key={index}
-                                        song={song}  // Truyền toàn bộ object song
+                                        song={song}
                                         index={index}
                                         hoveredIndex={hoveredIndex}
                                         clickedIndex={clickedIndex}
@@ -266,4 +265,4 @@ const ListSongOfAlbums = () => {
     );
 };
 
-export default ListSongOfAlbums;
+export default ListSongOfPublicPlaylist;
