@@ -44,7 +44,6 @@ export const favoriteApi = createApi({
     // Get user's favorite songs
     getUserFavorites: builder.query({
       query: () => "/favorites/list",
-      transformResponse: (response) => response.data,
       providesTags: ["Favorites"],
     }),
 

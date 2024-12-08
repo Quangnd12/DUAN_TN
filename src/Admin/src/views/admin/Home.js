@@ -203,9 +203,6 @@ const Home = () => {
                 </li>
               ))}
             </ul>
-            <button className="mt-3 text-right text-blue-500 font-semibold rounded outline-none focus:outline-none">
-              Listen to full album
-            </button>
           </div>
         </div>
       </div>

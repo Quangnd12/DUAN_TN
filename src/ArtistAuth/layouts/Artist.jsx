@@ -12,7 +12,7 @@ const Artist = () => {
   const { isAuthenticated } = useSelector((state) => state.artistAuth);
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black">
       <Routes>
         <Route
           path="auth/*"

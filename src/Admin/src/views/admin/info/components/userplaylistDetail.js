@@ -116,12 +116,12 @@ const PlaylistDetail = () => {
 
         <TableContainer
           component={Paper}
-          sx={{ maxHeight: "calc(100vh - 150px)", overflow: "auto", }}
+          sx={{ maxHeight: "calc(100vh - 150px)", overflow: "auto" }}
         >
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-              <TableCell>{t.tableHeaders.number}</TableCell>
+                <TableCell>{t.tableHeaders.number}</TableCell>
                 <TableCell>{t.tableHeaders.title}</TableCell>
                 <TableCell>{t.tableHeaders.artist}</TableCell>
                 <TableCell>{t.tableHeaders.album}</TableCell>
@@ -133,16 +133,16 @@ const PlaylistDetail = () => {
             <TableBody>
               {playlist.songs?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} align="center" >
+                  <TableCell colSpan={7} align="center">
                     <Typography variant="body1" color="text.secondary">
-                    {t.noSongs}
+                      {t.noSongs}
                     </Typography>
                   </TableCell>
                 </TableRow>
               ) : (
                 playlist.songs?.map((song, index) => (
                   <TableRow
-                    key={song.id}
+                    key={song.songId || song.id}
                     sx={{
                       "&:nth-of-type(even)": {
                         backgroundColor: "#f5f5f5",
@@ -165,15 +165,17 @@ const PlaylistDetail = () => {
                             mr: 2,
                           }}
                           image={song.image || "/default-song.jpg"}
-                          alt={song.artistNames}
+                          alt={song.title || song.name}
                         />
                         <Typography variant="body1" noWrap>
-                          {song.title}
+                          {song.title || song.name}
                         </Typography>
                       </Box>
                     </TableCell>
-                    <TableCell>{song.artistNames}</TableCell>
-                    <TableCell>{song.albumNames || "N/A"}</TableCell>
+                    <TableCell>{song.artistNames || song.artist}</TableCell>
+                    <TableCell>
+                      {song.albumNames || song.album || "N/A"}
+                    </TableCell>
                     <TableCell>
                       {format(new Date(song.addedAt), "MMM d, yyyy")}
                     </TableCell>
@@ -181,7 +183,7 @@ const PlaylistDetail = () => {
                     <TableCell>
                       <IconButton
                         color="error"
-                        onClick={() => handleRemoveSong(song.id)}
+                        onClick={() => handleRemoveSong(song.songId || song.id)}
                         disabled={isRemoving}
                         aria-label={t.confirmRemove}
                         sx={{

@@ -58,12 +58,7 @@ const PlaylistSongSelector = ({ playlistId, onClose }) => {
       
       await addSongToPlaylist({
         playlistId,
-        song: {
-          songId: song.id,
-          name: song.title,
-          artist: song.artistName || song.artist,
-          image: song.image || '/default-song.jpg'
-        }
+        songId: song.id
       }).unwrap();
       
       // Remove the added song from the list
@@ -81,9 +76,12 @@ const PlaylistSongSelector = ({ playlistId, onClose }) => {
   };
 
   // Filter out songs already in the playlist
-  const availableSongs = songs.filter(
-    song => !playlist?.songs?.some(playlistSong => playlistSong.id === song.id)
-  );
+  const availableSongs = songs.filter(song => {
+    const isAlreadyInPlaylist = playlist?.songs?.some(
+      playlistSong => playlistSong.songId === song.id || playlistSong.id === song.id
+    );
+    return !isAlreadyInPlaylist;
+  });
 
   return (
     <Box sx={{ p: 3, width: '100%', position: 'relative', boxShadow: "initial", maxHeight: '600px', overflow: 'auto' }}>
