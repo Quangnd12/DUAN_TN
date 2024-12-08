@@ -5,12 +5,20 @@ import "../../../assets/css/artist/artist.css";
 import MoreButton from "../../../components/button/more";
 import { slugify } from "Client/src/components/createSlug";
 import { getArtistById, getAllArtists } from "../../../../../../src/services/artist";
+import { 
+  useToggleFollowArtistMutation,
+  useGetTopFollowedArtistsQuery  // Sử dụng query này
+} from "../../../../../redux/slice/followSlice";
 
 const ArtistInfo = () => {
   const [artist, setArtist] = useState(null); // Dữ liệu nghệ sĩ
   const [isFollowing, setIsFollowing] = useState(false);
-
   const { artistName } = useParams();
+
+  const [toggleFollowArtist] = useToggleFollowArtistMutation();
+  const { data: topFollowedArtists } = useGetTopFollowedArtistsQuery(undefined, {
+    refetchOnMountOrArgChange: true // Đảm bảo luôn refetch khi component mount
+  });
 
   // Lấy dữ liệu nghệ sĩ từ API khi component mount
   useEffect(() => {
@@ -26,6 +34,15 @@ const ArtistInfo = () => {
           // Sử dụng getArtistById để lấy thông tin chi tiết
           const artistDetails = await getArtistById(currentArtist.id);
           setArtist(artistDetails);
+          
+          // Kiểm tra followerCount từ topFollowedArtists
+          if (topFollowedArtists) {
+            const followedArtist = topFollowedArtists.find(
+              (a) => a.id === currentArtist.id
+            );
+            // Nếu followerCount === 1 thì là following, ngược lại là follow
+            setIsFollowing(followedArtist?.followerCount === 1);
+          }
         }
       } catch (error) {
         console.error("Error fetching artist details:", error);
@@ -35,15 +52,22 @@ const ArtistInfo = () => {
     };
 
     fetchData();
-  }, [artistName]);
+  }, [artistName, topFollowedArtists]);
 
   // Kiểm tra nếu không tìm thấy nghệ sĩ
   if (!artist) {
     return <p>Loading artist data...</p>;
   }
 
-  const handleClick = () => {
-    setIsFollowing(!isFollowing);
+  const handleClick = async () => {
+    try {
+      // Toggle follow/unfollow artist
+      await toggleFollowArtist(artist.id).unwrap();  // Call the mutation
+      // Thay đổi UI ngay lập tức khi người dùng bấm
+      setIsFollowing(prev => !prev);
+    } catch (error) {
+      console.error("Error toggling follow state:", error);
+    }
   };
 
   const handleOptionSelect = (action) => {

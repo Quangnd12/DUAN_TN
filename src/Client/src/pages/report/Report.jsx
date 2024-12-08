@@ -1,143 +1,189 @@
-import React, { useState } from "react";
-import { handleAddReport, handleAcceptTerms } from "../../components/notification";
+import React, { useState, useEffect } from "react";
+import { FaStar, FaStarHalfAlt, FaRegStar, FaMusic } from 'react-icons/fa';
 import '../../../src/assets/css/report/report.css';
+import { useLocation } from 'react-router-dom';
+import { useCreateOrUpdateRatingMutation, useGetUserRatingQuery } from '../../../../redux/slice/ratingSlice';
 
 const Report = () => {
-  const [selectedReason, setSelectedReason] = useState("");
-  const [description, setDescription] = useState("");
-  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
-  const [reportTitle, setReportTitle] = useState("");
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const songId = searchParams.get('songId');
+
+  // Lấy thông tin bài hát từ localStorage
+  const songs = JSON.parse(localStorage.getItem("songs") || "[]");
+  const currentSong = songs.find(song => song.songID === parseInt(songId) || song.id === parseInt(songId));
+
+  const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
   const [showThankYouModal, setShowThankYouModal] = useState(false);
+  
+  const [createOrUpdateRating] = useCreateOrUpdateRatingMutation();
+  const { data: existingRating } = useGetUserRatingQuery(songId);
 
-  const reportReasons = [
-    "Inappropriate content",
-    "Copyright violation",
-    "Hateful content",
-    "Spam",
-    "Impersonation",
-    "Disruptive content",
-  ];
-
-  const handleSubmit = () => {
-    if (!isTermsAccepted) {
-      return;
+  useEffect(() => {
+    if (existingRating) {
+      setRating(existingRating.rating);
     }
-    console.log("Report Title:", reportTitle);
-    console.log("Selected Reason:", selectedReason);
-    console.log("Description:", description);
-   
-    setShowThankYouModal(true);
+  }, [existingRating]);
 
-    setReportTitle("");
-    setSelectedReason("");
-    setDescription("");
-    setIsTermsAccepted(false);
+  const ratingLabels = {
+    0.5: "Not good at all 😞",
+    1: "Not my style 😕",
+    1.5: "Could be better 🤔",
+    2: "It's okay 🙂",
+    2.5: "Getting better 😊",
+    3: "Pretty good 😊",
+    3.5: "Really nice! 😃",
+    4: "Love it! 😍",
+    4.5: "Amazing! 🤩",
+    5: "Masterpiece! 🌟"
+  };
 
-    setTimeout(() => {
-      window.location.href = '/';
-    }, 2000);
+  const handleRating = (value) => {
+    // Kiểm tra xem có đang click vào nửa sao không
+    const isHalfStar = value % 1 !== 0;
+    setRating(value);
+  };
+
+  // Component cho một ngôi sao (có thể là nửa sao)
+  const Star = ({ value, filled, half }) => {
+    if (filled) {
+      return <FaStar className="text-yellow-400" size={64} />;
+    }
+    if (half) {
+      return <FaStarHalfAlt className="text-yellow-400" size={64} />;
+    }
+    return <FaRegStar className="text-zinc-600" size={64} />;
+  };
+
+  // Render phần rating stars
+  const renderStars = () => {
+    return (
+      <div className="flex justify-center space-x-8">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <div key={star} className="relative">
+            {/* Vùng click cho nửa sao đầu */}
+            <div
+              className="absolute w-1/2 h-full cursor-pointer z-10"
+              onMouseEnter={() => setHover(star - 0.5)}
+              onMouseLeave={() => setHover(0)}
+              onClick={() => handleRating(star - 0.5)}
+            />
+            {/* Vùng click cho sao đầy đủ */}
+            <div
+              className="absolute w-1/2 h-full cursor-pointer z-10 right-0"
+              onMouseEnter={() => setHover(star)}
+              onMouseLeave={() => setHover(0)}
+              onClick={() => handleRating(star)}
+            />
+            <Star
+              value={star}
+              filled={hover || rating >= star}
+              half={hover || rating === star - 0.5}
+            />
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const handleSubmit = async () => {
+    try {
+      await createOrUpdateRating({
+        songId: songId,
+        rating: rating
+      });
+      setShowThankYouModal(true);
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 2000);
+    } catch (error) {
+      console.error("Error submitting rating:", error);
+    }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-900 p-6">
-      <div className="w-full h-full bg-zinc-800 rounded-lg shadow-lg p-8 mb-20">
-        <h2 className="text-3xl font-extrabold text-white mb-8 text-center">
-          Report Content
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-zinc-900 to-zinc-800 p-6">
+      <div className="w-full max-w-5xl bg-zinc-800/50 backdrop-blur-lg rounded-2xl shadow-2xl p-12 transform transition-all duration-300 hover:shadow-blue-500/10">
+        {/* Song Info Section */}
+        <div className="flex items-center justify-between mb-12 p-6 bg-zinc-700/30 rounded-xl">
+          <div className="flex items-center flex-1">
+            <div className="w-32 h-32 rounded-lg overflow-hidden shadow-lg">
+              <img 
+                src={currentSong?.songImage || currentSong?.image} 
+                alt={currentSong?.songTitle || currentSong?.title}
+                className="w-full h-full object-cover transform transition-transform duration-300 hover:scale-110"
+              />
+            </div>
+            <div className="ml-8">
+              <h3 className="text-3xl font-bold text-white mb-2">
+                {currentSong?.songTitle || currentSong?.title}
+              </h3>
+              <p className="text-xl text-blue-400">
+                {currentSong?.name || currentSong?.artist}
+              </p>
+              <p className="text-zinc-400 mt-2">
+                {currentSong?.album || "Single"} • {new Date().getFullYear()}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-4">
+            <span className="text-zinc-400">
+              Duration: {currentSong?.duration || "0:00"}
+            </span>
+            <span className="text-zinc-400">|</span>
+            <span className="text-zinc-400">
+              Genre: {currentSong?.genre || "Pop"}
+            </span>
+          </div>
+        </div>
+
+        <h2 className="text-4xl font-bold text-white mb-12 text-center">
+          How would you rate this song?
         </h2>
 
-        <div className="mb-8">
-          <label htmlFor="reportTitle" className="block text-white text-lg font-medium mb-2">
-            Report Title
-          </label>
-          <input
-            type="text"
-            id="reportTitle"
-            value={reportTitle}
-            onChange={(e) => setReportTitle(e.target.value)}
-            className="w-full p-3 bg-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-blue-400 border-none"
-            placeholder="Enter a title for the report"
-          />
+        {/* Rating Stars Section */}
+        <div className="mb-12">
+          {renderStars()}
+          {rating > 0 && (
+            <div className="text-center mt-8 animate-fadeIn">
+              <p className="text-3xl text-yellow-400 font-bold mb-2">
+                {ratingLabels[rating]}
+              </p>
+              <p className="text-zinc-400 text-xl">
+                {rating} out of 5 stars
+              </p>
+            </div>
+          )}
         </div>
 
-        <div className="space-y-6">
-          <div>
-            <label htmlFor="reason" className="block text-white text-lg font-medium mb-2">
-              Select Reason
-            </label>
-            <select
-              id="reason"
-              value={selectedReason}
-              onChange={(e) => setSelectedReason(e.target.value)}
-              className="w-full p-3 bg-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-blue-400 border-none"
-            >
-              <option value="">Choose a reason</option>
-              {reportReasons.map((reason) => (
-                <option key={reason} value={reason}>
-                  {reason}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="description" className="block text-white text-lg font-medium mb-2">
-              Description
-            </label>
-            <textarea
-              id="description"
-              className="w-full p-3 bg-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-blue-400 border-none"
-              placeholder="Describe the report in detail..."
-              rows="4"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="mt-8 flex items-center justify-between">
-          <div className="flex items-center mb-4">
-            <input
-              type="checkbox"
-              id="terms"
-              checked={isTermsAccepted}
-              onChange={() => setIsTermsAccepted((prev) => !prev)}
-              className="custom-checkbox mr-3"
-            />
-            <label htmlFor="terms" className="text-white">
-              I agree to the terms
-            </label>
-          </div>
-
+        {/* Submit Button */}
+        <div className="flex justify-center">
           <button
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-500 transition transform hover:scale-105"
+            className={`px-12 py-4 rounded-xl shadow-lg transition-all duration-300 transform 
+              ${rating > 0 
+                ? 'bg-gradient-to-r from-blue-600 to-blue-400 hover:scale-105 hover:shadow-blue-500/50' 
+                : 'bg-zinc-600 cursor-not-allowed'} 
+              text-white font-bold text-xl`}
             onClick={handleSubmit}
+            disabled={rating === 0}
           >
-            Submit Report
+            Submit Rating
           </button>
         </div>
       </div>
 
+      {/* Thank You Modal */}
       {showThankYouModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn">
-          <div className="bg-zinc-800 p-8 rounded-lg shadow-lg text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">Thank You!</h2>
-            <div className="mb-4">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="w-16 h-16 text-green-500 mx-auto animate-checkmark" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2"
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              >
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-              </svg>
+        <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-50 animate-fadeIn">
+          <div className="bg-zinc-800/90 p-12 rounded-2xl shadow-2xl text-center transform transition-all duration-500 animate-modal">
+            <div className="mb-8">
+              <div className="success-checkmark">
+                <FaMusic className="text-7xl text-blue-400 animate-bounce" />
+              </div>
             </div>
-            <p className="text-white">Your report has been submitted successfully.</p>
-            <p className="text-white">Redirecting you to the home page...</p>
+            <h2 className="text-4xl font-bold text-white mb-4">Thank You!</h2>
+            <p className="text-blue-400 text-xl">Your rating has been submitted successfully</p>
           </div>
         </div>
       )}

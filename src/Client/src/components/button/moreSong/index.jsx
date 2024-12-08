@@ -6,14 +6,15 @@ import ShareIcon from '@mui/icons-material/Share';
 import PersonIcon from '@mui/icons-material/Person';
 import AlbumIcon from '@mui/icons-material/Album';
 import AddIcon from '@mui/icons-material/Add';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import StarIcon from '@mui/icons-material/Star';
 import FeaturedPlayListIcon from '@mui/icons-material/FeaturedPlayList';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ShareOptions from '../share';
-import { handleAddFavorite, handleAddWaitlist } from "../../notification";
+import { handleAddWaitlist } from "../../notification";
 import AddPlaylistOption from '../../dropdown/dropdownAddPlaylist';
+import { useAddSongToPlaylistMutation } from '../../../../../redux/slice/playlistSlice';
 
-const SongMoreButton = ({ type, onOptionSelect }) => {
+const SongMoreButton = ({ type, songId, onOptionSelect }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
@@ -21,11 +22,12 @@ const SongMoreButton = ({ type, onOptionSelect }) => {
     const shareDropdownRef = useRef(null);
     const playlistDropdownRef = useRef(null);
 
-    
+    const [addSongToPlaylist] = useAddSongToPlaylistMutation();
+
     const songMenuOptionsMap = {
         song: [
             { label: 'Add to playlist', action: 'add_to_playlist', icon: <AddIcon /> },
-            { label: 'Save to your favorite songs', action: 'favorite_songs', icon: <AddCircleOutlineIcon /> },
+            { label: 'Rate this song', action: 'rate_song', icon: <StarIcon /> },
             { label: 'Add to waiting list', action: 'waiting_list', icon: <PlaylistAddIcon /> },
             { label: 'Jump to radio by song', action: 'go_to_song_radio', icon: <RadioIcon /> },
             { label: 'Go to artist', action: 'go_to_artist', icon: <PersonIcon /> },
@@ -38,11 +40,9 @@ const SongMoreButton = ({ type, onOptionSelect }) => {
             { label: 'Remove from playlist', action: 'attribution_information', icon: <CancelIcon /> },
             { label: 'Share', action: 'share', icon: <ShareIcon />, isShare: true },
         ]
-
     }
 
-    const songMenuOptions = songMenuOptionsMap[type] || []; 
-
+    const songMenuOptions = songMenuOptionsMap[type] || [];
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -58,8 +58,11 @@ const SongMoreButton = ({ type, onOptionSelect }) => {
         };
     }, []);
 
-
-    const handleOptionClick = (action) => {
+    const handleOptionClick = (action, playlistId) => {
+        console.log("Action:", action);
+        console.log("Song ID:", songId);
+        console.log("Playlist ID:", playlistId);
+    
         switch (action) {
             case 'share':
                 setIsShareOpen(!isShareOpen);
@@ -69,20 +72,24 @@ const SongMoreButton = ({ type, onOptionSelect }) => {
                 setIsPlaylistOpen(!isPlaylistOpen);
                 setIsOpen(!isOpen);
                 break;
-
-            case 'favorite_songs':
-                handleAddFavorite();
-                setIsOpen(!isOpen);
+            case 'rate_song':
+                window.location.href = `/report?songId=${songId}`;
+                setIsOpen(false);
                 break;
             case 'waiting_list':
                 handleAddWaitlist();
                 setIsOpen(!isOpen);
+                break;
+            case 'add_to_playlist_confirm':
+                addSongToPlaylist({ playlistId, songId });
+                setIsOpen(false);
                 break;
             default:
                 onOptionSelect(action);
                 setIsOpen(false);
         }
     };
+    
 
     const toggleDropdown = (e) => {
         e.stopPropagation();
@@ -99,9 +106,6 @@ const SongMoreButton = ({ type, onOptionSelect }) => {
 
         return { top: '100%', marginTop: '8px' };
     };
-
-
-
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -137,7 +141,7 @@ const SongMoreButton = ({ type, onOptionSelect }) => {
                                 }}
                             >
                                 <button
-                                    className={`flex items-center w-full text-left px-4 py-2 text-sm rounded-sm 
+                                    className={`flex items-center w-full text-left px-4 py-2 text-sm rounded-sm
                                   ${isShareOpen && option.action === 'share' && isShareOpen ? 'bg-gray-700' :
                                             isPlaylistOpen && option.action === 'add_to_playlist' ? 'bg-gray-700' :
                                                 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}
@@ -159,7 +163,7 @@ const SongMoreButton = ({ type, onOptionSelect }) => {
                                             setIsPlaylistOpen(false);
                                         }}
                                     >
-                                        <AddPlaylistOption onOptionClick={handleOptionClick} />
+                                        <AddPlaylistOption onOptionClick={handleOptionClick} songId={songId} />
                                     </div>
                                 )}
                                 {isShareOpen && option.action === 'share' && (

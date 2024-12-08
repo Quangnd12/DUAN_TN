@@ -5,6 +5,8 @@ import ArtistAuthForm from "../view/artistAuth/artistAuthForm";
 import ForgotPassword from "../view/artistAuth/forgot";
 import ResetPassword from "../view/artistAuth/resetPass";
 import ArtistDashboard from "../view/dashboard/Dashboard";
+import UploadTrack from "../view/dashboard/components/UploadTrack";
+import ArtistSongList from "../view/dashboard/components/ArtistSongList";
 
 const Artist = () => {
   const { isAuthenticated } = useSelector((state) => state.artistAuth);
@@ -29,6 +31,26 @@ const Artist = () => {
           element={
             isAuthenticated ? (
               <ArtistDashboard />
+            ) : (
+              <Navigate to="/artist-portal/auth" />
+            )
+          }
+        />
+        <Route
+          path="songs"
+          element={
+            isAuthenticated ? (
+              <ArtistSongList />
+            ) : (
+              <Navigate to="/artist-portal/auth" />
+            )
+          }
+        />
+        <Route
+          path="upload-track"
+          element={
+            isAuthenticated ? (
+              <UploadTrack />
             ) : (
               <Navigate to="/artist-portal/auth" />
             )

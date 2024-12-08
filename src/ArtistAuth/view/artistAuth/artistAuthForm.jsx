@@ -33,8 +33,9 @@ const ArtistAuthForm = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
   const dispatch = useDispatch();
-  const { loading, error, isAuthenticated } = useSelector((state) => state.artistAuth);
+  const { loading, isAuthenticated } = useSelector((state) => state.artistAuth);
   const [registerSuccess, setRegisterSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const { control, handleSubmit, formState: { errors }, reset, watch } = useForm({
     defaultValues: {
@@ -124,6 +125,11 @@ const ArtistAuthForm = () => {
         }
       }
     } catch (error) {
+      if (error.message) {
+        setErrorMessage(typeof error.message === 'object' ? error.message.message : error.message);
+      } else {
+        setErrorMessage(activeTab === 0 ? "Login failed" : "Registration failed");
+      }
       console.error(activeTab === 0 ? "Login failed:" : "Registration failed:", error);
     }
   };
@@ -159,12 +165,16 @@ const ArtistAuthForm = () => {
             <Tab label="Register" className="text-lg" />
           </Tabs>
 
-          {error && (
-            <Alert severity="error" className="mb-4" sx={{
-              backgroundColor: 'rgba(211, 47, 47, 0.1)',
-              color: '#ff5252',
-            }}>
-              {error}
+          {errorMessage && (
+            <Alert 
+              severity="error" 
+              className="mb-4"
+              sx={{
+                backgroundColor: 'rgba(211, 47, 47, 0.1)',
+                color: '#ff5252',
+              }}
+            >
+              {errorMessage}
             </Alert>
           )}
 

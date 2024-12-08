@@ -5,6 +5,7 @@ import { logout } from "../../../../redux/slice/authSlice";
 import { useLogoutMutation } from "../../../../redux/slice/apiSlice";
 import { toast } from "react-toastify";
 import SearchInput from "../searchInput/index";
+import NotificationBell from "../notification/NotificationBell";
 
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
@@ -266,20 +267,10 @@ useEffect(() => {
                   </Link>
                )} 
                 <Link to="/content">
-                  <Tooltip title="What's news">
-                    <div className="relative px-2 py-2 hover:bg-gray-600 rounded-md">
-
-                      <NotificationsIcon
-                        fontSize="large"
-                        className="text-white"
-                      />
-                      <div className="absolute top-0 right-1">
-                        <CircleIcon fontSize="small" className="text-red-500" />
-                      </div>
-                    </div>
-                  </Tooltip>
-                </Link>
+                <NotificationBell />
+              </Link>
               </>
+            
             )}
             {renderUserSection()}
           </div>

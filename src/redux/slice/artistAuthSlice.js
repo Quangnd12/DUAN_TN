@@ -5,7 +5,7 @@ import { BASE_URL } from '../../config/index';
 
 const setToken = (token) => {
   if (token) {
-    localStorage.setItem('artistToken', null);
+    localStorage.setItem('artistToken', token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   } else {
     localStorage.removeItem('artistToken');

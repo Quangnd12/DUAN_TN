@@ -1,18 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdFavorite, MdFavoriteBorder } from 'react-icons/md';
-import { handleAddFavorite } from '../../notification'; // Kiểm tra đường dẫn
+import { handleAddFavorite } from '../../notification';
+import { useToggleFavoriteMutation, useCheckFavoriteStatusQuery } from '../../../../../redux/slice/favoriets';
 
-const LikeButton = ({ likedSongs, handleLikeToggle }) => {
-    const [isLiked, setIsLiked] = useState(likedSongs);
+const LikeButton = ({ songId }) => {
+    const [isLiked, setIsLiked] = useState(() => {
+        const savedStatus = localStorage.getItem(`favorite-${songId}`);
+        return savedStatus ? JSON.parse(savedStatus) : false;
+    });
+    const [toggleFavorite] = useToggleFavoriteMutation();
+    
+    const { data: favoriteStatus, isSuccess } = useCheckFavoriteStatusQuery(songId, {
+        skip: !songId
+    });
 
-    const toggleLike = (e) => {
+    useEffect(() => {
+        if (isSuccess && favoriteStatus !== undefined) {
+            setIsLiked(favoriteStatus);
+            localStorage.setItem(`favorite-${songId}`, JSON.stringify(favoriteStatus));
+        }
+    }, [favoriteStatus, isSuccess, songId]);
+
+    const toggleLike = async (e) => {
         e.stopPropagation();
-        handleLikeToggle();
-        setIsLiked(!isLiked);
-        if (!isLiked) {
-            handleAddFavorite(); // Gọi hàm hiển thị thông báo
+        if (!songId) return;
+        
+        try {
+            const result = await toggleFavorite(songId).unwrap();
+            if (result.success) {
+                const newStatus = !isLiked;
+                setIsLiked(newStatus);
+                localStorage.setItem(`favorite-${songId}`, JSON.stringify(newStatus));
+                if (newStatus) {
+                    handleAddFavorite();
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
         }
     };
+
+    if (!songId) return null;
 
     return (
         <div>

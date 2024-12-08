@@ -27,8 +27,14 @@ const ForgotPassword = () => {
       setSuccessMessage("Password reset email sent successfully! Please check your inbox.");
       reset();
     } catch (error) {
+      let errorMsg = "Failed to send reset email. Please try again.";
+      if (error.message && error.message.includes("không tồn tại")) {
+        errorMsg = "Email address not found in our system.";
+      } else if (error.message && error.message.includes("không hợp lệ")) {
+        errorMsg = "Please enter a valid email address.";
+      }
+      setErrorMessage(errorMsg);
       console.error("Error sending password reset email:", error);
-      setErrorMessage(error.message || "Failed to send reset email. Please try again.");
     } finally {
       setLoading(false);
     }

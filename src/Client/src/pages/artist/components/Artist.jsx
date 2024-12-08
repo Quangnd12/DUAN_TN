@@ -20,9 +20,14 @@ const PopularSong = () => {
   const { artistName } = useParams();
   const { setPlayerState, clickedIndex, setClickedIndex } = useContext(PlayerContext);
   const age = useAge();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedCheckboxes, setSelectedCheckboxes] = useState(new Set());
+  const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
 
   useEffect(() => {
     const fetchArtistData = async () => {
+      setIsLoading(true);
       try {
         const { artists } = await getAllArtists();
         const artist = artists.find(a => slugify(a.name) === artistName);
@@ -51,8 +56,11 @@ const PopularSong = () => {
 
           setArtistData(formattedSongs);
         }
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching artist data:", error);
+        setError(error.message);
+        setIsLoading(false);
       }
     };
     fetchArtistData();
@@ -106,7 +114,16 @@ const PopularSong = () => {
     setClickedIndex(index);
 
     try {
-      localStorage.setItem("songs", JSON.stringify(artistData));
+      const songsToStore = artistData.map(song => ({
+        ...song,
+        file: song.songFile,
+        title: song.songTitle,
+        image: song.songImage,
+        lyrics: song.songLyrics,
+        duration: song.duration,
+        listens_count: song.listens_count
+      }));
+      localStorage.setItem("songs", JSON.stringify(songsToStore));
     } catch (error) {
       console.error("Error saving songs to localStorage:", error);
     }
@@ -123,15 +140,43 @@ const PopularSong = () => {
     setDropdownIndex(dropdownIndex === index ? null : index);
   };
 
+  const handleCheckboxToggle = (index) => {
+    setSelectedCheckboxes(prevSelectedCheckboxes => {
+      const updatedCheckboxes = new Set(prevSelectedCheckboxes);
+      if (updatedCheckboxes.has(index)) {
+        updatedCheckboxes.delete(index);
+      } else {
+        updatedCheckboxes.add(index);
+      }
+
+      setIsSelectAllChecked(updatedCheckboxes.size === artistData.length);
+      return updatedCheckboxes;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (isSelectAllChecked) {
+      setSelectedCheckboxes(new Set());
+    } else {
+      const allIndices = artistData.map((_, idx) => idx);
+      setSelectedCheckboxes(new Set(allIndices));
+    }
+    setIsSelectAllChecked(!isSelectAllChecked);
+  };
+
+  const isAnyCheckboxSelected = () => {
+    return selectedCheckboxes.size > 0;
+  };
+
   const newestSong = getNewestSong();
   const popularSongs = getPopularSongs();
 
   const itemHeight = "h-[5rem]";
   const borderHeight = `h-[calc(${itemHeight} * 3)]`;
 
-  if (!currentArtist) {
-    return <div className="text-white p-4">Artist not found</div>;
-  }
+  if (isLoading) return <p className="text-white p-4">Loading...</p>;
+  if (error) return <p className="text-white p-4">Error: {error}</p>;
+  if (!currentArtist) return <p className="text-white p-4">Artist not found</p>;
 
   return (
     <div className="p-4 text-white">
@@ -214,7 +259,11 @@ const PopularSong = () => {
                   </div>
 
                   <SongItem
-                    song={song}
+                   key={index}
+                   song={{
+                       ...song,
+                       id: song.songID
+                   }}
                     index={index}
                     hoveredIndex={hoveredIndex}
                     clickedIndex={clickedIndex}
@@ -230,6 +279,9 @@ const PopularSong = () => {
                     align={"right"}
                     type="song"
                   />
+                </div>
+                <div className="mr-10">
+                  <LikeButton songId={song.songID} />
                 </div>
               </div>
             ))}

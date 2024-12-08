@@ -1,4 +1,4 @@
-    import React, { useState, useRef, useEffect, useContext } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
     import { Link, useParams } from "react-router-dom";
     import { 
         MdPlayArrow, 
@@ -9,7 +9,6 @@
 
     import SongItem from "../../../components/dropdown/dropdownMenu";
     import LikeButton from "Client/src/components/button/favorite";
-    import MoreButton from "Client/src/components/button/more";
     import { getArtistById, getAllArtists } from "../../../../../../src/services/artist";
     import { slugify } from "Client/src/components/createSlug";
     import { PlayerContext } from "Client/src/components/context/MusicPlayer";
@@ -22,7 +21,6 @@ import { formatDuration } from "Client/src/components/format";
         const [dropdownIndex, setDropdownIndex] = useState(null);
         const [showShareOptions, setShowShareOptions] = useState(false);
         const [likedSongs, setLikedSongs] = useState({});
-        const [clickedIndex, setClickedIndex] = useState(null);
         const [selectedCheckboxes, setSelectedCheckboxes] = useState(new Set());
         const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
         const [artistSongs, setArtistSongs] = useState([]);
@@ -30,7 +28,7 @@ import { formatDuration } from "Client/src/components/format";
 
         const { artistName } = useParams();
         const dropdownRefs = useRef({});
-        const { setPlayerState } = useContext(PlayerContext);
+        const { setPlayerState, clickedIndex, setClickedIndex } = useContext(PlayerContext);
         const age = useAge();
 
         useEffect(() => {
@@ -130,8 +128,12 @@ import { formatDuration } from "Client/src/components/format";
             }
         };
 
+        const isAnyCheckboxSelected = () => {
+            return selectedCheckboxes.size > 0;
+        };
+
         const handleCheckboxToggle = (index) => {
-            setSelectedCheckboxes((prevSelectedCheckboxes) => {
+            setSelectedCheckboxes(prevSelectedCheckboxes => {
                 const updatedCheckboxes = new Set(prevSelectedCheckboxes);
                 if (updatedCheckboxes.has(index)) {
                     updatedCheckboxes.delete(index);
@@ -139,16 +141,26 @@ import { formatDuration } from "Client/src/components/format";
                     updatedCheckboxes.add(index);
                 }
 
-                setIsSelectAllChecked(updatedCheckboxes.size === artistSongs.length);
+                if (updatedCheckboxes.size === artistSongs.length) {
+                    setIsSelectAllChecked(true);
+                } else if (updatedCheckboxes.size === 0) {
+                    setIsSelectAllChecked(false);
+                } else {
+                    setIsSelectAllChecked(false);
+                }
+
                 return updatedCheckboxes;
             });
         };
 
         const handleSelectAll = () => {
+            if (isSelectAllChecked) {
+                setSelectedCheckboxes(new Set());
+            } else {
+                const allIndices = artistSongs.map((_, idx) => idx);
+                setSelectedCheckboxes(new Set(allIndices));
+            }
             setIsSelectAllChecked(!isSelectAllChecked);
-            setSelectedCheckboxes(
-                isSelectAllChecked ? new Set() : new Set(artistSongs.map((_, idx) => idx))
-            );
         };
 
         const handleLikeToggle = (index) => {
@@ -204,7 +216,7 @@ import { formatDuration } from "Client/src/components/format";
 
                         {/* Phần hiển thị checkbox và các nút chức năng */}
                         <div className="flex items-center">
-                            {selectedCheckboxes.size > 0 && (
+                            {isAnyCheckboxSelected() && (
                                 <div
                                     className="relative flex items-center p-2 rounded-lg mb-2 cursor-pointer"
                                     onClick={handleSelectAll}
@@ -229,18 +241,8 @@ import { formatDuration } from "Client/src/components/format";
                                 </div>
                             )}
 
-                            {selectedCheckboxes.size > 0 && (
+                            {selectedCheckboxes.size > 0 && artistSongs.length > 0 && (
                                 <div className="flex ml-4 mb-2 items-center">
-                                    <LikeButton
-                                        likedSongs={likedSongs[0]}
-                                        handleLikeToggle={() => handleLikeToggle(0)}
-                                    />
-                                    <div className="ml-6">
-                                        <MoreButton 
-                                            type="albumPlaylist" 
-                                            onOptionSelect={handleOptionSelect} 
-                                        />
-                                    </div>
                                 </div>
                             )}
                         </div>
