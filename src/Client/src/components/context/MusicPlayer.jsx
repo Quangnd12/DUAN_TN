@@ -13,7 +13,8 @@ export const PlayerProvider = ({ children }) => {
     playCount: null,
     TotalDuration:null,
     songId:null,
-    is_premium:null
+    is_premium:null,
+    artistID:[]
   });
 
   const [Songs, setSongs] = useState([]);

@@ -38,7 +38,7 @@ const RecentSearchCard = ({ item, index, handleRemove }) => {
       <div className="w-100 relative">
         <Link to="/artist">
           <img
-            src={`https://th.bing.com/th/id/OIP.xybS-OC0x_eE61F2CwIOgQHaHa?rs=1&pid=ImgDetMain`}
+            src={`images/${item.image}`}
             alt={item.name}
             className={`w-44 h-44 mb-2 ${
               item.role === "Artist" ? "rounded-full" : "rounded-md"

@@ -27,7 +27,8 @@ const PlaylistTab = () => {
         playCount: song.listens_count,
         TotalDuration:song.duration,
          songId:song.songId,
-        is_premium:song.is_premium
+        is_premium:song.is_premium,
+        artistID:song.artistID
       });
       setClickedIndex(index);
       try {
@@ -64,7 +65,7 @@ const PlaylistTab = () => {
                 className="w-12 h-12 rounded mr-4" // Kích thước hình ảnh và margin-right
               />
               <div>
-                <h3 className="text-white text-base font-semibold">
+                <h3 className="text-white text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-[150px]">
                   {song.title}
                 </h3>{" "}
                 {/* Tên bài hát lớn và đậm */}

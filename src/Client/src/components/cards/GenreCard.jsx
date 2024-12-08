@@ -7,7 +7,7 @@ const GenreCard = ({ genre }) => {
       className={`${genre.color} text-white w-full h-48 hover:opacity-50 cursor-pointer transition-all  rounded-lg text-left relative p-4 overflow-hidden`}
     >
       <img
-        src={`../assets/img/${genre.coverArt}`}
+        src={`${genre.coverArt}`}
         alt={genre.name}
         className="absolute w-48 h-full object-cover shadow-2xl transform rotate-12 -right-8 -bottom-8"
       />

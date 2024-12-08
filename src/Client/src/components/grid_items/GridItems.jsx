@@ -35,8 +35,10 @@ const GridItems = () => {
         playCount: song.listens_count,
         TotalDuration:song.duration,
         songId:song.id,
-        is_premium:song.is_premium
+        is_premium:song.is_premium,
+        artistID:song.artistID
       });
+      
       setClickedIndex(index);
       try {
         localStorage.setItem("songs", JSON.stringify(Songs));

@@ -51,12 +51,79 @@ const Volume = ({ volume, onVolumeChange, lyrics, title, artist, album, image, p
     onVolumeChange({ target: { value: volume === 0 ? 0.5 : 0 } });
   };
 
+  const handlePipClick = async () => {
+    try {
+      if (!document.pictureInPictureEnabled) {
+        console.error('Picture-in-Picture is not supported');
+        return;
+      }
+
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+        return;
+      }
+
+      if (audio && audio.current) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 400;
+        canvas.height = 300;
+
+        const pipVideo = document.createElement('video');
+        pipVideo.width = canvas.width;
+        pipVideo.height = canvas.height;
+        pipVideo.muted = true;
+        
+        const stream = canvas.captureStream();
+        pipVideo.srcObject = stream;
+
+        const drawInfo = () => {
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = '20px Arial';
+          ctx.fillText(title || 'Now Playing', 20, 40);
+          
+          ctx.font = '16px Arial';
+          ctx.fillText(artist || '', 20, 70);
+
+          const img = new Image();
+          img.crossOrigin = "anonymous"; // Bắt buộc để tránh lỗi CORS
+          img.src = image; // URL của ảnh
+          img.onload = () => {
+            ctx.drawImage(img, (canvas.width - 200) / 2, 80, 200, 200);
+          };
+          img.onerror = () => {
+            console.error("Failed to load image due to CORS");
+          };
+          
+        };
+
+        drawInfo();
+
+        const updateInterval = setInterval(drawInfo, 100);
+
+        pipVideo.addEventListener('leavepictureinpicture', () => {
+          clearInterval(updateInterval);
+          pipVideo.srcObject = null;
+          stream.getTracks().forEach(track => track.stop());
+        });
+
+        await pipVideo.play();
+        await pipVideo.requestPictureInPicture();
+      }
+    } catch (error) {
+      console.error('Failed to start PiP:', error);
+    }
+  };
+
   return (
     <div className="volume-container">
       <MdPictureInPictureAlt
         className="icon-QueueMusic mr-4"
-        title="Restore"
-        onClick={togglePip}
+        title="Picture in Picture"
+        onClick={handlePipClick}
       />
       <FaMicrophoneAlt
         className="icon-microphone mr-4 text-white"

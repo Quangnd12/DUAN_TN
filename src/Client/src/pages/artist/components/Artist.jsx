@@ -7,6 +7,7 @@ import useAge from "Client/src/components/calculateAge";
 import { handleWarning } from "../../../components/notification";
 import "../../../assets/css/artist/artist.css";
 import { slugify } from "Client/src/components/createSlug";
+import { formatDuration } from "Client/src/components/format";
 
 const PopularSong = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -32,13 +33,20 @@ const PopularSong = () => {
 
           // Chuyển đổi cấu trúc songs để phù hợp với component
           const formattedSongs = artistDetails.songs.map(song => ({
-            songID: song.id,
-            songTitle: song.title,
-            songFile: song.file,
-            songImage: song.image,
-            songLyrics: song.lyrics,
+            id: song.id,
+            title: song.title,
+            file_song: song.file,
+            image: song.image,
+            lyrics: song.lyrics,
             name: artistDetails.name,
-            is_explicit: 0 // Mặc định, bạn có thể thêm trường này vào API nếu cần
+            is_explicit: song.is_explicit || 0,
+            listens_count: song.listens_count || 0,
+            duration: song.duration || 0,
+            is_premium: song.is_premium,
+            artistID: artistDetails.id,
+            releaseDate: song.releaseDate,
+            albumID: song.albumId,
+            albumName: song.albumTitle
           }));
 
           setArtistData(formattedSongs);
@@ -50,21 +58,28 @@ const PopularSong = () => {
     fetchArtistData();
   }, [artistName]);
 
+  const isReleased = (releaseDate) => {
+    if (!releaseDate) return true;
+    const today = new Date();
+    const release = new Date(releaseDate);
+    return release <= today;
+  };
+
   const getNewestSong = () => {
     if (!artistData.length) return null;
-    return artistData.reduce((newest, current) => {
+    const releasedSongs = artistData.filter(song => isReleased(song.releaseDate));
+    return releasedSongs.reduce((newest, current) => {
       if (!newest) return current;
-      return current.songID > newest.songID ? current : newest;
-    });
+      return current.id > newest.id ? current : newest;
+    }, null);
   };
 
   const getPopularSongs = () => {
     const newestSong = getNewestSong();
     if (!newestSong) return [];
-    
-    // Loại trừ bài hát mới nhất và lấy tối đa 7 bài
+
     return artistData
-      .filter(song => song.songID !== newestSong.songID)
+      .filter(song => song.id !== newestSong.id && isReleased(song.releaseDate))
       .slice(0, 7);
   };
 
@@ -74,19 +89,22 @@ const PopularSong = () => {
       setClickedIndex(null);
       return;
     }
-    
+
     setPlayerState({
-      audioUrl: song.songFile,
-      title: song.songTitle,
+      audioUrl: song.file_song,
+      title: song.title,
       artist: song.name,
-      Image: song.songImage,
-      lyrics: song.songLyrics,
-      album: song.songTitle,
-      playCount: 0,
-      TotalDuration: 0
+      Image: song.image,
+      lyrics: song.lyrics,
+      album: song.title,
+      playCount: song.listens_count,
+      TotalDuration: song.duration,
+      songId: song.id,
+      is_premium: song.is_premium,
+      artistID: song.artistID
     });
     setClickedIndex(index);
-    
+
     try {
       localStorage.setItem("songs", JSON.stringify(artistData));
     } catch (error) {
@@ -122,18 +140,18 @@ const PopularSong = () => {
           <h2 className="text-2xl font-bold mb-4">New Song</h2>
           {newestSong && (
             <div className="flex justify-center bg-gray-700 p-4 rounded-lg mt-2 h-full">
-              <div 
+              <div
                 className="flex items-start space-x-4 cursor-pointer"
                 onClick={() => handleRowClick(newestSong, 0)}
               >
                 <img
-                  src={newestSong.songImage}
-                  alt={newestSong.songTitle}
+                  src={newestSong.image}
+                  alt={newestSong.title}
                   className="w-48 h-48 object-cover rounded-lg mt-3"
                 />
                 <div className="flex flex-col text-left mt-12">
                   <p className="text-sm font-semibold overflow-hidden text-ellipsis w-[200px] line-clamp-2">
-                    {newestSong.songTitle}
+                    {newestSong.title}
                   </p>
                   <p className="text-gray-400 text-sm break-words pt-2">
                     {newestSong.name}
@@ -143,7 +161,7 @@ const PopularSong = () => {
             </div>
           )}
         </div>
-        
+
         <div className="flex flex-col flex-grow ml-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">Popular</h2>
@@ -154,11 +172,11 @@ const PopularSong = () => {
               Show All
             </Link>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-[10px]">
             {popularSongs.map((song, index) => (
               <div
-                key={song.songID}
+                key={song.id}
                 className={`relative flex items-center p-2 rounded-lg transition-colors 
                   ${hoveredIndex === index || clickedIndex === index ? "bg-gray-700" : ""} 
                   ${itemHeight}`}
@@ -167,15 +185,23 @@ const PopularSong = () => {
                 onClick={() => handleRowClick(song, index + 1)}
               >
                 <img
-                  src={song.songImage}
-                  alt={song.songTitle}
+                  src={song.image}
+                  alt={song.title}
                   className="w-14 h-14 object-cover rounded-lg"
                 />
                 <div className="flex flex-col flex-grow ml-3">
                   <div className="flex justify-between items-center">
                     <div style={{ width: "150px" }}>
                       <p className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-[150px]">
-                        {song.songTitle}
+                        {song.title}
+                      </p>
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-end">
+                      <p
+                        className={`text-gray-500 text-sm w-20 text-right mr-2 ${hoveredIndex === index ? "opacity-0" : ""
+                          }`}
+                      >
+                        {formatDuration(song.duration)}
                       </p>
                     </div>
                   </div>
@@ -186,7 +212,7 @@ const PopularSong = () => {
                       </p>
                     </span>
                   </div>
-                  
+
                   <SongItem
                     song={song}
                     index={index}

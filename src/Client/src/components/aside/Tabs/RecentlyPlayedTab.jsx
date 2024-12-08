@@ -58,7 +58,8 @@ const RecentlyPlayedTab = () => {
         playCount: song.listens_count,
         TotalDuration: song.duration,
         songId: song.id,
-        is_premium:song.is_premium
+        is_premium:song.is_premium,
+        artistID:song.artistID
       });
       setClickedIndex(index);
       try {

@@ -149,31 +149,31 @@ const SearchPage = () => {
   const location = useLocation();
   const [searchResults, setSearchResults] = useState(null);
   const [recentSearches, setRecentSearches] = useState([
-    { name: "Soobin", role: "Artist", image: "soobin.jpg" },
-    { name: "Taylor Swift", role: "Artist", image: "taylor.jpg" },
-    { name: "Charlie Puth", role: "Artist", image: "charlie.jpg" },
-    { name: "Harry Styles", role: "Song", image: "harry.jpg" },
+    { name: "Luis Fonsi", role: "Artist", image: "luis.jpg" },
+    { name: "Sơn tùng MTP", role: "Artist", image: "sơn tùng.jpg" },
+    { name: "Ed Sheeran", role: "Artist", image: "ed.jpg" },
+    { name: "Perfect", role: "Song", image: "hq720.jpg" },
   ]);
 
   // Use useMemo for genres array
   const genres = useMemo(
     () => [
-      { name: "Music", color: "bg-red-500", coverArt: "CoverArt.jpg" },
+      { name: "Music", color: "bg-red-500", coverArt: "images/music.jpg" },
       {
         name: "Vietnamese Music",
         color: "bg-amber-200",
-        coverArt: "CoverArt2.jpg",
+        coverArt: "images/sơn tùng.jpg",
       },
-      { name: "US-UK", color: "bg-cyan-500", coverArt: "CoverArt3.jpg" },
-      { name: "Made For You", color: "bg-sky-700", coverArt: "CoverArt4.jpg" },
+      { name: "US-UK", color: "bg-cyan-500", coverArt: "images/us-uk.jpg" },
+      { name: "Made For You", color: "bg-sky-700", coverArt: "images/made-for-you.jpg" },
       {
         name: "Live Events",
         color: "bg-purple-600",
-        coverArt: "CoverArt5.jpg",
+        coverArt: "images/live.jpg",
       },
-      { name: "Soul", color: "bg-amber-600", coverArt: "CoverArt6.jpg" },
-      { name: "Blue", color: "bg-stone-300", coverArt: "CoverArt7.jpg" },
-      { name: "Comedy", color: "bg-blue-600", coverArt: "CoverArt8.jpg" },
+      { name: "Soul", color: "bg-amber-600", coverArt: "images/soul.jpg" },
+      { name: "Blue", color: "bg-stone-300", coverArt: "images/blue.jpg" },
+      { name: "Comedy", color: "bg-blue-600", coverArt: "images/comeny.jpg" },
     ],
     []
   );
