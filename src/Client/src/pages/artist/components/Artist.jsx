@@ -207,8 +207,9 @@ const PopularSong = () => {
             {popularSongs.map((song, index) => (
               <div
                 key={song.songID}
-                className={`relative flex items-center p-2 rounded-lg transition-colors 
-                  ${hoveredIndex === index || clickedIndex === index ? "bg-gray-700" : ""} 
+                className={`relative flex items-center p-2 rounded-lg transition-colors
+                  ${hoveredIndex === index ? "bg-gray-700" : ""}
+                  ${clickedIndex === index + 1 ? "bg-gray-600" : "hover:bg-gray-700"}
                   ${itemHeight}`}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
