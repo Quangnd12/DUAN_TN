@@ -52,16 +52,14 @@ const PlayerControls = () => {
   const user_id = userData ? userData.id : null;
 
   useEffect(() => {
-    setIsPlaying(false); // Luôn set là false khi load lại trang
-  }, []);
-
-  useEffect(() => {
     if (audioUrl) {
-      setIsPlaying(true); // Tự động phát khi có bài hát mới
-    } else {
-      setIsPlaying(false);
+      setIsPlaying(true);
     }
   }, [audioUrl]);
+
+  useEffect(() => {
+    setIsPlaying(false);
+  }, []);
 
   useEffect(() => {
     if (audioUrl) {
