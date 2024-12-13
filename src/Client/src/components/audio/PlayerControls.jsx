@@ -45,6 +45,7 @@ const PlayerControls = () => {
     TotalDuration,
     songId,
     is_premium,
+    artistID 
   } = playerState;
   const age = useAge();
   const navigate = useNavigate();
@@ -94,6 +95,7 @@ const PlayerControls = () => {
         TotalDuration,
         songId,
         is_premium,
+        artistID
       }));
     }
   }, [
@@ -107,6 +109,7 @@ const PlayerControls = () => {
     TotalDuration,
     songId,
     is_premium,
+    artistID,
     setPlayerState,
   ]);
 
@@ -319,6 +322,7 @@ const PlayerControls = () => {
         TotalDuration: nextSong.duration,
         songId: nextSong.songId,
         is_premium: nextSong.is_premium,
+        artistID: nextSong.artistID,
       });
       setClickedIndex(nextIndex);
       setIsPlaying(true);
@@ -352,6 +356,7 @@ const PlayerControls = () => {
           TotalDuration: prevSong.duration,
           songId: prevSong.songId,
           is_premium: prevSong.is_premium,
+          artistID: prevSong.artistID,
         });
         setClickedIndex(prevIndex);
         return;

@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
 import { Link, useParams } from "react-router-dom";
-import { 
-    MdPlayArrow, 
-    MdShuffle, 
-    MdCheckBoxOutlineBlank, 
-    MdCheck 
+import {
+    MdPlayArrow,
+    MdShuffle,
+    MdCheckBoxOutlineBlank,
+    MdCheck
 } from "react-icons/md";
 
 import SongItem from "../../../components/dropdown/dropdownMenu";
@@ -14,6 +14,7 @@ import { PlayerContext } from "Client/src/components/context/MusicPlayer";
 import useAge from "Client/src/components/calculateAge";
 import { handleWarning } from "../../../components/notification";
 import { formatDuration } from "Client/src/components/format";
+import LikeButton from "Client/src/components/button/favorite";
 
 const AllSong = () => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -75,7 +76,7 @@ const AllSong = () => {
             setClickedIndex(null);
             return;
         }
-        
+
         setPlayerState({
             audioUrl: song.file_song,
             title: song.title,
@@ -86,11 +87,11 @@ const AllSong = () => {
             playCount: song.listens_count,
             TotalDuration: song.duration,
             songId: song.id,
-            is_premium:song.is_premium,
-            artistID:song.artistID
+            is_premium: song.is_premium,
+            artistID: song.artistID
         });
         setClickedIndex(index);
-        
+
         try {
             localStorage.setItem("songs", JSON.stringify(artistSongs));
         } catch (error) {
@@ -100,10 +101,10 @@ const AllSong = () => {
 
     const handlePlayAll = () => {
         if (artistSongs.length > 0) {
-            const validSongs = artistSongs.filter(song => 
+            const validSongs = artistSongs.filter(song =>
                 song.is_explicit !== 1 || age >= 18
             );
-            
+
             if (validSongs.length > 0) {
                 handleRowClick(validSongs[0], 0);
             } else {
@@ -114,10 +115,10 @@ const AllSong = () => {
 
     const handleShufflePlay = () => {
         if (artistSongs.length > 0) {
-            const validSongs = artistSongs.filter(song => 
+            const validSongs = artistSongs.filter(song =>
                 song.is_explicit !== 1 || age >= 18
             );
-            
+
             if (validSongs.length > 0) {
                 const randomIndex = Math.floor(Math.random() * validSongs.length);
                 handleRowClick(validSongs[randomIndex], randomIndex);
@@ -170,7 +171,7 @@ const AllSong = () => {
     };
 
     const handleDropdownToggle = (index, e) => {
-        e.stopPropagation(); 
+        e.stopPropagation();
         setDropdownIndex(index === dropdownIndex ? null : index);
     };
 
@@ -197,14 +198,14 @@ const AllSong = () => {
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center">
                             <h2 className="text-2xl font-bold">{artist.name} - All songs</h2>
-                            <button 
+                            <button
                                 className="bg-icon text-white p-2 rounded-full hover:bg-blue-700 transition ml-3"
                                 onClick={handlePlayAll}
                             >
                                 <MdPlayArrow size={24} />
                             </button>
                         </div>
-                        <button 
+                        <button
                             className="flex items-center bg-icon text-white p-2 rounded-full hover:bg-blue-700 transition"
                             onClick={handleShufflePlay}
                         >
@@ -261,8 +262,8 @@ const AllSong = () => {
                                 >
                                     {/* Checkbox và các nút chức năng */}
                                     {(hoveredIndex === index || selectedCheckboxes.size > 0) && (
-                                        <div 
-                                            className="absolute left-2 top-1/2 transform -translate-y-1/2 flex items-center gap-4" 
+                                        <div
+                                            className="absolute left-2 top-1/2 transform -translate-y-1/2 flex items-center gap-4"
                                             style={{ zIndex: 2 }}
                                         >
                                             <div
@@ -274,9 +275,9 @@ const AllSong = () => {
                                             >
                                                 <MdCheckBoxOutlineBlank size={23} />
                                                 {selectedCheckboxes.has(index) && (
-                                                    <MdCheck 
-                                                        size={16} 
-                                                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-blue-400" 
+                                                    <MdCheck
+                                                        size={16}
+                                                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-blue-400"
                                                     />
                                                 )}
                                             </div>
@@ -294,9 +295,16 @@ const AllSong = () => {
                                     />
                                     <div className="flex flex-grow flex-col ml-3">
                                         <div className="flex justify-between items-center">
-                                            <p className="text-sm font-semibold w-48 whitespace-nowrap overflow-hidden text-ellipsis w-[370px]">
-                                                {song.title}
-                                            </p>
+                                            <div className="flex items-center w-[370px] whitespace-nowrap overflow-hidden text-ellipsis">
+                                                <p className="text-sm font-semibold overflow-hidden text-ellipsis">
+                                                    {song.title}
+                                                </p>
+                                                {song.is_premium === 1 && (
+                                                    <span className="bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded ml-2 shrink-0">
+                                                        PREMIUM
+                                                    </span>
+                                                )}
+                                            </div>
                                             <div className="absolute top-[25px] justify-end right-[200px]">
                                                 <Link to={`/album/${song.albumID}`}>
                                                     <p className="text-gray-500 text-sm text-center whitespace-nowrap overflow-hidden text-ellipsis w-[370px] hover:text-blue-500 hover:underline no-underline">
@@ -306,11 +314,10 @@ const AllSong = () => {
                                             </div>
                                             <div className="absolute top-[25px] justify-end right-[10px]">
                                                 <p
-                                                    className={`text-gray-500 text-sm w-20 text-right mr-2 ${
-                                                        hoveredIndex === index ? "opacity-0" : ""
-                                                    }`}
+                                                    className={`text-gray-500 text-sm w-20 text-right mr-2 ${hoveredIndex === index ? "opacity-0" : ""
+                                                        }`}
                                                 >
-                                                   {formatDuration(song.duration)}
+                                                    {formatDuration(song.duration)}
                                                 </p>
                                             </div>
                                         </div>
@@ -323,7 +330,7 @@ const AllSong = () => {
                                                 </Link>
                                             </span>
                                         </div>
-                                        
+
                                         <SongItem
                                             song={song}
                                             index={index}
@@ -342,6 +349,11 @@ const AllSong = () => {
                                             type="song"
                                         />
                                     </div>
+                                    {hoveredIndex === index && (
+                                        <div className="mr-[50px]">
+                                            <LikeButton songId={song.id} />
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                     </div>

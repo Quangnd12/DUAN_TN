@@ -50,9 +50,18 @@ const ContentCard = () => {
       lyrics: song.lyrics,
       album: artist.name,
       playCount: song.listens_count || 0,
-      TotalDuration: song.duration
+      TotalDuration: song.duration,
+      songId: song.id,
+      is_premium: song.is_premium,
+      artistID: followedArtists[index]?.id
     });
     setClickedIndex(index);
+    try {
+      const artistSongs = followedArtists[index]?.songs || [];
+      localStorage.setItem("songs", JSON.stringify(artistSongs));
+    } catch (error) {
+      console.error("Lỗi khi lưu bài hát vào localStorage:", error);
+    }
   };
 
   const handleCheckboxToggle = (index) => {
@@ -170,10 +179,10 @@ const ContentCard = () => {
                       <div className="flex items-center">
                         <p className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-[400px]">
                           {latestSong.title}
+                          <span className="ml-2 text-xs text-blue-500 bg-blue-500/10 px-2 py-1 rounded-full">
+                            New
+                          </span>
                         </p>
-                        <span className="ml-2 text-xs text-blue-500 bg-blue-500/10 px-2 py-1 rounded-full">
-                          Mới
-                        </span>
                       </div>
 
                       <div className="absolute inset-0 flex items-center justify-end">

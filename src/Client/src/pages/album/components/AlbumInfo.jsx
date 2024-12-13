@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../../../assets/css/artist/artist.css";
 import { useParams, Link } from "react-router-dom";
 import { getAlbumById } from "../../../../../services/album";
+import { slugify } from "../../../components/createSlug";
 
 const AlbumInfo = () => {
     const { id } = useParams(); // Lấy ID album từ URL
@@ -63,7 +64,7 @@ const AlbumInfo = () => {
                             <h6 className="text-5xl font-bold">{album.title}</h6>
                         </div>
                         <div className="flex items-center pt-2">
-                            <Link to={`/artist/${album.artistName}`} className="flex items-center space-x-2">
+                            <Link to={`/artist/${slugify(album.artistName)}`} className="flex items-center space-x-2">
                               
                                 <div className="w-10 h-10 rounded-full overflow-hidden">
                                     <img
