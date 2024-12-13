@@ -13,6 +13,7 @@ import ShareOptions from '../share';
 import { handleAddWaitlist } from "../../notification";
 import AddPlaylistOption from '../../dropdown/dropdownAddPlaylist';
 import { useAddSongToPlaylistMutation } from '../../../../../redux/slice/playlistSlice';
+import { useNavigate } from 'react-router-dom';
 
 const SongMoreButton = ({ type, songId, onOptionSelect }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -21,6 +22,7 @@ const SongMoreButton = ({ type, songId, onOptionSelect }) => {
     const dropdownRef = useRef(null);
     const shareDropdownRef = useRef(null);
     const playlistDropdownRef = useRef(null);
+    const navigate = useNavigate();
 
     const [addSongToPlaylist] = useAddSongToPlaylistMutation();
 
@@ -73,7 +75,7 @@ const SongMoreButton = ({ type, songId, onOptionSelect }) => {
                 setIsOpen(!isOpen);
                 break;
             case 'rate_song':
-                window.location.href = `/report?songId=${songId}`;
+                navigate(`/report?songId=${songId}`);
                 setIsOpen(false);
                 break;
             case 'waiting_list':
