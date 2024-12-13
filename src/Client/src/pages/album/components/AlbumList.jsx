@@ -89,7 +89,8 @@ const ListSongOfAlbums = () => {
                 album: album.title,
                 playCount: song.songListensCount,
                 TotalDuration: song.songDuration,
-                songId: song.songId,
+                // songId: song.id || song._id,
+                songId: song.id,
                 is_premium:song.songIsPremium,
                 artistID:song.artistIds[0]
             });
