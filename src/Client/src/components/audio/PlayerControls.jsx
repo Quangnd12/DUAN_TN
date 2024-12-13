@@ -160,20 +160,29 @@ const PlayerControls = () => {
         return;
       }
 
-      const historyForSong =
-        Array.isArray(history) &&
+      const historyForSong = Array.isArray(history) && 
         history.find((item) => item.songID === songId);
 
       if (!historyForSong && !hasAddedHistory) {
-        await addHistory(user_id, songId);
-        setHasAddedHistory(true);
-        localStorage.setItem(`history_${songId}`, "true");
-        const updatedHistory = await getHistoryById(user_id);
-        if (Array.isArray(updatedHistory)) {
-          setHistory(updatedHistory);
+        try {
+          await addHistory(user_id, songId);
+          setHasAddedHistory(true);
+          localStorage.setItem(`history_${songId}`, "true");
+          
+          const updatedHistory = await getHistoryById(user_id);
+          if (Array.isArray(updatedHistory)) {
+            setHistory(updatedHistory);
+          }
+        } catch (error) {
+          if (error.response?.status === 400) {
+            setHasAddedHistory(true);
+            localStorage.setItem(`history_${songId}`, "true");
+          }
         }
       }
-    } catch (error) { }
+    } catch (error) {
+      return;
+    }
   };
 
   const handleProgress = (state) => {

@@ -8,6 +8,7 @@ import { handleWarning } from "../../../components/notification";
 import "../../../assets/css/artist/artist.css";
 import { slugify } from "Client/src/components/createSlug";
 import { formatDuration } from "Client/src/components/format";
+import LikeButton from "Client/src/components/button/favorite";
 
 const PopularSong = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -262,7 +263,7 @@ const PopularSong = () => {
                    key={index}
                    song={{
                        ...song,
-                       id: song.songID
+                       id: song.id
                    }}
                     index={index}
                     hoveredIndex={hoveredIndex}
@@ -281,7 +282,7 @@ const PopularSong = () => {
                   />
                 </div>
                 <div className="mr-10">
-                  <LikeButton songId={song.songID} />
+                  <LikeButton songId={song.id} />
                 </div>
               </div>
             ))}
