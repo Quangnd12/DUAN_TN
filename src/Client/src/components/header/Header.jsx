@@ -17,7 +17,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { styled } from "@mui/joy";
 import Button from "@mui/joy/Button";
-import { getPaymentByUser } from 'services/payment';
+import { getPaymentByUser,CheckPayment } from 'services/payment';
 import { GiCrown } from 'react-icons/gi';
 
 const VisuallyHiddenInput = styled("input")`
@@ -142,6 +142,18 @@ useEffect(() => {
         getPayment();
     }
 }, [user]); 
+
+  const checkUserPremium = async () => {
+    if (user) {
+    await CheckPayment();
+    }
+}
+
+useEffect(() => {
+  if (user) {
+    checkUserPremium();
+  }
+}, [])
 
   // Render user section based on authentication status
   const renderUserSection = () => {

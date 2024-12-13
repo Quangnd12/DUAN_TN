@@ -14,6 +14,7 @@ import React, { useState, useRef, useEffect, useContext } from "react";
     import { PlayerContext } from "Client/src/components/context/MusicPlayer";
     import useAge from "Client/src/components/calculateAge";
     import { handleWarning } from "../../../components/notification";
+import { formatDuration } from "Client/src/components/format";
 
     const AllSong = () => {
         const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -43,14 +44,20 @@ import React, { useState, useRef, useEffect, useContext } from "react";
                         setArtist(artistDetails);
 
                         const formattedSongs = artistDetails.songs.map(song => ({
-                            songID: song.id,
-                            songTitle: song.title,
-                            songFile: song.file,
-                            songImage: song.image,
-                            songLyrics: song.lyrics,
+                            id: song.id,
+                            title: song.title,
+                            file_song: song.file,
+                            image: song.image,
+                            lyrics: song.lyrics,
                             name: artistDetails.name,
                             is_explicit: song.is_explicit || 0,
-                            duration: song.duration || "3:45"
+                            listens_count: song.listens_count || 0,
+                            duration: song.duration || 0,
+                            is_premium: song.is_premium,
+                            artistID: artistDetails.id,
+                            releaseDate: song.releaseDate,
+                            albumID: song.albumId,
+                            albumName: song.albumTitle
                         }));
 
                         setArtistSongs(formattedSongs);
@@ -71,14 +78,17 @@ import React, { useState, useRef, useEffect, useContext } from "react";
             }
             
             setPlayerState({
-                audioUrl: song.songFile,
-                title: song.songTitle,
+                audioUrl: song.file_song,
+                title: song.title,
                 artist: song.name,
-                Image: song.songImage,
-                lyrics: song.songLyrics,
-                album: song.songTitle,
-                playCount: song.listens_count || 0,
-                TotalDuration: song.duration || 0
+                Image: song.image,
+                lyrics: song.lyrics,
+                album: song.title,
+                playCount: song.listens_count,
+                TotalDuration: song.duration,
+                songId: song.id,
+                is_premium:song.is_premium,
+                artistID:song.artistID
             });
             setClickedIndex(index);
             
@@ -170,6 +180,13 @@ import React, { useState, useRef, useEffect, useContext } from "react";
             // Xử lý action tại đây
         };
 
+        const isReleased = (releaseDate) => {
+            if (!releaseDate) return true;
+            const today = new Date();
+            const release = new Date(releaseDate);
+            return release <= today;
+        };
+
         if (!artist) {
             return <div className="text-white p-4">Loading artist songs...</div>;
         }
@@ -232,105 +249,102 @@ import React, { useState, useRef, useEffect, useContext } from "react";
 
                         {/* Danh sách bài hát */}
                         <div className="flex flex-col gap-4 pt-2">
-                            {artistSongs.map((song, index) => (
-                                <div
-                                    key={song.songID}
-                                    className={`relative flex items-center p-2 rounded-lg transition-colors hover:bg-gray-700 
-                                        ${hoveredIndex === index || clickedIndex === index ? "bg-gray-700" : ""}`}
-                                    onMouseEnter={() => setHoveredIndex(index)}
-                                    onMouseLeave={() => setHoveredIndex(null)}
-                                    onClick={() => handleRowClick(song, index)}
-                                >
-                                    {/* Checkbox và các nút chức năng */}
-                                    {(hoveredIndex === index || selectedCheckboxes.size > 0) && (
-                                        <div 
-                                            className="absolute left-2 top-1/2 transform -translate-y-1/2 flex items-center gap-4" 
-                                            style={{ zIndex: 2 }}
-                                        >
-                                            <div
-                                                className={`relative cursor-pointer ${selectedCheckboxes.has(index) ? 'text-blue-400' : 'text-gray-400'}`}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleCheckboxToggle(index);
-                                                }}
+                            {artistSongs
+                                .filter(song => isReleased(song.releaseDate))
+                                .map((song, index) => (
+                                    <div
+                                        key={song.id}
+                                        className={`relative flex items-center p-2 rounded-lg transition-colors hover:bg-gray-700 
+                                            ${hoveredIndex === index || clickedIndex === index ? "bg-gray-700" : ""}`}
+                                        onMouseEnter={() => setHoveredIndex(index)}
+                                        onMouseLeave={() => setHoveredIndex(null)}
+                                        onClick={() => handleRowClick(song, index)}
+                                    >
+                                        {/* Checkbox và các nút chức năng */}
+                                        {(hoveredIndex === index || selectedCheckboxes.size > 0) && (
+                                            <div 
+                                                className="absolute left-2 top-1/2 transform -translate-y-1/2 flex items-center gap-4" 
+                                                style={{ zIndex: 2 }}
                                             >
-                                                <MdCheckBoxOutlineBlank size={23} />
-                                                {selectedCheckboxes.has(index) && (
-                                                    <MdCheck 
-                                                        size={16} 
-                                                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-blue-400" 
-                                                    />
-                                                )}
+                                                <div
+                                                    className={`relative cursor-pointer ${selectedCheckboxes.has(index) ? 'text-blue-400' : 'text-gray-400'}`}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleCheckboxToggle(index);
+                                                    }}
+                                                >
+                                                    <MdCheckBoxOutlineBlank size={23} />
+                                                    {selectedCheckboxes.has(index) && (
+                                                        <MdCheck 
+                                                            size={16} 
+                                                            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-blue-400" 
+                                                        />
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {/* Nội dung bài hát */}
-                                    <p className={`text-sm font-semibold w-8 text-center ${hoveredIndex === index || selectedCheckboxes.size > 0 ? "opacity-0" : ""}`}>
-                                        {index + 1}
-                                    </p>
-                                    <img
-                                        src={song.songImage}
-                                        alt={song.songTitle}
-                                        className="w-14 h-14 object-cover rounded-lg ml-2"
-                                    />
-                                    <div className="flex flex-grow flex-col ml-3">
-                                        <div className="flex justify-between items-center">
-                                            <p className="text-sm font-semibold w-48 whitespace-nowrap overflow-hidden text-ellipsis w-[370px] flex items-center justify-between">
-                                                {song.songTitle}
-                                            </p>
-                                            <div className="absolute top-[25px] justify-end right-[200px]">
-                                            <span className="ml-auto">
-                                                    <LikeButton
-                                                        songId={song.songID}
-                                                        className="inline-block"
-                                                    />
+                                        {/* Nội dung bài hát */}
+                                        <p className={`text-sm font-semibold w-8 text-center ${hoveredIndex === index || selectedCheckboxes.size > 0 ? "opacity-0" : ""}`}>
+                                            {index + 1}
+                                        </p>
+                                        <img
+                                            src={song.image}
+                                            alt={song.title}
+                                            className="w-14 h-14 object-cover rounded-lg ml-2"
+                                        />
+                                        <div className="flex flex-grow flex-col ml-3">
+                                            <div className="flex justify-between items-center">
+                                                <p className="text-sm font-semibold w-48 whitespace-nowrap overflow-hidden text-ellipsis w-[370px]">
+                                                    {song.title}
+                                                </p>
+                                                <div className="absolute top-[25px] justify-end right-[200px]">
+                                                    <Link to={`/album/${song.albumID}`}>
+                                                        <p className="text-gray-500 text-sm text-center whitespace-nowrap overflow-hidden text-ellipsis w-[370px] hover:text-blue-500 hover:underline no-underline">
+                                                            {song.albumName}
+                                                        </p>
+                                                    </Link>
+                                                </div>
+                                                <div className="absolute top-[25px] justify-end right-[10px]">
+                                                    <p
+                                                        className={`text-gray-500 text-sm w-20 text-right mr-2 ${
+                                                            hoveredIndex === index ? "opacity-0" : ""
+                                                        }`}
+                                                    >
+                                                       {formatDuration(song.duration)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-wrap gap-1 mt-1" style={{ zIndex: 1 }}>
+                                                <span className="flex items-center">
+                                                    <Link to={`/artist/${slugify(song.name)}`}>
+                                                        <p className="text-gray-400 text-sm whitespace-nowrap overflow-hidden text-ellipsis hover:text-blue-500 hover:underline">
+                                                            {song.name}
+                                                        </p>
+                                                    </Link>
                                                 </span>
                                             </div>
-                                            <div className="absolute top-[25px] justify-end right-[10px]">
-                                                <p
-                                                    className={`text-gray-500 text-sm w-20 text-right mr-2 ${
-                                                        hoveredIndex === index ? "opacity-0" : ""
-                                                    }`}
-                                                >
-                                                    {song.duration}
-                                                </p>
-                                            </div>
+                                            
+                                            <SongItem
+                                                song={song}
+                                                index={index}
+                                                hoveredIndex={hoveredIndex}
+                                                clickedIndex={clickedIndex}
+                                                setHoveredIndex={setHoveredIndex}
+                                                setClickedIndex={setClickedIndex}
+                                                likedSongs={likedSongs}
+                                                handleLikeToggle={handleLikeToggle}
+                                                handleDropdownToggle={handleDropdownToggle}
+                                                dropdownIndex={dropdownIndex}
+                                                dropdownRefs={dropdownRefs}
+                                                setShowShareOptions={setShowShareOptions}
+                                                showShareOptions={showShareOptions}
+                                                align={'right'}
+                                                type="song"
+                                            />
                                         </div>
-                                        <div className="flex flex-wrap gap-1 mt-1" style={{ zIndex: 1 }}>
-                                            <span className="flex items-center">
-                                                <Link to={`/artist/${slugify(song.name)}`}>
-                                                    <p className="text-gray-400 text-sm whitespace-nowrap overflow-hidden text-ellipsis hover:text-blue-500 hover:underline">
-                                                        {song.name}
-                                                    </p>
-                                                </Link>
-                                            </span>
-                                        </div>
-                                        
-                                        <SongItem
-                                            key={index}
-                                            song={{
-                                                ...song,
-                                                id: song.songID
-                                            }}
-                                            index={index}
-                                            hoveredIndex={hoveredIndex}
-                                            clickedIndex={clickedIndex}
-                                            setHoveredIndex={setHoveredIndex}
-                                            setClickedIndex={setClickedIndex}
-                                            likedSongs={likedSongs}
-                                            handleLikeToggle={handleLikeToggle}
-                                            handleDropdownToggle={handleDropdownToggle}
-                                            dropdownIndex={dropdownIndex}
-                                            dropdownRefs={dropdownRefs}
-                                            setShowShareOptions={setShowShareOptions}
-                                            showShareOptions={showShareOptions}
-                                            align={'right'}
-                                            type="song"
-                                        />
                                     </div>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </div>
                 </div>

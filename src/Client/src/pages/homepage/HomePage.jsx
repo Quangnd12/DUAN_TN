@@ -7,7 +7,6 @@ import GridGenreItems from "../../components/grid_items/GridGenreItems";
 import Footer from "../../components/footer/Footer";
 import { getAllArtists } from "../../../../services/artist";
 import { getAlbums } from "../../../../services/album"; // Import hàm getAlbums
-import { CheckPayment } from "services/payment";
 import { useDispatch, useSelector } from "react-redux";
 
 
@@ -31,17 +30,7 @@ const HomePage = () => {
     );
   }, [globalPlayingState]);
 
-  const checkUserPremium = async () => {
-    if (user) {
-    await CheckPayment();
-    }
-}
 
-useEffect(() => {
-  if (user) {
-    checkUserPremium();
-  }
-}, [])
 
 // Thêm state để kiểm soát việc component đã mount
 const [isMounted, setIsMounted] = useState(false);

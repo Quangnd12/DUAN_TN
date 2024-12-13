@@ -81,17 +81,18 @@ const ListSongOfAlbums = () => {
 
         if (songIndex !== -1) {
             setPlayerState({
-                audioUrl: song.file,
+                audioUrl: song.songFile,
                 title: song.title,
                 artist: album.artistName,
                 Image: song.image,
                 lyrics: song.lyrics,
                 album: album.title,
-                playCount: song.listens_count,
-                TotalDuration: song.duration,
-                songId: song.id || song._id,
-                is_premium: song.is_premium,
-                is_explicit: song.is_explicit
+                playCount: song.songListensCount,
+                TotalDuration: song.songDuration,
+                // songId: song.id || song._id,
+                songId: song.id,
+                is_premium:song.songIsPremium,
+                artistID:song.artistIds[0]
             });
             setClickedIndex(index);
             setHoveredIndex(index);
@@ -271,7 +272,12 @@ const ListSongOfAlbums = () => {
                                     </div>
 
                                     <p className="text-gray-400 text-sm mt-1 whitespace-nowrap overflow-hidden text-ellipsis w-[430px]">
-                                        {album.artistName}
+                                        <Link 
+                                            to={`/artist/${album.artistId}`} 
+                                            className="hover:text-blue-500 hover:underline no-underline"
+                                        >
+                                            {album.artistName}
+                                        </Link>
                                     </p>
 
                                     <SongItem

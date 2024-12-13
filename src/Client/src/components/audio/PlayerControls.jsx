@@ -31,6 +31,7 @@ const PlayerControls = () => {
   const [isDragging, setIsDragging] = useState(false);
 
   const playerRef = useRef(null);
+  const audioRef = useRef(null);
   const { playerState, setPlayerState, Songs, clickedIndex, setClickedIndex } =
     useContext(PlayerContext);
   const {
@@ -52,8 +53,26 @@ const PlayerControls = () => {
   const user_id = userData ? userData.id : null;
 
   useEffect(() => {
+    const resetPlayer = () => {
+      setIsPlaying(false);
+      if (playerRef.current) {
+        playerRef.current.seekTo(0);
+      }
+    };
+
+    resetPlayer();
+    window.addEventListener('load', resetPlayer);
+
+    return () => {
+      window.removeEventListener('load', resetPlayer);
+    };
+  }, []);
+
+  useEffect(() => {
     if (audioUrl) {
       setIsPlaying(true);
+    } else {
+      setIsPlaying(false);
     }
   }, [audioUrl]);
 
@@ -158,7 +177,7 @@ const PlayerControls = () => {
           setHistory(updatedHistory);
         }
       }
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleProgress = (state) => {
@@ -169,7 +188,6 @@ const PlayerControls = () => {
     }
 
     if (playerRef.current) {
-      const audioElement = playerRef.current.getInternalPlayer();
       setPlayerState((prev) => ({
         ...prev,
         currentTime: currentTime,
@@ -181,14 +199,11 @@ const PlayerControls = () => {
       return;
     }
 
-    const fifteenSeconds = 15;
-    // Thêm lịch sử khi nghe đủ 15 giây (chỉ 1 lần)
-    if (currentTime > fifteenSeconds && !hasAddedHistory && !isDragging) {
+    const Seconds = duration * 0.7;
+    if (currentTime > Seconds && !hasAddedHistory && !isDragging) {
       handleAddHistory();
     }
-
-    // Tăng lượt nghe khi nghe đủ 15 giây (mỗi ngày 1 lần)
-    if (currentTime > fifteenSeconds && !hasListened && !isDragging) {
+    if (currentTime > Seconds && !hasListened && !isDragging) {
       incrementPlayCount();
     }
   };
@@ -355,6 +370,12 @@ const PlayerControls = () => {
     setHasListened(storedListen === "true");
   }, [songId]);
 
+  useEffect(() => {
+    if (Songs.length === 0) {
+      setClickedIndex(null);
+    }
+  }, [Songs]);
+
   return (
     <div className="container-controls">
       <div className="controls">
@@ -396,7 +417,7 @@ const PlayerControls = () => {
             album={album}
             image={Image}
             playCount={playCount}
-            audio={audioUrl}
+            audio={audioRef}
             currentTime={currentTime}
             TotalDuration={TotalDuration}
             user_id={payment.user_id}
@@ -427,6 +448,7 @@ const PlayerControls = () => {
         width="0"
         height="0"
       />
+      <audio ref={audioRef} src={audioUrl} crossOrigin="anonymous" />
     </div>
   );
 };
