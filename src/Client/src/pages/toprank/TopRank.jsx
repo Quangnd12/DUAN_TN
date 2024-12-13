@@ -1,17 +1,16 @@
 import React from "react";
-import ToprankList from "./sections/toprank";
 import ToprankInfo from "./components/ToprankInfo";
+import TopRankSongList from "./components/TopRankSongList";
 
-const Toprank = () => {
+const TopRank = () => {
   return (
-
-    <div className="relative  w-full h-screen">
+    <div className="relative w-full h-screen">
       <ToprankInfo />
       <div className="relative text-left">
-        <ToprankList />
+        <TopRankSongList />
       </div>
     </div>
   );
 };
 
-export default Toprank;
+export default TopRank;

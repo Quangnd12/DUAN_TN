@@ -1,22 +1,28 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../../../assets/css/artist/artist.css";
-import data from "../../../data/fetchtopData"; // Adjust based on your top-ranked data structure
 import { useParams } from "react-router-dom";
+import { getGenres } from '../../../../../services/genres';
 
 const TopRankInfo = () => {
-    const { id } = useParams(); // Assuming id is the genre id you want to find
-    let genreData = null;
+    const { id } = useParams();
+    const [genreData, setGenreData] = useState(null);
 
-    // Find the top rank that contains the desired genre within its gender array
-    data.topranks.forEach((toprank) => {
-        const foundGenre = toprank.gender.find(genre => genre.id === parseInt(id));
-        if (foundGenre) {
-            genreData = foundGenre;
-        }
-    });
+    useEffect(() => {
+        const fetchGenreData = async () => {
+            try {
+                const data = await getGenres();
+                const foundGenre = data.genres.find(genre => genre.id === parseInt(id));
+                setGenreData(foundGenre);
+            } catch (error) {
+                console.error("Error fetching genre data:", error);
+            }
+        };
+
+        fetchGenreData();
+    }, [id]);
 
     if (!genreData) {
-        return <div className="text-gray-600">Genre not found.</div>;
+        return <div className="text-gray-600">Đang tải...</div>;
     }
 
     return (
@@ -38,19 +44,21 @@ const TopRankInfo = () => {
                 ))}
             </div>
             <style jsx>{`
-            @keyframes waveEffect {
-                0%, 100% { transform: translateX(-100%); }
-                50% { transform: translateX(100%); }
-            }
-        `}</style>
+                @keyframes waveEffect {
+                    0%, 100% { transform: translateX(-100%); }
+                    50% { transform: translateX(100%); }
+                }
+            `}</style>
             <div className="relative z-10 text-white text-center p-4 max-w-5xl">
                 <h1 className="text-6xl font-black mb-4 tracking-tighter">
                     <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-500 via-yellow-500 to-green-500">TOP</span>
                     <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-500 via-blue-500 to-purple-500"> 100</span>
                 </h1>
-                <h2 className="text-4xl font-extrabold mb-4 tracking-tight">{`${genreData.genre.toUpperCase()} TRACKS`}</h2>
+                <h2 className="text-4xl font-extrabold mb-4 tracking-tight">
+                    {`${genreData.name.toUpperCase()} TRACKS`}
+                </h2>
                 <p className="text-lg text-gray-400 mb-6 max-w-3xl mx-auto">
-                    {genreData.description}
+                    {genreData.description || `Những bài hát ${genreData.name} hay nhất hiện nay`}
                 </p>
                 <div className="flex justify-center space-x-4">
                     <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-yellow-500 rounded-full animate-pulse"></div>

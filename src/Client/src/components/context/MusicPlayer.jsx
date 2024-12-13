@@ -18,6 +18,7 @@ export const PlayerProvider = ({ children }) => {
 
   const [Songs, setSongs] = useState([]);
   const [clickedIndex, setClickedIndex] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   
   useEffect(() => {
     const savedState = localStorage.getItem("playerState");
@@ -55,7 +56,7 @@ export const PlayerProvider = ({ children }) => {
   }, [clickedIndex]);
 
   return (
-    <PlayerContext.Provider value={{ playerState, setPlayerState, Songs, setSongs, clickedIndex, setClickedIndex }}>
+    <PlayerContext.Provider value={{ playerState, setPlayerState, Songs, setSongs, clickedIndex, setClickedIndex, isPlaying, setIsPlaying }}>
       {children}
     </PlayerContext.Provider>
   );
