@@ -11,47 +11,6 @@ import LogoutDialog from "./components/logoutDialog";
 import { useUpdateUserMutation } from "../../../../redux/slice/apiSlice";
 import { updateUser, logout } from "../../../../redux/slice/authSlice";
 
-const topTracks = [
-  {
-    id: 1,
-    title: "Tên bài hát 1",
-    artist: "Tên nghệ sĩ 1",
-    duration: "4:30",
-    imageUrl: "/assets/images/anh1.jpg",
-  },
-  {
-    id: 2,
-    title: "Tên bài hát 2",
-    artist: "Tên nghệ sĩ 2",
-    duration: "3:45",
-    imageUrl: "/assets/images/anh1.jpg",
-  },
-  {
-    id: 3,
-    title: "Tên bài hát 3",
-    artist: "Tên nghệ sĩ 3",
-    duration: "5:00",
-    imageUrl: "/assets/images/anh1.jpg",
-  },
-];
-
-const followingArtists = [
-  {
-    id: 1,
-    name: "Tên nghệ sĩ theo dõi 1",
-    imageUrl: "/assets/images/anh1.jpg",
-  },
-  {
-    id: 2,
-    name: "Tên nghệ sĩ theo dõi 2",
-    imageUrl: "/assets/images/anh2.jpg",
-  },
-  {
-    id: 3,
-    name: "Tên nghệ sĩ theo dõi 3",
-    imageUrl: "/assets/images/anh2.jpg",
-  },
-];
 
 const InfoClient = () => {
   const navigate = useNavigate();
@@ -280,7 +239,6 @@ const InfoClient = () => {
                   : "N/A"}
               </p>
               <p className="text-gray-400 text-base sm:text-lg">
-                Following {user.followsId ? user.followsId.length : 0}
               </p>
             </div>
           </div>
@@ -300,16 +258,13 @@ const InfoClient = () => {
           <hr className="w-full border-t border-gray-600" />
           <br />
           <ul className="grid grid-cols-1 gap-4">
-            {topTracks.map((track, index) => (
-              <InfoClientCard key={index} {...track} />
-            ))}
+            <InfoClientCard/>
           </ul>
         </div>
 
         <div className="mt-8">
-          <h3 className="text-2xl font-bold mb-4 text-left">Following</h3>
           <div className="flex flex-wrap gap-6">
-     <InfoClientFollowingCard/>
+         <InfoClientFollowingCard/>
           </div>
         </div>
 

@@ -25,9 +25,12 @@ export const favoriteApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(
-            favoriteApi.util.updateQueryData('checkFavoriteStatus', songId, (draft) => {
-              if (draft?.data) {
-                draft.data.isFavorite = !draft.data.isFavorite;
+            favoriteApi.util.updateQueryData('getUserFavorites', undefined, (draft) => {
+              const index = draft.favorites.findIndex(fav => fav.id === songId);
+              if (index > -1) {
+                draft.favorites.splice(index, 1);
+              } else {
+                draft.favorites.push({ id: songId });
               }
             })
           );
@@ -35,10 +38,7 @@ export const favoriteApi = createApi({
           // Xử lý lỗi nếu cần
         }
       },
-      invalidatesTags: (result, error, songId) => [
-        { type: "Favorites", id: songId },
-        "Favorites"
-      ],
+      invalidatesTags: ["Favorites"],
     }),
 
     // Get user's favorite songs
@@ -50,7 +50,7 @@ export const favoriteApi = createApi({
     // Check favorite status for a song
     checkFavoriteStatus: builder.query({
       query: (songId) => `/favorites/status/${songId}`,
-      transformResponse: (response) => response.data,
+      transformResponse: (response) => response.isFavorite,
       providesTags: (result, error, songId) => [
         { type: "Favorites", id: songId },
       ],

@@ -7,64 +7,77 @@ import { slugify } from "Client/src/components/createSlug";
 import { getArtistById, getAllArtists } from "../../../../../../src/services/artist";
 import { 
   useToggleFollowArtistMutation,
-  useGetTopFollowedArtistsQuery  // Sử dụng query này
+  useGetUserFollowedArtistsQuery,
+  useGetTopFollowedArtistsQuery
 } from "../../../../../redux/slice/followSlice";
+import { useSelector } from "react-redux";
 
 const ArtistInfo = () => {
-  const [artist, setArtist] = useState(null); // Dữ liệu nghệ sĩ
+  const [artist, setArtist] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const { artistName } = useParams();
 
+  const currentUser = useSelector((state) => state.auth.user);
   const [toggleFollowArtist] = useToggleFollowArtistMutation();
-  const { data: topFollowedArtists } = useGetTopFollowedArtistsQuery(undefined, {
-    refetchOnMountOrArgChange: true // Đảm bảo luôn refetch khi component mount
+  
+  const { data: userFollowedArtists, refetch: refetchFollowed } = useGetUserFollowedArtistsQuery(undefined, {
+    skip: !currentUser,
+    refetchOnMountOrArgChange: true
   });
 
-  // Lấy dữ liệu nghệ sĩ từ API khi component mount
+  const { data: topFollowedArtists, refetch: refetchTop } = useGetTopFollowedArtistsQuery(undefined, {
+    refetchOnMountOrArgChange: true
+  });
+
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchArtistData = async () => {
       try {
-        // Lấy toàn bộ danh sách nghệ sĩ để tìm ID
         const { artists } = await getAllArtists();
         const currentArtist = artists.find(
           (artist) => slugify(artist.name) === artistName
         );
 
         if (currentArtist) {
-          // Sử dụng getArtistById để lấy thông tin chi tiết
           const artistDetails = await getArtistById(currentArtist.id);
-          setArtist(artistDetails);
           
-          // Kiểm tra followerCount từ topFollowedArtists
-          if (topFollowedArtists) {
-            const followedArtist = topFollowedArtists.find(
-              (a) => a.id === currentArtist.id
-            );
-            // Nếu followerCount === 1 thì là following, ngược lại là follow
-            setIsFollowing(followedArtist?.followerCount === 1);
-          }
+          const topArtist = topFollowedArtists?.find(
+            (artist) => artist.id === currentArtist.id
+          );
+
+          setArtist({
+            ...artistDetails,
+            followerCount: topArtist?.followerCount ?? artistDetails.followerCount,
+          });
+
+          setIsFollowing(userFollowedArtists?.some(artist => artist.id === currentArtist.id) || false);
         }
       } catch (error) {
         console.error("Error fetching artist details:", error);
-        // Xử lý trường hợp không tìm thấy nghệ sĩ
-        setArtist(null);
       }
     };
 
-    fetchData();
-  }, [artistName, topFollowedArtists]);
-
-  // Kiểm tra nếu không tìm thấy nghệ sĩ
-  if (!artist) {
-    return <p>Loading artist data...</p>;
-  }
+    fetchArtistData();
+  }, [artistName, userFollowedArtists, topFollowedArtists]);
 
   const handleClick = async () => {
     try {
-      // Toggle follow/unfollow artist
-      await toggleFollowArtist(artist.id).unwrap();  // Call the mutation
-      // Thay đổi UI ngay lập tức khi người dùng bấm
-      setIsFollowing(prev => !prev);
+      if (!currentUser || !artist) return;
+      
+      const response = await toggleFollowArtist(artist.id).unwrap();
+      if (response.data) {
+        setIsFollowing(response.data.isFollowing);
+        setArtist(prevArtist => ({
+          ...prevArtist,
+          followerCount: response.data.isFollowing 
+            ? prevArtist.followerCount + 1 
+            : prevArtist.followerCount - 1
+        }));
+
+        await Promise.all([
+          refetchFollowed(),
+          refetchTop()
+        ]);
+      }
     } catch (error) {
       console.error("Error toggling follow state:", error);
     }
@@ -75,7 +88,11 @@ const ArtistInfo = () => {
     // Xử lý action tại đây
   };
 
-  return (
+  if (!artist) {
+    return <p>Loading artist data...</p>;
+  }
+
+  return(
     <div className="relative w-full h-3/5 flex">
       <div className="w-3/5 h-[400px] artist-bg flex items-center justify-center p-8">
         <div className="flex items-center space-x-4">
@@ -105,14 +122,17 @@ const ArtistInfo = () => {
                 </svg>
               </div>
             </div>
-            <p className="text-left text-lg mt-2">1,017,761 followers</p>
+            <p className="text-left text-lg mt-2">
+              {artist.followerCount} followers
+            </p>
             <div className="grid grid-cols-2">
               <button
                 onClick={handleClick}
-                className={`flex items-center px-4 py-2 mt-2 border rounded-full transition duration-300 ${isFollowing
-                  ? "bg-blue-500 text-white border-transparent"
-                  : "border-white-500 text-white-500 hover:bg-blue-500 hover:border-transparent hover:text-white"
-                  }`}
+                className={`flex items-center px-4 py-2 mt-2 border rounded-full transition duration-300 ${
+                  isFollowing
+                    ? "bg-blue-500 text-white border-transparent"
+                    : "border-white-500 text-white-500 hover:bg-blue-500 hover:border-transparent hover:text-white"
+                }`}
               >
                 {isFollowing ? (
                   <>

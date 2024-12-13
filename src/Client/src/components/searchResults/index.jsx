@@ -42,7 +42,7 @@ const SearchResults = ({ results }) => {
         </Tabs>
         {activeTab === 0 && <AllResults results={results} />}
         {activeTab === 1 && <SongsResults songs={results.songs} />}
-        {activeTab === 2 && <AlbumsResults albums={results.albums} />}
+        {activeTab === 2 && <AlbumsResults albums={results} />}
         {activeTab === 3 && <PlaylistsResults playlists={results.playlists} />}
         {activeTab === 4 && <ArtistsResults artists={results.artists} />}
       </div>
