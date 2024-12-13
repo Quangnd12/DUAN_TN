@@ -41,7 +41,7 @@ const getArtists = async (page , limit) => {
 };
 
 const getAllArtists = async () => {
-  let path = '/api/artists'; // Đường dẫn API lấy tất cả nghệ sĩ
+  let path = '/api/artists'; // Đường dẫn API lấy t��t cả nghệ sĩ
 
   // Gửi request đến API
   const res = await request({
@@ -89,11 +89,14 @@ const fetcher = async (page, limit, searchTerm) => {
     method: "GET",
     path: searchTerm 
       ? `/api/artists/search?page=${page}&limit=${limit}&name=${searchTerm}`
-      : `/api/artists?page=${page}&limit=${limit}`, // fallback nếu không có từ khóa tìm kiếm
+      : `/api/artists?page=${page}&limit=${limit}`,
   });
+
   return {
     artists: res.artists || [],
-    totalPages: res.totalPages || 0,
+    totalPages: res.totalPages || 1,
+    currentPage: res.currentPage || page,
+    totalCount: res.totalCount || 0
   };
 };
 

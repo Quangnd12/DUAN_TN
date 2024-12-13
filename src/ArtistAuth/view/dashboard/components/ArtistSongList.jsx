@@ -20,12 +20,14 @@ import {
   LinearProgress,
   Pagination,
   Stack,
+  Snackbar,
 } from "@mui/material";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import {
   Delete as DeleteIcon,
   Add as AddIcon,
   Edit as EditIcon,
+  ArrowBack as ArrowBackIcon,
 } from "@mui/icons-material";
 import {
   getArtistSongs,
@@ -33,6 +35,7 @@ import {
 } from "../../../../redux/slice/artistSongSlice";
 import UploadTrack from "./UploadTrack";
 import UpdateTrack from "./UpdateTrack";
+import { useNavigate } from "react-router-dom";
 
 const ArtistSongList = () => {
   const dispatch = useDispatch();
@@ -41,7 +44,6 @@ const ArtistSongList = () => {
     loading,
     error,
     totalPages,
-    totalItems
   } = useSelector((state) => state.artistSong || {});
 
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -50,6 +52,13 @@ const ArtistSongList = () => {
   const [selectedSong, setSelectedSong] = useState(null);
   const [page, setPage] = useState(1);
   const limit = 10;
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success"
+  });
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(getArtistSongs({ page, limit }));
@@ -79,13 +88,19 @@ const ArtistSongList = () => {
   };
 
   const handleUpdateSuccess = () => {
-    dispatch(getArtistSongs());
     setIsUpdateModalOpen(false);
-  };
-
-  const formatListens = (listens) => {
-    if (listens === undefined || listens === null) return '0';
-    return listens.toLocaleString();
+    
+    dispatch(getArtistSongs({ page, limit }))
+      .unwrap()
+      .catch(err => {
+        console.error("Failed to refresh songs:", err);
+        setSnackbar({
+          open: true,
+          message: err?.message || "An error occurred while uploading the song!",
+          severity: "error"
+        });
+      });
+      
   };
 
   const handlePageChange = (event, newPage) => {
@@ -135,6 +150,21 @@ const ArtistSongList = () => {
             borderBottom: "1px solid rgba(255,255,255,0.1)",
           }}
         >
+          <IconButton
+            onClick={() => navigate(-1)}
+            sx={{
+              color: "white",
+              mr: 2,
+              "&:hover": {
+                background: "rgba(255,255,255,0.1)",
+                transform: "scale(1.1)",
+              },
+              transition: "all 0.3s ease",
+            }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+
           <Typography
             variant="h4"
             sx={{
@@ -190,7 +220,6 @@ const ArtistSongList = () => {
                   "#",
                   "Title",
                   "Duration",
-                  "Listens",
                   "Release Date",
                   "Premium",
                   "Explicit",
@@ -301,9 +330,6 @@ const ArtistSongList = () => {
                       {formatDuration(song.duration)}
                     </TableCell>
                     <TableCell sx={{ color: "rgba(255,255,255,0.8)" }}>
-                      {formatListens(song.listens_count)}
-                    </TableCell>
-                    <TableCell sx={{ color: "rgba(255,255,255,0.8)" }}>
                       {format(new Date(song.releaseDate), "dd/MM/yyyy")}
                     </TableCell>
                     <TableCell>
@@ -400,7 +426,7 @@ const ArtistSongList = () => {
               }}
             />
             <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-              Showing {songs.length} of {totalItems} songs
+              Showing {songs.length} songs
             </Typography>
           </Stack>
         )}
@@ -439,6 +465,21 @@ const ArtistSongList = () => {
         onUpdateSuccess={handleUpdateSuccess}
         songData={selectedSong}
       />
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

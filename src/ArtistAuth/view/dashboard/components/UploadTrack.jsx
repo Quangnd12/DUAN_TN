@@ -6,27 +6,28 @@ import {
   Typography,
   TextField,
   Button,
+  IconButton,
   Switch,
   FormControlLabel,
   CircularProgress,
   Snackbar,
   Alert,
-  Select,
-  MenuItem,
   FormControl,
   InputLabel,
+  Select,
+  MenuItem,
   Chip,
-  IconButton,
-  Modal
+  Modal,
+  FormHelperText
 } from '@mui/material';
 import { Close as CloseIcon, Image as ImageIcon } from '@mui/icons-material';
 import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
-import { uploadSong, getGenresAndAlbums, selectGenres, selectAlbums } from '../../../../redux/slice/artistSongSlice';
+import { uploadSong, getGenresAndAlbums, selectGenres } from '../../../../redux/slice/artistSongSlice';
+import { format } from 'date-fns';
 
 const UploadTrack = ({ open, onClose, onUploadSuccess }) => {
   const dispatch = useDispatch();
   const genres = useSelector(selectGenres);
-  const albums = useSelector(selectAlbums);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFileName, setSelectedFileName] = useState('');
@@ -41,7 +42,6 @@ const UploadTrack = ({ open, onClose, onUploadSuccess }) => {
       lyrics: '',
       releaseDate: '',
       is_premium: false,
-      albumID: [],
       genreID: [],
       duration: 0
     }
@@ -83,7 +83,7 @@ const UploadTrack = ({ open, onClose, onUploadSuccess }) => {
       if (!data.genreID || data.genreID.length === 0) {
         setNotification({
           open: true,
-          message: 'Vui lòng chọn ít nhất một thể loại',
+          message: 'Please select at least one category',
           type: 'error'
         });
         return;
@@ -101,12 +101,6 @@ const UploadTrack = ({ open, onClose, onUploadSuccess }) => {
       
       if (data.lyrics) {
         formData.append('lyrics', data.lyrics);
-      }
-
-      if (data.albumID && data.albumID.length > 0) {
-        data.albumID.forEach(id => {
-          formData.append('albumID[]', id);
-        });
       }
 
       data.genreID.forEach(id => {
@@ -136,9 +130,18 @@ const UploadTrack = ({ open, onClose, onUploadSuccess }) => {
       }, 1000);
     } catch (error) {
       console.error('Upload error:', error);
+      
+      let errorMessage = 'An error occurred while uploading the song!';
+      
+      if (error?.error) {
+        errorMessage = error.error;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
       setNotification({
         open: true,
-        message: 'Có lỗi xảy ra khi tải lên bài hát!',
+        message: errorMessage,
         type: 'error'
       });
     } finally {
@@ -249,7 +252,16 @@ const UploadTrack = ({ open, onClose, onUploadSuccess }) => {
                 name="releaseDate"
                 control={control}
                 render={({ field }) => (
-                  <TextField {...field} type="date" label="Release Date" fullWidth InputLabelProps={{ shrink: true }} />
+                  <TextField
+                    {...field}
+                    type="date"
+                    label="Release Date"
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    inputProps={{
+                      min: format(new Date(), 'yyyy-MM-dd'),
+                    }}
+                  />
                 )}
               />
 
@@ -259,7 +271,7 @@ const UploadTrack = ({ open, onClose, onUploadSuccess }) => {
                 control={control}
                 rules={{ required: 'Please select at least one genre' }}
                 render={({ field }) => (
-                  <FormControl fullWidth>
+                  <FormControl fullWidth error={!!errors.genreID}>
                     <InputLabel>Genres</InputLabel>
                     <Select
                       {...field}
@@ -275,12 +287,6 @@ const UploadTrack = ({ open, onClose, onUploadSuccess }) => {
                                 sx={{
                                   backgroundColor: 'rgba(147, 51, 234, 0.2)',
                                   color: 'white',
-                                  '& .MuiChip-deleteIcon': {
-                                    color: 'rgba(255, 255, 255, 0.7)',
-                                    '&:hover': {
-                                      color: '#ef4444'
-                                    }
-                                  }
                                 }}
                               />
                             );
@@ -294,51 +300,20 @@ const UploadTrack = ({ open, onClose, onUploadSuccess }) => {
                         </MenuItem>
                       ))}
                     </Select>
+                    {errors.genreID && (
+                      <FormHelperText error>
+                        {errors.genreID.message}
+                      </FormHelperText>
+                    )}
                   </FormControl>
                 )}
               />
-
-              {/* Albums */}
-              <Controller
-                name="albumID"
+               {/* Lyrics */}
+               <Controller
+                name="lyrics"
                 control={control}
                 render={({ field }) => (
-                  <FormControl fullWidth>
-                    <InputLabel>Albums</InputLabel>
-                    <Select
-                      {...field}
-                      multiple
-                      renderValue={(selected) => (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {selected.map((value) => {
-                            const album = albums.find(a => a.id === value);
-                            return (
-                              <Chip
-                                key={value}
-                                label={album?.title}
-                                sx={{
-                                  backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                                  color: 'white',
-                                  '& .MuiChip-deleteIcon': {
-                                    color: 'rgba(255, 255, 255, 0.7)',
-                                    '&:hover': {
-                                      color: '#ef4444'
-                                    }
-                                  }
-                                }}
-                              />
-                            );
-                          })}
-                        </Box>
-                      )}
-                    >
-                      {albums.map((album) => (
-                        <MenuItem key={album.id} value={album.id}>
-                          {album.title}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                  <TextField {...field} label="Lyrics" multiline rows={6} fullWidth />
                 )}
               />
 
@@ -360,7 +335,7 @@ const UploadTrack = ({ open, onClose, onUploadSuccess }) => {
             {/* Right Column - Media and Lyrics */}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.9)', mb: 2 }}>
-                Media and Lyrics
+                Media
               </Typography>
 
               {/* Image Upload */}
@@ -427,7 +402,7 @@ const UploadTrack = ({ open, onClose, onUploadSuccess }) => {
                 <Controller
                   name="file_song"
                   control={control}
-                  rules={{ required: 'File bài hát là bắt buộc' }}
+                  rules={{ required: 'Song file is required' }}
                   render={({ field: { onChange } }) => (
                     <>
                       <input
@@ -473,14 +448,7 @@ const UploadTrack = ({ open, onClose, onUploadSuccess }) => {
                 />
               </Box>
 
-              {/* Lyrics */}
-              <Controller
-                name="lyrics"
-                control={control}
-                render={({ field }) => (
-                  <TextField {...field} label="Lyrics" multiline rows={6} fullWidth />
-                )}
-              />
+             
             </Box>
           </Box>
 

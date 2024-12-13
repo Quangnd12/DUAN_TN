@@ -11,6 +11,7 @@ import playerReducer from "./slice/playerSlice";
 import { eventApi } from "./slice/eventSlice";
 import artistAuthReducer from "./slice/artistAuthSlice";
 import artistSongReducer from './slice/artistSongSlice';
+import artistAlbumReducer from './slice/artistAlbumSlice';
 import { ratingApi } from './slice/ratingSlice'; // Thêm import
 
 
@@ -26,6 +27,7 @@ const store = configureStore({
     auth: persistedAuthReducer,
     artistAuth: artistAuthReducer, // Thay đổi ở đây
     artistSong: artistSongReducer,
+    artistAlbum: artistAlbumReducer,
     notifications: notificationReducer,
     player: playerReducer,
     [playlistApi.reducerPath]: playlistApi.reducer,

@@ -37,41 +37,44 @@ const getArtistToken = () => {
         });
         return response.data;
       } catch (error) {
+        // Trả về thông tin lỗi chi tiết từ phản hồi API
         if (error.response?.data) {
-          return rejectWithValue(error.response.data);
+          return rejectWithValue({
+            message: error.response.data.message || 'Lỗi khi tải lên bài hát',
+            error: error.response.data.error || 'Có lỗi không xác định'
+          });
         }
-        return rejectWithValue({ message: error.message });
+        return rejectWithValue({ 
+          message: error.message,
+          error: 'Có lỗi không xác định'
+        });
       }
     }
   );
   
   export const getArtistSongs = createAsyncThunk(
     'artistSong/getArtistSongs',
-    async ({ page = 1, limit = 10, status = null }, { rejectWithValue }) => {
+    async ({ page, limit }, { rejectWithValue }) => {
       try {
-        const token = getArtistToken();
+        const token = localStorage.getItem('artistToken');
         if (!token) {
           throw new Error('Không tìm thấy token xác thực');
         }
   
-        let url = `${API_BASE_URL}/artist/songs?page=${page}&limit=${limit}`;
-        if (status) {
-          url += `&status=${status}`;
-        }
-  
-        const response = await axios.get(url, {
-          headers: {
-            'Authorization': `Bearer ${token}`
+        const response = await axios.get(
+          `${API_BASE_URL}/artist/songs?page=${page}&limit=${limit}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
-        return {
-          songs: response.data.songs,
-          totalPages: response.data.totalPages,
-          currentPage: response.data.currentPage,
-          totalItems: response.data.totalItems
-        };
+        );
+  
+        return response.data;
       } catch (error) {
-        return rejectWithValue(error.response?.data || error.message);
+        return rejectWithValue(
+          error.response?.data?.message || 'An error occurred while loading the song list'
+        );
       }
     }
   );
@@ -203,7 +206,7 @@ const artistSongSlice = createSlice({
       })
       .addCase(uploadSong.rejected, (state, action) => {
         state.uploadStatus = 'failed';
-        state.error = action.payload?.message || 'Lỗi khi tải lên bài hát';
+        state.error = action.payload?.error || 'Có lỗi xảy ra';
       })
 
     // Get artist songs
@@ -219,13 +222,12 @@ const artistSongSlice = createSlice({
           genres: song.genres || [],
           albums: song.albums || []
         }));
-        state.totalPages = action.payload.totalPages;
-        state.currentPage = action.payload.currentPage;
-        state.totalItems = action.payload.totalItems;
+        state.pagination = action.payload.pagination;
+        state.error = null;
       })
       .addCase(getArtistSongs.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || 'Lỗi khi lấy danh sách bài hát';
+        state.error = action.payload || 'Có lỗi xảy ra';
       })
 
     // Update song
@@ -254,7 +256,7 @@ const artistSongSlice = createSlice({
       })
       .addCase(deleteArtistSong.rejected, (state, action) => {
         state.deleteStatus = 'failed';
-        state.error = action.payload?.message || 'Lỗi khi xóa bài hát';
+        state.error = action.payload || 'Có lỗi xảy ra';
       })
 
     // Thêm reducers mới cho getGenresAndAlbums

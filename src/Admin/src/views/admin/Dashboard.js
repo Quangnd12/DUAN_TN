@@ -111,7 +111,6 @@ export default function Dashboard() {
         startTime: event.startTime,
         artist: event.artist
       }))
-      .slice(0, 2); // Chỉ lấy 2 sự kiện để gọn gàng hơn
   };
 
   // Xử lý dữ liệu artists từ songs (giữ nguyên code cũ)

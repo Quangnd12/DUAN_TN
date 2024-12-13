@@ -12,8 +12,11 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Tooltip from "@mui/material/Tooltip";
 import Logo from "../../assets/images/logo.png";
 import { createAlbumSlug } from "../../components/createSlug"
+import { useTheme } from "../../utils/ThemeContext";
+import { translations } from "../../utils/translations/translations";
 
 const SideBar = () => {
+  const { language, toggleLanguage } = useTheme();
   const [isClicked, setIsClicked] = useState(false);
   const [isOpen, setIsOpen] = useState(() => {
     const saved = localStorage.getItem("sidebarOpen");
@@ -27,12 +30,6 @@ const SideBar = () => {
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
-
-  const data = ["NGÁO NGƠ- LYRICS", "HIEUTHUHAI, JSOL, Erik"];
-  const [playlistName, artistName] = data; // ĐÚNG
-
-  const validPlaylistName = playlistName || "unknown";
-  const validArtistName = artistName || "unknown";
 
   return (
     <div
@@ -56,75 +53,69 @@ const SideBar = () => {
           onClick={toggleSidebar}
           className="text-white hover:bg-gray-600 hover:rounded-md px-3 py-3"
         >
-          {isOpen ? (
-            <Tooltip title="Collapse the library">
-              <>
-                {" "}
-                <MenuIcon fontSize="medium" />
-              </>
-            </Tooltip>
-          ) : (
-            <Tooltip title="Expand the library">
-              <>
-                <ArrowForwardIosIcon />
-              </>
-            </Tooltip>
-          )}
+          <Tooltip title={isOpen ? translations[language].collapseLibrary : translations[language].expandLibrary}>
+            {isOpen ? (
+              <MenuIcon fontSize="medium" />
+            ) : (
+              <ArrowForwardIosIcon />
+            )}
+          </Tooltip>
         </button>
       </div>
       <NavItem
         to="/search"
         icon={<SearchIcon />}
-        text="Search"
+        text={translations[language].search}
         isOpen={isOpen}
-        tooltipText="Search"
       />
-      <NavItem to="/" icon={<HomeIcon />} text="Home" isOpen={isOpen} />
+      <NavItem to="/" icon={<HomeIcon />} text={translations[language].home} isOpen={isOpen} />
       <NavItem
         to="/event"
-        icon={<CelebrationIcon />}   // Sử dụng icon Celebration
-        text="Event"
+        icon={<CelebrationIcon />}
+        text={translations[language].event}
         isOpen={isOpen}
       />
       <NavItem
         to="/library"
         icon={<LibraryMusicIcon />}
-        text="My library"
+        text={translations[language].myLibrary}
         isOpen={isOpen}
       />
       <NavItem
         to="/playlistall"
         icon={<QueueMusicIcon />}
-        text="Playlist"
+        text={translations[language].playlist}
         isOpen={isOpen}
       />
       <NavItem
         to="/toprank"
         icon={<StarRateIcon />}
-        text="Top rank"
+        text={translations[language].topRank}
         isOpen={isOpen}
       />
 
       <div className="mt-auto">
         {isOpen && (
           <div className="text-white font-bold p-3 mb-4">
-            Burn together, get lost in the music heals
+            {translations[language].sidebarDescription}
           </div>
         )}
         <div
           className={`flex items-center gap-3 rounded-full w-max p-2 mb-5 font-bold transition-all cursor-pointer ${isClicked ? "bg-white text-black" : "bg-black text-white"
             } hover:scale-105 ${isOpen ? "" : "justify-center"}`}
-          onClick={() => setIsClicked(!isClicked)}
+          onClick={() => {
+            toggleLanguage();
+            setIsClicked(!isClicked);
+          }}
         >
-          {" "}
-          <Tooltip title="Change language">
+          <Tooltip title={translations[language].changeLanguage}>
             <div>
               <LanguageIcon
                 className={isClicked ? "text-black" : "text-white"}
               />
               {isOpen && (
                 <span className="ml-0">
-                  {isClicked ? "Tiếng Việt" : "English"}
+                  {language === 'vi' ? "Tiếng Việt" : "English"}
                 </span>
               )}
             </div>

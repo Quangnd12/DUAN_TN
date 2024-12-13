@@ -47,6 +47,7 @@ import PlayerControls from "./components/audio/PlayerControls";
 import PaymentPage from "./pages/payment";
 import PricingPlans from "./pages/payment/components/plan";
 import { getPaymentByUser } from "services/payment";
+import { ThemeProvider } from './utils/ThemeContext';
 
 
 function MainLayout({ children }) {
@@ -69,15 +70,17 @@ function MainLayout({ children }) {
   };
 
   return (
-    <div className="flex gap-2">
-      <div>{!isMobile && <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />}</div>
-      <div className={`flex-1 flex flex-col ${isSidebarOpen ? 'ml-0' : 'ml-16'} transition-all duration-300`}>
-        <Header toggleSidebar={toggleSidebar} />
+    <ThemeProvider>
+      <div className="flex gap-2">
+        <div>{!isMobile && <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />}</div>
+        <div className={`flex-1 flex flex-col ${isSidebarOpen ? 'ml-0' : 'ml-16'} transition-all duration-300`}>
+          <Header toggleSidebar={toggleSidebar} />
         <div className="overflow-y-auto scrollbar-custom" style={{ height: "calc(100vh - 190px)" }}>
           {children}
+          </div>
         </div>
       </div>
-    </div>
+    </ThemeProvider>
   );
 }
 
