@@ -77,6 +77,10 @@ const PlayerControls = () => {
   }, [audioUrl]);
 
   useEffect(() => {
+    setIsPlaying(false);
+  }, []);
+
+  useEffect(() => {
     if (audioUrl) {
       setPlayerState((prevState) => ({
         ...prevState,

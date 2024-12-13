@@ -32,11 +32,24 @@ const HomePage = () => {
 
 
 
+// Thêm state để kiểm soát việc component đã mount
+const [isMounted, setIsMounted] = useState(false);
+
+useEffect(() => {
+  setIsMounted(true);
+  return () => setIsMounted(false);
+}, []);
+
 useEffect(() => {
   const fetchData = async () => {
+    if (!isMounted) return;
+    
     try {
+      setLoading(true);
       // Fetch Artists
       const { artists } = await getAllArtists();
+      if (!isMounted) return;
+
       const formattedArtists = artists
         .map(artist => ({
           id: artist._id,
@@ -48,25 +61,27 @@ useEffect(() => {
       setArtists(formattedArtists);
 
       // Fetch Albums
-      const albumsResponse = await getAlbums(1, 6); // Lấy 6 albums đầu tiên
+      const albumsResponse = await getAlbums(1, 6);
+      if (!isMounted) return;
+
       const formattedAlbums = albumsResponse.albums.map(album => ({
-        id: album.id, // Chắc chắn rằng đây là ID chính xác của album
+        id: album.id,
         name: album.title,
-        image: album.image || '/images/default-album.jpg', 
+        image: album.image || '/images/default-album.jpg',
         title: album.artistNames?.join(', ') || 'Unknown Artist',
-       
       }));
       setAlbums(formattedAlbums);
-
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
-      setLoading(false);
+    } finally {
+      if (isMounted) {
+        setLoading(false);
+      }
     }
   };
 
   fetchData();
-}, []);
+}, [isMounted]);
 
 // Giữ nguyên dữ liệu radio
 const data = {
@@ -82,7 +97,11 @@ const data = {
 };
 
 if (loading) {
-  return <div>Loading...</div>;
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+  );
 }
   return (
     <HelmetProvider>

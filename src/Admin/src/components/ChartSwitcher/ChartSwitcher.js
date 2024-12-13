@@ -1,35 +1,57 @@
 import React from "react";
+import { useTheme } from "../../views/admin/ThemeContext";
+
+// Thêm translations cho ChartSwitcher
+const translations = {
+  vi: {
+    popularGenres: {
+      title: "Thể loại yêu thích",
+      icon: "fas fa-music"
+    },
+    topArtists: {
+      title: "Nghệ sĩ có album",
+      icon: "fas fa-compact-disc"
+    }
+  },
+  en: {
+    popularGenres: {
+      title: "Popular Genres",
+      icon: "fas fa-music"
+    },
+    topArtists: {
+      title: "Artists with Albums",
+      icon: "fas fa-compact-disc"
+    }
+  }
+};
 
 function ChartSwitcher({ chartType, handleChartTypeChange }) {
+  const { language } = useTheme();
+  const t = translations[language];
+
   return (
     <div className="flex flex-wrap justify-center md:justify-end space-x-2">
       <button
-        onClick={() => handleChartTypeChange("newListeners")}
-        className="flex items-center px-2 py-2 sm:px-2 bg-blue-500 hover:bg-blue-700 text-white rounded border"
-      >
-        <i className="fa fa-users mr-2" />
-        Total new listeners by month
-      </button>
-      <button
-        onClick={() => handleChartTypeChange("avgListeningTime")}
-        className="flex items-center px-2 py-2 bg-green-500 hover:bg-green-700 text-white rounded border"
-      >
-        <i className="fa fa-clock-o mr-2" />
-        Average daily listening time
-      </button>
-      <button
         onClick={() => handleChartTypeChange("popularGenres")}
-        className="flex items-center px-2 py-2 bg-yellow-500 hover:bg-yellow-700 text-white rounded border"
+        className={`flex items-center px-3 py-2 rounded-md transition-colors ${
+          chartType === "popularGenres"
+            ? "bg-blue-500 text-white"
+            : "bg-gray-100 hover:bg-blue-100"
+        }`}
       >
-        <i className="fa fa-music mr-2" />
-        Popular music genres
+        <i className={`${t.popularGenres.icon} mr-2`} />
+        {t.popularGenres.title}
       </button>
       <button
         onClick={() => handleChartTypeChange("topArtists")}
-        className="flex items-center px-2 py-2 bg-red-500 hover:bg-red-700 text-white rounded border"
+        className={`flex items-center px-3 py-2 rounded-md transition-colors ${
+          chartType === "topArtists"
+            ? "bg-green-500 text-white"
+            : "bg-gray-100 hover:bg-green-100"
+        }`}
       >
-        <i className="fa fa-star mr-2" />
-        Top most listened artists
+        <i className={`${t.topArtists.icon} mr-2`} />
+        {t.topArtists.title}
       </button>
     </div>
   );

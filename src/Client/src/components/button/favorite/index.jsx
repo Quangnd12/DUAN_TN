@@ -1,50 +1,48 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { MdFavorite, MdFavoriteBorder } from 'react-icons/md';
 import { handleAddFavorite } from '../../notification';
 import { useToggleFavoriteMutation, useCheckFavoriteStatusQuery } from '../../../../../redux/slice/favoriets';
 
 const LikeButton = ({ songId }) => {
-    const [isLiked, setIsLiked] = useState(() => {
-        const savedStatus = localStorage.getItem(`favorite-${songId}`);
-        return savedStatus ? JSON.parse(savedStatus) : false;
-    });
-    const [toggleFavorite] = useToggleFavoriteMutation();
+    const { user } = useSelector((state) => state.auth);
     
-    const { data: favoriteStatus, isSuccess } = useCheckFavoriteStatusQuery(songId, {
-        skip: !songId
-    });
+    const { data: isFavorite, refetch } = useCheckFavoriteStatusQuery(
+        songId,
+        {
+            skip: !songId || !user?.id,
+            refetchOnMountOrArgChange: true
+        }
+    );
+
+    const [toggleFavorite] = useToggleFavoriteMutation();
 
     useEffect(() => {
-        if (isSuccess && favoriteStatus !== undefined) {
-            setIsLiked(favoriteStatus);
-            localStorage.setItem(`favorite-${songId}`, JSON.stringify(favoriteStatus));
+        if (user?.id && songId) {
+            refetch();
         }
-    }, [favoriteStatus, isSuccess, songId]);
+    }, [user?.id, songId, refetch]);
 
     const toggleLike = async (e) => {
         e.stopPropagation();
-        if (!songId) return;
+        if (!songId || !user?.id) return;
         
         try {
             const result = await toggleFavorite(songId).unwrap();
-            if (result.success) {
-                const newStatus = !isLiked;
-                setIsLiked(newStatus);
-                localStorage.setItem(`favorite-${songId}`, JSON.stringify(newStatus));
-                if (newStatus) {
-                    handleAddFavorite();
-                }
+            if (result.success && !isFavorite) {
+                handleAddFavorite();
             }
+            refetch();
         } catch (error) {
             console.error('Error toggling favorite:', error);
         }
     };
 
-    if (!songId) return null;
+    if (!songId || !user?.id) return null;
 
     return (
         <div>
-            {isLiked ? (
+            {isFavorite ? (
                 <MdFavorite
                     className="text-red-500 cursor-pointer hover:text-red-600"
                     size={24}

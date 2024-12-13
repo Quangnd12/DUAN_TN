@@ -6,21 +6,25 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
+import { useTheme } from "../../ThemeContext";
+import { translations } from "../../../../components/Translation/translation";
 
 const LogoutDialog = ({ open, onClose, onLogout }) => {
+  const { language } = useTheme();
+  const t = translations[language].userProfile;
+
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Logout Confirmation</DialogTitle>
+      <DialogTitle>{t.logoutTitle}</DialogTitle>
       <DialogContent>
-        Your profile has been updated successfully. Please log out and log back
-        in to see the changes.
+        {t.logoutMessage}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">
-          Cancel
+          {t.stayLoggedIn}
         </Button>
-        <Button onClick={onLogout} color="primary">
-          Logout
+        <Button onClick={onLogout} color="primary" variant="contained">
+          {t.logout}
         </Button>
       </DialogActions>
     </Dialog>

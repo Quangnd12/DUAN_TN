@@ -7,12 +7,14 @@ import ResetPassword from "../view/artistAuth/resetPass";
 import ArtistDashboard from "../view/dashboard/Dashboard";
 import UploadTrack from "../view/dashboard/components/UploadTrack";
 import ArtistSongList from "../view/dashboard/components/ArtistSongList";
+import ArtistAlbumList from "../view/dashboard/components/ArtistAlbumList";
+import ArtistAlbumDetail from "../view/dashboard/components/ArtistAlbumDetail";
 
 const Artist = () => {
   const { isAuthenticated } = useSelector((state) => state.artistAuth);
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black">
       <Routes>
         <Route
           path="auth/*"
@@ -41,6 +43,26 @@ const Artist = () => {
           element={
             isAuthenticated ? (
               <ArtistSongList />
+            ) : (
+              <Navigate to="/artist-portal/auth" />
+            )
+          }
+        />
+        <Route
+          path="albums"
+          element={
+            isAuthenticated ? (
+              <ArtistAlbumList />
+            ) : (
+              <Navigate to="/artist-portal/auth" />
+            )
+          }
+        />
+        <Route
+          path="albums/:albumId"
+          element={
+            isAuthenticated ? (
+              <ArtistAlbumDetail />
             ) : (
               <Navigate to="/artist-portal/auth" />
             )

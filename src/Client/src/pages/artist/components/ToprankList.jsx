@@ -1,8 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import data from "../../../data/fetchtopData"; // Ensure your path is correct
+import { getGenres } from '../../../../../services/genres';
+import { getSongs } from '../../../../../services/songs';
 
 const AllTopranks = () => {
+    const [genres, setGenres] = useState([]);
+
+    useEffect(() => {
+        const fetchGenres = async () => {
+            const data = await getGenres();
+            const genresWithPopularSongs = [];
+
+            for (const genre of data.genres || []) {
+                const songsData = await getSongs(0, 100, '', [genre.id]);
+                const hasPopularSongs = (songsData.songs || []).some(song => song.listens_count >= 100000);
+
+                if (hasPopularSongs) {
+                    genresWithPopularSongs.push(genre);
+                }
+            }
+
+            setGenres(genresWithPopularSongs);
+        };
+        fetchGenres();
+    }, []);
+
     return (
         <div className="p-6 mt-4 text-white">
             {/* Banner Section */}
@@ -24,43 +46,42 @@ const AllTopranks = () => {
                 </h1>
             </div>
 
-
-            {data.topranks.length > 0 ? (
-                data.topranks.map((toprank) => (
-                    <div key={toprank.id} className="mb-8">
-                        <div className="relative z-10 text-white p-4 mb-8">
-                            <div className="absolute inset-0 bg-purple-600 blur-2xl opacity-30 animate-pulse"></div>
-                            <h2 className="relative text-2xl font-semibold mb-4 tracking-tight z-20">
-                                {toprank.Title}
-                            </h2>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                            {toprank.gender.map((genre) => (
-                                <Link
-                                    to={`/toprank/${genre.id}`}
-                                    key={genre.id}
-                                    className="flex flex-col items-start mb-6 rounded-lg p-4 shadow-lg"
-                                >
-                                    <figure className="relative mt-2">
-                                        <img
-                                            src={genre.image}
-                                            className="w-52 h-52 object-cover rounded-lg mb-4"
-                                            alt={`${genre.title} cover`}
-                                        />
-                                        <figcaption className="absolute bottom-0 left-0 right-0 bg-gray-800 bg-opacity-75 text-white text-center p-2">
-                                            {genre.title}
-                                        </figcaption>
-                                    </figure>
-                                    <h2 className="text-lg font-bold text-white">{genre.title}</h2>
-                                    <p className="text-xs text-gray-300">
-                                        Nghệ sĩ nổi bật: {genre.popularArtists.length > 3 ? `${genre.popularArtists.slice(0, 3).join(", ")}...` : genre.popularArtists.join(", ")}
-                                    </p>
-                                </Link>
-                            ))}
-                        </div>
+            {genres.length > 0 ? (
+                <div className="mb-8">
+                    <div className="relative z-10 text-white p-4 mb-8">
+                        <div className="absolute inset-0 bg-purple-600 blur-2xl opacity-30 animate-pulse"></div>
+                        <h2 className="relative text-2xl font-semibold mb-4 tracking-tight z-20">
+                            Top Thể Loại
+                        </h2>
                     </div>
-                ))
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                        {genres.map((genre) => (
+                            <Link
+                                to={`/toprank/${genre.id}`}
+                                key={genre.id}
+                                className="flex flex-col items-start mb-6 rounded-lg p-4 shadow-lg hover:bg-gray-800 transition duration-300"
+                            >
+                                <figure className="relative mt-2">
+                                    <img
+                                        src={genre.image}
+                                        className="w-52 h-52 object-cover rounded-lg mb-4"
+                                        alt={`${genre.name} cover`}
+                                    />
+                                    <figcaption className="absolute bottom-0 left-0 right-0 bg-gray-800 bg-opacity-75 text-white text-center p-2">
+                                        {genre.name}
+                                    </figcaption>
+                                </figure>
+                                <h2 className="text-lg font-bold text-white">{genre.name}</h2>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <span className="px-3 py-1 text-xs font-semibold bg-purple-600 rounded-full text-white">
+                                        {genre.country || 'Quốc tế'}
+                                    </span>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
             ) : (
                 <p className="text-center text-gray-400">Không có dữ liệu để hiển thị.</p>
             )}

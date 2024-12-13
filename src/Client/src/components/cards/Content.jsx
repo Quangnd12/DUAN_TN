@@ -1,4 +1,5 @@
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { MdCheckBoxOutlineBlank, MdCheck } from "react-icons/md";
 import { useGetUserFollowedArtistsQuery } from "../../../../redux/slice/followSlice";
 import { PlayerContext } from "../context/MusicPlayer";
@@ -9,7 +10,21 @@ import LikeButton from "../button/favorite";
 import { formatDuration } from "Admin/src/components/formatDate";
 
 const ContentCard = () => {
-  const { data: followedArtists, isLoading } = useGetUserFollowedArtistsQuery();
+  const { user } = useSelector((state) => state.auth);
+  const { data: followedArtists, isLoading, refetch } = useGetUserFollowedArtistsQuery(
+    undefined,
+    {
+      skip: !user?.id,
+      refetchOnMountOrArgChange: true
+    }
+  );
+
+  useEffect(() => {
+    if (user?.id) {
+      refetch();
+    }
+  }, [user?.id, refetch]);
+
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [dropdownIndex, setDropdownIndex] = useState(null);
   const [selectedCheckboxes, setSelectedCheckboxes] = useState(new Set());
@@ -67,37 +82,64 @@ const ContentCard = () => {
     return selectedCheckboxes.size > 0;
   };
 
-  if (isLoading) return <div>Đang tải...</div>;
+  // Thêm hàm để lấy bài hát mới nhất của mỗi nghệ sĩ
+  const getLatestSong = (songs) => {
+    if (!songs || songs.length === 0) return null;
+    
+    return songs.reduce((latest, current) => {
+      const latestDate = new Date(latest.releaseDate);
+      const currentDate = new Date(current.releaseDate);
+      return currentDate > latestDate ? current : latest;
+    });
+  };
+
+  if (isLoading) return (
+    <div className="flex items-center justify-center py-4">
+      <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+  );
+
+  if (!followedArtists || followedArtists.length === 0) {
+    return (
+      <div className="text-center text-gray-400 py-8">
+        Chưa có nghệ sĩ nào được theo dõi
+      </div>
+    );
+  }
 
   return (
     <div className="w-full text-white">
       <div className="pt-4 w-full">
         <div className="flex flex-col">
           <div className="flex flex-col gap-4 pt-2">
-            {followedArtists?.map(artist =>
-              artist.songs?.map((song, index) => (
+            {followedArtists?.map((artist, artistIndex) => {
+              // Chỉ lấy bài hát mới nhất của nghệ sĩ
+              const latestSong = getLatestSong(artist.songs);
+              if (!latestSong) return null;
+
+              return (
                 <div
-                  key={`${artist.id}-${song.id}`}
+                  key={`${artist.id}-${latestSong.id}`}
                   className={`relative flex items-center p-2 rounded-lg transition-colors hover:bg-gray-700 
-                  ${hoveredIndex === index || clickedIndex === index ? "bg-gray-700" : ""}`}
-                  onMouseEnter={() => setHoveredIndex(index)}
+                  ${hoveredIndex === artistIndex || clickedIndex === artistIndex ? "bg-gray-700" : ""}`}
+                  onMouseEnter={() => setHoveredIndex(artistIndex)}
                   onMouseLeave={() => setHoveredIndex(null)}
-                  onClick={() => handleRowClick(song, index, artist)}
+                  onClick={() => handleRowClick(latestSong, artistIndex, artist)}
                 >
-                  {(hoveredIndex === index || selectedCheckboxes.size > 0) && (
+                  {(hoveredIndex === artistIndex || selectedCheckboxes.size > 0) && (
                     <div
                       className="absolute left-2 top-1/2 transform -translate-y-1/2 flex items-center gap-4"
                       style={{ zIndex: 2 }}
                     >
                       <div
-                        className={`relative cursor-pointer ${selectedCheckboxes.has(index) ? 'text-gray-400' : 'text-gray-400'}`}
+                        className={`relative cursor-pointer ${selectedCheckboxes.has(artistIndex) ? 'text-gray-400' : 'text-gray-400'}`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleCheckboxToggle(index);
+                          handleCheckboxToggle(artistIndex);
                         }}
                       >
                         <MdCheckBoxOutlineBlank size={23} />
-                        {selectedCheckboxes.has(index) && (
+                        {selectedCheckboxes.has(artistIndex) && (
                           <MdCheck
                             size={16}
                             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-400"
@@ -109,37 +151,46 @@ const ContentCard = () => {
 
                   <p
                     className={`text-sm font-semibold w-8 text-center ${
-                      hoveredIndex === index || selectedCheckboxes.size > 0
+                      hoveredIndex === artistIndex || selectedCheckboxes.size > 0
                         ? "opacity-0"
                         : ""
                     }`}
                   >
-                    {index + 1}
+                    {artistIndex + 1}
                   </p>
 
                   <img
-                    src={song.image}
-                    alt={song.title}
+                    src={latestSong.image}
+                    alt={latestSong.title}
                     className="w-14 h-14 object-cover rounded-lg ml-2"
                   />
 
                   <div className="flex flex-grow flex-col ml-3 relative">
                     <div className="flex justify-between items-center">
-                      <p className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-[400px]">
-                        {song.title}
-                      </p>
+                      <div className="flex items-center">
+                        <p className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-[400px]">
+                          {latestSong.title}
+                        </p>
+                        <span className="ml-2 text-xs text-blue-500 bg-blue-500/10 px-2 py-1 rounded-full">
+                          Mới
+                        </span>
+                      </div>
 
                       <div className="absolute inset-0 flex items-center justify-end">
-                        <div className="absolute right-[250px]">
-                          <LikeButton songId={song.id} />
+                        <div
+                          className={`absolute right-[250px] transition-opacity duration-300 ${
+                            hoveredIndex === artistIndex ? "opacity-100" : "opacity-0"
+                          }`}
+                        >
+                          <LikeButton songId={latestSong.id} />
                         </div>
                         
                         <p
                           className={`text-gray-500 text-sm w-20 text-right ${
-                            hoveredIndex === index ? "opacity-0" : ""
+                            hoveredIndex === artistIndex ? "opacity-0" : ""
                           }`}
                         >
-                          {formatDuration(song.duration)}
+                          {formatDuration(latestSong.duration)}
                         </p>
                       </div>
                     </div>
@@ -149,8 +200,8 @@ const ContentCard = () => {
                     </p>
 
                     <SongItem
-                      song={song}
-                      index={index}
+                      song={latestSong}
+                      index={artistIndex}
                       hoveredIndex={hoveredIndex}
                       clickedIndex={clickedIndex}
                       setHoveredIndex={setHoveredIndex}
@@ -167,8 +218,8 @@ const ContentCard = () => {
                     />
                   </div>
                 </div>
-              ))
-            )}
+              );
+            })}
           </div>
         </div>
       </div>

@@ -1,5 +1,8 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { getArtistSongs } from '../../../redux/slice/artistSongSlice';
+import { getArtistAlbums } from '../../../redux/slice/artistAlbumSlice';
+import { getSongs } from '../../../services/songs';
 import { 
   Card, 
   CardContent, 
@@ -23,30 +26,53 @@ import {
 import ArtistHeader from '../../components/Header/Header';
 import { useNavigate } from 'react-router-dom';
 
+
 const ArtistDashboard = () => {
+  const dispatch = useDispatch();
   const { artist } = useSelector((state) => state.artistAuth);
+  const { pagination, songs } = useSelector((state) => state.artistSong);
+  const { albums } = useSelector((state) => state.artistAlbum);
   const navigate = useNavigate();
+  const [monthlyListeners, setMonthlyListeners] = useState(0);
+
+  useEffect(() => {
+    dispatch(getArtistSongs({ page: 1, limit: 10 }));
+    dispatch(getArtistAlbums());
+
+    const fetchSongs = async () => {
+      const res = await getSongs();
+      if (res && res.songs) {
+        const artistSongs = res.songs.filter(song => song.artist === artist.stage_name);
+        const totalListens = artistSongs.reduce((total, song) => total + (song.listens_count || 0), 0);
+        setMonthlyListeners(totalListens);
+      }
+    };
+
+    fetchSongs();
+  }, [dispatch, artist]);
+
+  const totalDuration = songs.reduce((total, song) => total + (song.duration || 0), 0);
 
   const dashboardStats = [
     {
       icon: <MusicNoteIcon sx={{ fontSize: 40 }} className="text-purple-400" />,
       title: 'Total Tracks',
-      value: 0,
-      change: '+2 this month',
+      value: pagination?.total || 0,
+      change: `Total Duration: ${Math.floor(totalDuration / 60)}:${(totalDuration % 60).toString().padStart(2, '0')}`,
       progress: 65,
     },
     {
       icon: <AlbumIcon sx={{ fontSize: 40 }} className="text-blue-400" />,
       title: 'Total Albums',
-      value: 0,
+      value: albums?.length || 0,
       change: '+1 this month',
       progress: 45,
     },
     {
       icon: <HeadphonesIcon sx={{ fontSize: 40 }} className="text-green-400" />,
       title: 'Monthly Listeners',
-      value: 0,
-      change: '+124 this week',
+      value: monthlyListeners,
+      change: '+1 this week',
       progress: 78,
     },
     {
@@ -55,6 +81,7 @@ const ArtistDashboard = () => {
       value: 0,
       change: '+1.2k this month',
       progress: 85,
+      overlay: true,
     }
   ];
 
@@ -70,19 +97,22 @@ const ArtistDashboard = () => {
       icon: <PlaylistAddIcon />,
       title: 'Create Album',
       description: 'Organize your music',
-      color: 'from-blue-500 to-cyan-500'
+      color: 'from-blue-500 to-cyan-500',
+      onClick: () => navigate('/artist-portal/albums')
     },
     {
       icon: <AnalyticsIcon />,
       title: 'View Analytics',
       description: 'Track your performance',
-      color: 'from-green-500 to-emerald-500'
+      color: 'from-green-500 to-emerald-500',
+      overlay: true 
     },
     {
       icon: <ScheduleIcon />,
       title: 'Schedule Release',
       description: 'Plan your launches',
-      color: 'from-orange-500 to-red-500'
+      color: 'from-orange-500 to-red-500',
+      overlay: true 
     }
   ];
 
@@ -145,6 +175,11 @@ const ArtistDashboard = () => {
                       }
                     }}
                   />
+                  {stat.overlay && ( // Hiển thị lớp phủ nếu có
+                    <Box className="absolute inset-0 bg-black opacity-65 flex items-center justify-center">
+                      <Typography variant="h6" className="text-white">Feature in Development</Typography>
+                    </Box>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
@@ -173,7 +208,8 @@ const ArtistDashboard = () => {
                   borderRadius: '16px',
                   color: 'white',
                   textAlign: 'left',
-                  alignItems: 'flex-start'
+                  alignItems: 'flex-start',
+                  position: 'relative'
                 }}
               >
                 <Box className="bg-white/20 p-2 rounded-lg mb-4">
@@ -185,6 +221,11 @@ const ArtistDashboard = () => {
                 <Typography variant="body2" className="text-white/70">
                   {action.description}
                 </Typography>
+                {action.overlay && ( // Hiển thị lớp phủ nếu có
+                  <Box className="absolute inset-0 bg-black opacity-65 rounded-2xl flex items-center justify-center">
+                    <Typography variant="h6" className="text-white">Feature in Development</Typography>
+                  </Box>
+                )}
               </Button>
             </Grid>
           ))}

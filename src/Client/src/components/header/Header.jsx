@@ -6,7 +6,7 @@ import { useLogoutMutation } from "../../../../redux/slice/apiSlice";
 import { toast } from "react-toastify";
 import SearchInput from "../searchInput/index";
 import NotificationBell from "../notification/NotificationBell";
-
+import { searchAll } from '../../../../services/search';
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import Tooltip from "@mui/material/Tooltip";
@@ -73,11 +73,16 @@ const Header = () => {
     }
   }, [user]);
 
-  const handleSearch = (query) => {
-    if (query) {
-      navigate("/search", { state: { query } });
+  const handleSearch = async (query) => {
+    if (query.trim()) {
+      try {
+        const results = await searchAll(query);
+        navigate("/search", { state: { results, query } });
+      } catch (error) {
+        console.error('Error fetching search results:', error);
+      }
     } else {
-      navigate("/search");
+      navigate("/search", { replace: true });
     }
   };
 

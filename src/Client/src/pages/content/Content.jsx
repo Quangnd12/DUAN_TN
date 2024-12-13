@@ -3,17 +3,6 @@ import ContentCard from '../../components/cards/Content';
 import tb from '../../../public/assets/img/Tb.png';
 
 const Content = () => {
-  const items = [
-    {
-      img: '/assets/images/anh1.jpg',
-      title: 'Hero',
-      artist: 'Charlie Puth',
-      releaseDate: 'Single - May 24, 2024',
-      duration: '3:30',
-    },
-    // ... other items
-  ];
-
   return (
     <div className="bg-black text-white p-8">
       <div className="flex flex-col items-start justify-between">
@@ -36,9 +25,8 @@ const Content = () => {
 
       {/* Render items */}
       <div className="flex flex-col gap-4 pt-2">
-        {items.map((item, index) => (
-          <ContentCard key={index} {...item} />
-        ))}
+       <ContentCard/>
+       
       </div>
     </div>
   );

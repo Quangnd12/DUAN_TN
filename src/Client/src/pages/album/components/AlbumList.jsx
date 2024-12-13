@@ -28,7 +28,7 @@ const ListSongOfAlbums = () => {
 
     const { id } = useParams();
     const dropdownRefs = useRef({});
-    const { setPlayerState, clickedIndex, setClickedIndex } = useContext(PlayerContext);
+    const { setPlayerState, Songs, clickedIndex, setClickedIndex } = useContext(PlayerContext);
     const age = useAge();
 
     // Fetch album details
@@ -36,7 +36,29 @@ const ListSongOfAlbums = () => {
         const fetchAlbumDetails = async () => {
             try {
                 const response = await getAlbumById(id);
-                setAlbum(response);
+                if (response && response.songs) {
+                    // Thêm songs vào Songs global
+                    response.songs.forEach(song => {
+                        if (!Songs.find(s => s._id === song._id)) {
+                            Songs.push({
+                                ...song,
+                                _id: song._id,
+                                id: song.id,
+                                file_song: song.file,
+                                artist: response.artistName,
+                                album: response.title,
+                                listens_count: parseInt(song.listens_count) || 0
+                            });
+                        }
+                    });
+                    setAlbum({
+                        ...response,
+                        songs: response.songs.map(song => ({
+                            ...song,
+                            id: song.id || song._id
+                        }))
+                    });
+                }
                 setIsLoading(false);
             } catch (err) {
                 setError(err.message);
@@ -47,13 +69,17 @@ const ListSongOfAlbums = () => {
         fetchAlbumDetails();
     }, [id]);
 
-    // Song row click handler
-    const handleRowClick = (song, index) => {
+    // Song click handler
+    const handleSongClick = (song, index) => {
         if (song.is_explicit === 1 && age < 18) {
             handleWarning();
             setClickedIndex(null);
             return;
-        } else {
+        }
+
+        const songIndex = Songs.findIndex((s) => s._id === song._id);
+
+        if (songIndex !== -1) {
             setPlayerState({
                 audioUrl: song.songFile,
                 title: song.title,
@@ -68,6 +94,13 @@ const ListSongOfAlbums = () => {
                 artistID:song.artistIds[0]
             });
             setClickedIndex(index);
+            setHoveredIndex(index);
+
+            try {
+                localStorage.setItem("songs", JSON.stringify(Songs));
+            } catch (error) {
+                console.error("Error saving songs to localStorage:", error);
+            }
         }
     };
 
@@ -169,11 +202,12 @@ const ListSongOfAlbums = () => {
                         {album.songs.map((song, index) => (
                             <div
                                 key={index}
-                                className={`relative flex items-center p-2 rounded-lg transition-colors hover:bg-gray-700 
-                                ${hoveredIndex === index || clickedIndex === index ? "bg-gray-700" : ""}`}
+                                className={`relative flex items-center p-2 rounded-lg transition-colors
+                                    ${hoveredIndex === index ? "bg-gray-700" : ""}
+                                    ${clickedIndex === index ? "bg-gray-600" : "hover:bg-gray-700"}`}
                                 onMouseEnter={() => setHoveredIndex(index)}
                                 onMouseLeave={() => setHoveredIndex(null)}
-                                onClick={() => handleRowClick(song, index)}
+                                onClick={() => handleSongClick(song, index)}
                             >
                                 {/* Checkbox */}
                                 {(hoveredIndex === index || selectedCheckboxes.size > 0) && (
@@ -224,13 +258,12 @@ const ListSongOfAlbums = () => {
                                         </p>
 
                                         <div className="absolute inset-0 flex items-center justify-end">
-                                            <div className="absolute right-[250px]">
+                                            <div className="absolute right-[80px]">
                                                 <LikeButton songId={song.id} />
                                             </div>
-                                            
+
                                             <p
-                                                className={`text-gray-500 text-sm w-20 text-right ${hoveredIndex === index ? "opacity-0" : ""
-                                                    }`}
+                                                className={`text-gray-500 text-sm w-20 text-right ${hoveredIndex === index ? "opacity-0" : ""}`}
                                             >
                                                 {formatDuration(song.duration)}
                                             </p>

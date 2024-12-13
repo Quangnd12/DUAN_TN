@@ -1,16 +1,18 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ClearIcon from "@mui/icons-material/Clear";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 
 const RecentSearchCard = ({ item, index, handleRemove }) => {
+  const navigate = useNavigate();
   const sky = getComputedStyle(document.documentElement)
     .getPropertyValue("--sky")
     .trim();
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+
   const handleIconClick = () => {
     setIsPlaying(!isPlaying);
   };
@@ -18,8 +20,13 @@ const RecentSearchCard = ({ item, index, handleRemove }) => {
   const handleMouseEnter = () => {
     setIsHovered(true);
   };
+
   const handleMouseLeave = () => {
     setIsHovered(false);
+  };
+
+  const handleArtistClick = () => {
+    navigate(`/artist/${item.name}`);
   };
 
   return (
@@ -36,19 +43,15 @@ const RecentSearchCard = ({ item, index, handleRemove }) => {
         <ClearIcon />
       </button>
       <div className="w-100 relative">
-        <Link to="/artist">
+        <div onClick={handleArtistClick} className="cursor-pointer">
           <img
-            src={`images/${item.image}`}
+            src={item.avatar}
             alt={item.name}
-            className={`w-44 h-44 mb-2 ${
-              item.role === "Artist" ? "rounded-full" : "rounded-md"
-            }`}
+            className="w-44 h-44 mb-2 rounded-full object-cover"
           />
-        </Link>
+        </div>
 
-        <div
-          className=" absolute top-2/3 right-0 cursor-pointer transition-all rounded-md p-2 "
-        >
+        <div className="absolute top-2/3 right-0 cursor-pointer transition-all rounded-md p-2">
           {(isHovered || isPlaying) &&
             (isPlaying ? (
               <PauseCircleIcon
@@ -59,7 +62,7 @@ const RecentSearchCard = ({ item, index, handleRemove }) => {
               />
             ) : (
               <PlayCircleIcon
-                className="transform: translate-x-1/2 -translate-y-1/2 z-10 ;"
+                className="transform: translate-x-1/2 -translate-y-1/2 z-10"
                 fontSize="large"
                 sx={{ color: sky }}
                 onClick={handleIconClick}
@@ -67,8 +70,12 @@ const RecentSearchCard = ({ item, index, handleRemove }) => {
             ))}
         </div>
       </div>
-      <div className="text-white">{item.name}</div>
-      <div className="text-gray-400 text-sm">{item.role}</div>
+      <div className="text-white cursor-pointer" onClick={handleArtistClick}>
+        {item.name}
+      </div>
+      <div className="text-gray-400 text-sm">
+        {item.role === 1 ? "Artist" : "Singer"}
+      </div>
     </div>
   );
 };

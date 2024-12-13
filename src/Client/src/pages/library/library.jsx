@@ -1,110 +1,139 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Rowlib from "../../components/rowlibrary/rowlib";
 import Footer from "../../components/footer/Footer";
 import SongItem from "../../components/dropdown/dropdownMenu";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import { MdCheckBoxOutlineBlank, MdCheck, MdFavorite, MdFavoriteBorder, MdMoreVert, MdMusicNote } from "react-icons/md";
-import MoreButton from "../../components/button/more"; // Import MoreButton
+import MoreButton from "../../components/button/more";
+import { getArtists } from "../../../../services/artist";
+import { getSongs } from "../../../../services/songs";
+import { PlayerContext } from "../../components/context/MusicPlayer";
+import { Link } from "react-router-dom";
+import { slugify } from "../../components/createSlug";
+import LikeButton from "../../components/button/favorite";
+import useAge from "../../components/calculateAge";
+import { handleWarning } from "../../components/notification";
+import { formatDuration } from "Admin/src/components/formatDate";
 
-const initialData = {
-  artist: [
-    {
-      id: 1,
-      name: "Sơn Tùng MTP",
-      image: "https://th.bing.com/th/id/OIP.fLnk_eILwplVquL4wn3t2gHaHa?rs=1&pid=ImgDetMain",
-      title: "Artist",
-    },
-    {
-      id: 2,
-      name: "SOOBIN",
-      image: "https://th.bing.com/th/id/OIP.xybS-OC0x_eE61F2CwIOgQHaHa?w=171&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-      title: "Artist",
-    },
-  ],
-  favoriteSongs: [
-    {
-      id: 1,
-      song: "Hơn Cả Yêu",
-      album: "Hơn Cả Yêu (Single)",
-      time: "04:16",
-      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMFqNnDtgQS2Y5nmIoeVbpJZQyjjh0wh8Q6Q&usqp=CAU",
-      artist: "Đức Phúc",
-    },
-    {
-      id: 2,
-      song: "Đừng Yêu Nữa, Em Mệt Rồi",
-      album: "Đừng Yêu Nữa, Em Mệt Rồi (Single)",
-      time: "04:41",
-      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIHP3cFgCbQnbK9-NMFZMWCFKzN2W76rAjXGJiKk1QdS3llzb99ZWZNdHN-7NnRkkgnbc&usqp=CAU",
-      artist: "Min",
-    },
-    {
-      id: 3,
-      song: "Phía Sau Một Cô Gái",
-      album: "Phía Sau Một Cô Gái",
-      time: "04:38",
-      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQb-m6lThdqAMqPFkVQMO1NAfJsodI7e-x9Sg&usqp=CAU",
-      artist: "Soobin Hoàng Sơn",
-    },
-    {
-      id: 4,
-      song: "Yêu Một Người Vô Tâm",
-      album: "Yêu Một Người Vô Tâm (Single)",
-      time: "04:30",
-      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVEmA8JMfn-KvxQEQrIsaRAEjQC1gFV3xpWA&usqp=CAU",
-      artist: "Hương Tràm",
-    },
-    {
-      id: 5,
-      song: "Lạc Trôi",
-      album: "Lạc Trôi (Single)",
-      time: "03:56",
-      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRH14Asa_FbHmV3TaF5G0VTw0oAvbbEt5_zkA&usqp=CAU",
-      artist: "Sơn Tùng MTP",
-    },
-  ],
+const getRandomItems = (array, count) => {
+  const shuffled = [...array].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
 };
 
 const Library = () => {
-  const [favoriteSongs, setFavoriteSongs] = useState(initialData.favoriteSongs);
-  const [selectedSongs, setSelectedSongs] = useState(new Set());
-  const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
-  const [hoveredSong, setHoveredSong] = useState(null);
-  const [dropdownOpen, setDropdownOpen] = useState(null);
+  const [artists, setArtists] = useState([]);
+  const [displayedArtists, setDisplayedArtists] = useState([]);
+  const [favoriteSongs, setFavoriteSongs] = useState([]);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [dropdownIndex, setDropdownIndex] = useState(null);
+  const { setPlayerState, clickedIndex, setClickedIndex, isPlaying, setIsPlaying } = useContext(PlayerContext);
+  const age = useAge();
 
-  const toggleDropdown = (id) => {
-    setDropdownOpen(dropdownOpen === id ? null : id);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch artists
+        const artistsResponse = await getArtists(1, 10);
+        if (artistsResponse.artists) {
+          const formattedArtists = artistsResponse.artists.map(artist => ({
+            id: artist._id,
+            name: artist.name,
+            image: artist.avatar || "https://th.bing.com/th/id/OIP.fLnk_eILwplVquL4wn3t2gHaHa?rs=1&pid=ImgDetMain",
+            monthlyListeners: artist.monthly_listeners || 0,
+            followers: artist.followers || 0
+          }));
+          setArtists(formattedArtists);
+          setDisplayedArtists(formattedArtists.slice(0, 5));
+        }
 
-  const handleCheckboxChange = (id) => {
-    setSelectedSongs((prevSelectedSongs) => {
-      const updated = new Set(prevSelectedSongs);
-      if (updated.has(id)) {
-        updated.delete(id);
-      } else {
-        updated.add(id);
+        // Fetch songs và lấy 5 bài ngẫu nhiên
+        const songsResponse = await getSongs(1, 100); // Lấy nhiều bài hơn để có thể random
+        if (songsResponse.songs) {
+          const formattedSongs = songsResponse.songs
+            // Lọc bỏ bài premium và explicit
+            .filter(song => song.is_premium === 0 && song.is_explicit === 0)
+            .map(song => ({
+              id: song._id,
+              title: song.title,
+              duration: song.duration,
+              image: song.image,
+              artist: song.artist?.name || "",
+              file_song: song.file_song,
+              lyrics: song.lyrics,
+              album: song.album?.name || "",
+              listens_count: song.listens_count,
+              is_premium: song.is_premium,
+              is_explicit: song.is_explicit
+            }));
+            
+          // Lấy 5 bài ngẫu nhiên từ danh sách đã lọc
+          const randomSongs = getRandomItems(formattedSongs, 5);
+          setFavoriteSongs(randomSongs);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
-      setIsSelectAllChecked(updated.size === favoriteSongs.length);
-      return updated;
-    });
-  };
+    };
 
-  const handleSelectAll = () => {
-    if (isSelectAllChecked) {
-      setSelectedSongs(new Set());
-    } else {
-      const allSongIds = favoriteSongs.map((song) => song.id);
-      setSelectedSongs(new Set(allSongIds));
+    fetchData();
+  }, []);
+
+  const handleRowClick = (song, index) => {
+    if (song.is_explicit === 1 && age < 18) {
+      handleWarning();
+      setClickedIndex(null);
+      return;
     }
-    setIsSelectAllChecked(!isSelectAllChecked);
+    
+    setPlayerState({
+      audioUrl: song.file_song,
+      title: song.title,
+      artist: song.artist,
+      Image: song.image,
+      lyrics: song.lyrics,
+      album: song.album,
+      playCount: song.listens_count,
+      TotalDuration: song.duration,
+      songId: song.id,
+      is_premium: song.is_premium
+    });
+    setClickedIndex(index);
+    setIsPlaying(true);
+
+    try {
+      localStorage.setItem("songs", JSON.stringify(favoriteSongs));
+    } catch (error) {
+      console.error("Error saving songs to localStorage:", error);
+    }
   };
 
-  const handleToggleLike = (id) => {
-    setFavoriteSongs((prevSongs) =>
-      prevSongs.map((song) =>
-        song.id === id ? { ...song, liked: !song.liked } : song
-      )
-    );
+  // Thêm nút refresh để lấy 5 bài hát ngẫu nhiên mới
+  const handleRefreshSongs = async () => {
+    try {
+      const songsResponse = await getSongs(1, 100);
+      if (songsResponse.songs) {
+        const formattedSongs = songsResponse.songs
+          .filter(song => song.is_premium === 0 && song.is_explicit === 0)
+          .map(song => ({
+            id: song._id,
+            title: song.title,
+            duration: song.duration,
+            image: song.image,
+            artist: song.artist?.name || "",
+            file_song: song.file_song,
+            lyrics: song.lyrics,
+            album: song.album?.name || "",
+            listens_count: song.listens_count,
+            is_premium: song.is_premium,
+            is_explicit: song.is_explicit
+          }));
+          
+        const randomSongs = getRandomItems(formattedSongs, 5);
+        setFavoriteSongs(randomSongs);
+      }
+    } catch (error) {
+      console.error("Error refreshing songs:", error);
+    }
   };
 
   return (
@@ -114,79 +143,124 @@ const Library = () => {
           <title>Library</title>
           <meta name="description" content="This is the library page of our music app." />
         </Helmet>
-        <Rowlib data={initialData.artist} />
 
-        <div className="my-6 border-t border-gray-700"></div>
+        {/* Artists Section */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold">Your Artists</h2>
+            <Link
+              to="/show-all/artist"
+              className="text-blue-500 hover:text-blue-400 text-sm"
+            >
+              Xem tất cả
+            </Link>
+          </div>
+          <div className="flex overflow-x-auto gap-6 pb-4">
+            {displayedArtists.map((artist) => (
+              <Link
+                key={artist.id}
+                to={`/artist/${slugify(artist.name)}`}
+                className="flex-shrink-0 w-[180px] group"
+              >
+                <div className="text-center">
+                  <div className="relative mb-4">
+                    <img
+                      src={artist.image}
+                      alt={artist.name}
+                      className="w-[180px] h-[180px] object-cover rounded-full"
+                    />
+                  </div>
+                  <h3 className="font-semibold text-white group-hover:text-blue-500 truncate px-2">
+                    {artist.name}
+                  </h3>
+                  <p className="text-sm text-gray-400 mt-1">Artist</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
 
+        <div className="my-6 border-t border-gray-700/50"></div>
+
+        {/* Favorite Songs Section */}
         <div className="mt-6">
-          <h2 className="text-2xl font-semibold mb-4">Favorite Songs</h2>
-
-          {/* Select All Checkbox */}
-          {selectedSongs.size > 0 && (
-            <div className="flex items-center mb-4" onClick={handleSelectAll}>
-              <div className="cursor-pointer flex items-center">
-                {isSelectAllChecked ? (
-                  <MdCheck className="text-blue-400" size={23} />
-                ) : (
-                  <MdCheckBoxOutlineBlank className="text-gray-400" size={23} />
-                )}
-                <span className="ml-2 text-gray-400">
-                  {isSelectAllChecked ? "Deselect All" : "Select All"}
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Danh sách bài hát */}
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold">Favorite Songs</h2>
+            <button 
+              onClick={handleRefreshSongs}
+              className="text-blue-500 hover:text-blue-400 flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+              </svg>
+              Refresh
+            </button>
+          </div>
           <div className="flex flex-col gap-4">
-            {favoriteSongs.map((song) => (
+            {favoriteSongs.map((song, index) => (
               <div
                 key={song.id}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-700"
-                onMouseEnter={() => setHoveredSong(song.id)}
-                onMouseLeave={() => setHoveredSong(null)}
+                className={`flex items-center justify-between p-2 rounded-lg hover:bg-gray-700/50 cursor-pointer transition-all duration-300
+                  ${hoveredIndex === index && "bg-gray-700/50"}`}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                onClick={() => handleRowClick(song, index)}
               >
-                <div className="flex items-center">
-                  {/* Hiển thị checkbox hoặc nốt nhạc */}
-                  <div className="cursor-pointer flex items-center" onClick={() => handleCheckboxChange(song.id)}>
-                    {selectedSongs.has(song.id) ? (
-                      <MdCheck className="text-blue-400" size={23} />
-                    ) : hoveredSong === song.id ? (
-                      <MdCheckBoxOutlineBlank className="text-gray-400" size={23} />
-                    ) : (
-                      <MdMusicNote className="text-blue-400" size={23} />
+                <div className="flex items-center gap-4">
+                  {/* Số thứ tự */}
+                  <div className="w-8 text-center">
+                    <span className={`text-gray-400 ${hoveredIndex === index && "hidden"}`}>
+                      {index + 1}
+                    </span>
+                    {hoveredIndex === index && (
+                      <button className="text-white hover:text-blue-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                        </svg>
+                      </button>
                     )}
                   </div>
 
-                  <img src={song.image} alt={song.song} className="w-14 h-14 object-cover rounded-lg ml-2" />
+                  {/* Ảnh và thông tin bài hát */}
+                  <img 
+                    src={song.image} 
+                    alt={song.title} 
+                    className="w-14 h-14 object-cover rounded-lg"
+                  />
                   <div className="ml-4">
-                    <p className="text-sm font-semibold">{song.song}</p>
+                    <div className="flex items-center">
+                      <p className="text-sm font-semibold text-white">
+                        {song.title}
+                      </p>
+                      {song.is_premium === 1 && (
+                        <span className="bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded ml-2">
+                          PREMIUM
+                        </span>
+                      )}
+                    </div>
                     <p className="text-gray-400 text-sm">{song.artist}</p>
                   </div>
                 </div>
 
-                {/* Hiển thị like và MoreButton khi hover */}
-                {hoveredSong === song.id ? (
-                  <div className="flex items-center">
-                    <div className="cursor-pointer text-gray-400 mr-4" onClick={() => handleToggleLike(song.id)}>
-                      {song.liked ? (
-                        <MdFavorite className="text-red-600" size={23} />
-                      ) : (
-                        <MdFavoriteBorder size={23} />
-                      )}
-                    </div>
+                {/* Phần bên phải */}
+                {hoveredIndex === index ? (
+                  <div className="flex items-center gap-3">
+                    <LikeButton songId={song.id} />
                     <MoreButton
-                      index={song.id}
-                      dropdownIndex={dropdownOpen} // Pass the current dropdown state
-                      handleDropdownToggle={() => toggleDropdown(song.id)} // Toggle dropdown function
-                      dropdownRefs={{}} // Pass the required refs if needed
-                      setShowShareOptions={() => { }} // Manage share options state
-                      showShareOptions={false} // Manage share options visibility
+                      type="song"
+                      index={index}
+                      dropdownIndex={dropdownIndex}
+                      handleDropdownToggle={(e) => {
+                        e.stopPropagation();
+                        setDropdownIndex(index === dropdownIndex ? null : index);
+                      }}
                       align="right"
                     />
                   </div>
                 ) : (
-                  <p className="text-gray-400">{song.time}</p>
+                  <span className="text-gray-400 text-sm">
+                    {formatDuration(song.duration)}
+                  </span>
                 )}
               </div>
             ))}

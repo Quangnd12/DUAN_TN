@@ -13,15 +13,12 @@ export const playlistApi = createApi({
       return headers;
     },
   }),
-  
 
-  
   tagTypes: ["Playlist", "UserPlaylists"],
   endpoints: (builder) => ({
-
     getPublicPlaylists: builder.query({
       query: () => "/playlists/discover",
-      transformResponse: (response) => response.data.items,  // Chỉ lấy phần items
+      transformResponse: (response) => response.data.items, // Chỉ lấy phần items
       providesTags: (result) => {
         // Kiểm tra xem result có phải là một mảng không trước khi sử dụng map
         if (Array.isArray(result)) {
@@ -42,7 +39,6 @@ export const playlistApi = createApi({
         { type: "Playlist", id: playlistId },
       ],
     }),
-    
 
     // Get user's playlists
     getUserPlaylists: builder.query({
@@ -144,12 +140,29 @@ export const playlistApi = createApi({
     // Trong file playlistSlice.js
     addSongToPlaylist: builder.mutation({
       query: ({ playlistId, songId }) => ({
-          url: `/playlists/songs/add`,
-          method: 'POST',
-          body: { playlistId, songId },
+        url: `/playlists/songs/add`,
+        method: "POST",
+        body: { playlistId, songId },
       }),
-  }),
-
+      invalidatesTags: (result, error, { playlistId }) => [
+        { type: "Playlist", id: playlistId },
+      ],
+      async onQueryStarted(
+        { playlistId, songId },
+        { dispatch, queryFulfilled }
+      ) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            playlistApi.util.invalidateTags([
+              { type: "Playlist", id: playlistId },
+            ])
+          );
+        } catch {
+          // Xử lý lỗi nếu cần
+        }
+      },
+    }),
 
     // Remove song from playlist
     removeSongFromPlaylist: builder.mutation({

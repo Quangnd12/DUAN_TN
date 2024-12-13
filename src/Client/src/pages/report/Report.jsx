@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaStar, FaStarHalfAlt, FaRegStar, FaMusic } from 'react-icons/fa';
 import '../../../src/assets/css/report/report.css';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useCreateOrUpdateRatingMutation, useGetUserRatingQuery } from '../../../../redux/slice/ratingSlice';
 
 const Report = () => {
@@ -19,6 +19,8 @@ const Report = () => {
   
   const [createOrUpdateRating] = useCreateOrUpdateRatingMutation();
   const { data: existingRating } = useGetUserRatingQuery(songId);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (existingRating) {
@@ -40,17 +42,18 @@ const Report = () => {
   };
 
   const handleRating = (value) => {
-    // Kiểm tra xem có đang click vào nửa sao không
-    const isHalfStar = value % 1 !== 0;
     setRating(value);
   };
 
   // Component cho một ngôi sao (có thể là nửa sao)
-  const Star = ({ value, filled, half }) => {
-    if (filled) {
+  const Star = ({ value }) => {
+    const isActive = (hover || rating) >= value;
+    const isHalf = (hover || rating) === value - 0.5;
+    
+    if (isActive) {
       return <FaStar className="text-yellow-400" size={64} />;
     }
-    if (half) {
+    if (isHalf) {
       return <FaStarHalfAlt className="text-yellow-400" size={64} />;
     }
     return <FaRegStar className="text-zinc-600" size={64} />;
@@ -62,25 +65,19 @@ const Report = () => {
       <div className="flex justify-center space-x-8">
         {[1, 2, 3, 4, 5].map((star) => (
           <div key={star} className="relative">
-            {/* Vùng click cho nửa sao đầu */}
             <div
               className="absolute w-1/2 h-full cursor-pointer z-10"
               onMouseEnter={() => setHover(star - 0.5)}
               onMouseLeave={() => setHover(0)}
               onClick={() => handleRating(star - 0.5)}
             />
-            {/* Vùng click cho sao đầy đủ */}
             <div
               className="absolute w-1/2 h-full cursor-pointer z-10 right-0"
               onMouseEnter={() => setHover(star)}
               onMouseLeave={() => setHover(0)}
               onClick={() => handleRating(star)}
             />
-            <Star
-              value={star}
-              filled={hover || rating >= star}
-              half={hover || rating === star - 0.5}
-            />
+            <Star value={star} />
           </div>
         ))}
       </div>
@@ -95,7 +92,7 @@ const Report = () => {
       });
       setShowThankYouModal(true);
       setTimeout(() => {
-        window.location.href = '/';
+        navigate('/');
       }, 2000);
     } catch (error) {
       console.error("Error submitting rating:", error);

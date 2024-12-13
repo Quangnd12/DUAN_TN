@@ -121,4 +121,56 @@ const updatePlayCount = async (id, song) => {
   }
 };
 
-export { getSongs, getSongById, addSong, deleteSong, updateSong,updatePlayCount };
+const getSongStats = async () => {
+  try {
+    const res = await request({
+      method: "GET",
+      path: "/api/songs",
+      params: {
+        limit: 50 // Lấy nhiều bài hát để có thống kê chính xác
+      }
+    });
+
+    // Tính toán thống kê từ danh sách bài hát
+    const stats = {
+      // Thống kê theo nghệ sĩ
+      artists: {},
+      // Thống kê theo thể loại
+      genres: {},
+      // Tổng số lượt nghe
+      totalListens: 0
+    };
+
+    res.songs.forEach(song => {
+      // Đếm số bài hát theo nghệ sĩ
+      if (!stats.artists[song.artist]) {
+        stats.artists[song.artist] = {
+          count: 0,
+          listens: 0
+        };
+      }
+      stats.artists[song.artist].count++;
+      stats.artists[song.artist].listens += song.listens_count || 0;
+
+      // Đếm số bài hát theo thể loại
+      if (!stats.genres[song.genre]) {
+        stats.genres[song.genre] = {
+          count: 0,
+          listens: 0
+        };
+      }
+      stats.genres[song.genre].count++;
+      stats.genres[song.genre].listens += song.listens_count || 0;
+
+      // Tổng số lượt nghe
+      stats.totalListens += song.listens_count || 0;
+    });
+
+    return stats;
+  } catch (error) {
+    console.error('Error fetching song stats:', error);
+    return null;
+  }
+};
+
+export { getSongs, getSongById, addSong, deleteSong, updateSong, updatePlayCount, getSongStats };

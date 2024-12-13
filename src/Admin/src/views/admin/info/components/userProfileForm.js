@@ -25,6 +25,7 @@ import {
 import LogoutDialog from './logoutDialog';
 import ProfileTabs from './tabs';
 import UserPlaylist from './userPlaylist';
+import UserFavorites from './userFavorites';
 
 const UserProfileForm = ({ user }) => {
   const dispatch = useDispatch();
@@ -357,9 +358,7 @@ const UserProfileForm = ({ user }) => {
       case 1:
         return <UserPlaylist />;
       case 2:
-        return <div>Favorites Content</div>;
-      case 3:
-        return <div>History Content</div>;
+        return <UserFavorites />;
       default:
         return null;
     }
