@@ -8,7 +8,7 @@ import { handleWarning } from "../../../components/notification";
 import "../../../assets/css/artist/artist.css";
 import { slugify } from "Client/src/components/createSlug";
 import { formatDuration } from "Client/src/components/format";
-import LikeButton from "../../../components/button/favorite/";
+import LikeButton from "Client/src/components/button/favorite";
 
 const PopularSong = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -117,12 +117,17 @@ const PopularSong = () => {
     try {
       const songsToStore = artistData.map(song => ({
         ...song,
-        file: song.songFile,
-        title: song.songTitle,
-        image: song.songImage,
-        lyrics: song.songLyrics,
-        duration: song.duration,
-        listens_count: song.listens_count
+        audioUrl: song.file_song,
+        title: song.title,
+        artist: song.name,
+        Image: song.image,
+        lyrics: song.lyrics,
+        album: song.title,
+        playCount: song.listens_count,
+        TotalDuration: song.duration,
+        songId: song.id,
+        is_premium: song.is_premium,
+        artistID: song.artistID
       }));
       localStorage.setItem("songs", JSON.stringify(songsToStore));
     } catch (error) {
@@ -222,7 +227,7 @@ const PopularSong = () => {
           <div className="grid grid-cols-2 gap-[10px]">
             {popularSongs.map((song, index) => (
               <div
-                key={song.songID}
+                key={song.id}
                 className={`relative flex items-center p-2 rounded-lg transition-colors
                   ${hoveredIndex === index ? "bg-gray-700" : ""}
                   ${clickedIndex === index + 1 ? "bg-gray-600" : "hover:bg-gray-700"}

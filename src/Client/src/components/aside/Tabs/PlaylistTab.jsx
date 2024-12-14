@@ -26,7 +26,7 @@ const PlaylistTab = () => {
         album: song.album,
         playCount: song.listens_count,
         TotalDuration:song.duration,
-         songId:song.songId,
+        songId:song.id,
         is_premium:song.is_premium,
         artistID:song.artistID
       });

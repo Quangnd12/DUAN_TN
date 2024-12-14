@@ -16,7 +16,7 @@ const RecentlyPlayedTab = () => {
   const { setPlayerState, clickedIndex, setClickedIndex } = useContext(PlayerContext);
   const age = useAge();
   const user=JSON.parse(localStorage.getItem('user'));
-  const user_id=user.id;
+  const user_id=user? user.id : null;
 
   const HistorySong = async () => {
     if (user) {

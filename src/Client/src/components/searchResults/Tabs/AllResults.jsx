@@ -35,7 +35,7 @@ const AllResults = ({ results }) => {
     setPlayerState({
       audioUrl: song.file_song,
       title: song.title,
-      artists: song.artists?.join(', ') || song.artist || '',
+      artist: song.artists?.join(', ') || song.artist || '',
       Image: song.image,
       playCount: song.listens_count || 0,
       TotalDuration: song.duration,
@@ -55,7 +55,7 @@ const AllResults = ({ results }) => {
     setPlayerState({
       audioUrl: song.file_song,
       title: song.title,
-      artists: song.artists?.join(', ') || song.artist || '',
+      artist: song.artists?.join(', ') || song.artist || '',
       Image: song.image,
       playCount: song.listens_count || 0,
       TotalDuration: song.duration,

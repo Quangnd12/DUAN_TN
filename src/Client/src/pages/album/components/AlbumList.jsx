@@ -14,6 +14,7 @@ import useAge from "Client/src/components/calculateAge";
 import { formatDuration } from "Admin/src/components/formatDate";
 import { handleWarning } from "../../../components/notification";
 import LikeButton from "../../../components/button/favorite";
+import { slugify } from "Client/src/components/createSlug";
 
 const ListSongOfAlbums = () => {
     const [album, setAlbum] = useState(null);
@@ -36,28 +37,8 @@ const ListSongOfAlbums = () => {
         const fetchAlbumDetails = async () => {
             try {
                 const response = await getAlbumById(id);
-                if (response && response.songs) {
-                    // Thêm songs vào Songs global
-                    response.songs.forEach(song => {
-                        if (!Songs.find(s => s._id === song._id)) {
-                            Songs.push({
-                                ...song,
-                                _id: song._id,
-                                id: song.id,
-                                file_song: song.file,
-                                artist: response.artistName,
-                                album: response.title,
-                                listens_count: parseInt(song.listens_count) || 0
-                            });
-                        }
-                    });
-                    setAlbum({
-                        ...response,
-                        songs: response.songs.map(song => ({
-                            ...song,
-                            id: song.id || song._id
-                        }))
-                    });
+                if (response) {
+                    setAlbum(response);
                 }
                 setIsLoading(false);
             } catch (err) {
@@ -89,16 +70,15 @@ const ListSongOfAlbums = () => {
                 album: album.title,
                 playCount: song.songListensCount,
                 TotalDuration: song.songDuration,
-                // songId: song.id || song._id,
                 songId: song.id,
-                is_premium:song.songIsPremium,
-                artistID:song.artistIds[0]
+                is_premium: song.songIsPremium,
+                artistID: song.artistIds[0]
             });
             setClickedIndex(index);
             setHoveredIndex(index);
 
             try {
-                localStorage.setItem("songs", JSON.stringify(Songs));
+                localStorage.setItem("songs", JSON.stringify(album.songs));
             } catch (error) {
                 console.error("Error saving songs to localStorage:", error);
             }
@@ -254,14 +234,26 @@ const ListSongOfAlbums = () => {
                                 {/* Song Details */}
                                 <div className="flex flex-grow flex-col ml-3 relative">
                                     <div className="flex justify-between items-center">
-                                        <p className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-[400px]">
-                                            {song.title}
-                                        </p>
+                                        <div className="flex items-center w-[400px] whitespace-nowrap overflow-hidden text-ellipsis">
+                                            <p className="text-sm font-semibold overflow-hidden text-ellipsis">
+                                                {song.title}
+                                            </p>
+                                            {song.is_premium === 1 && (
+                                                <span className="bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded ml-2 shrink-0">
+                                                    PREMIUM
+                                                </span>
+                                            )}
+                                        </div>
 
                                         <div className="absolute inset-0 flex items-center justify-end">
-                                            <div className="absolute right-[80px]">
-                                                <LikeButton songId={song.id} />
-                                            </div>
+                                            {hoveredIndex === index && (
+                                                <div onClick={(e) => e.stopPropagation()}>
+                                                    <LikeButton 
+                                                        songId={song.id}
+                                                        className="mr-[50px]"
+                                                    />
+                                                </div>
+                                            )}
 
                                             <p
                                                 className={`text-gray-500 text-sm w-20 text-right ${hoveredIndex === index ? "opacity-0" : ""}`}
@@ -271,10 +263,11 @@ const ListSongOfAlbums = () => {
                                         </div>
                                     </div>
 
-                                    <p className="text-gray-400 text-sm mt-1 whitespace-nowrap overflow-hidden text-ellipsis w-[430px]">
-                                        <Link 
-                                            to={`/artist/${album.artistId}`} 
-                                            className="hover:text-blue-500 hover:underline no-underline"
+                                    <p className="text-gray-400 text-sm mt-1 relative z-10">
+                                        <Link
+                                            to={`/artist/${slugify(album.artistName)}`}
+                                            className="text-gray-400 text-sm hover:text-blue-500 hover:underline"
+                                            onClick={(e) => e.stopPropagation()}
                                         >
                                             {album.artistName}
                                         </Link>
