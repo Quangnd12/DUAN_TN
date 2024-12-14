@@ -4,8 +4,16 @@ import CopyLink from "../../button/copy";
 import { PlayerContext } from "../../context/MusicPlayer";
 import { getArtistById } from "services/artist";
 import { Link } from "react-router-dom";
+import slugify from "slugify";
+import { 
+  useToggleFollowArtistMutation,
+  useGetUserFollowedArtistsQuery,
+  useGetTopFollowedArtistsQuery
+} from "../../../../../../src/redux/slice/followSlice";
+import { useSelector } from "react-redux";
+import { MdPersonAdd, MdCheck } from "react-icons/md";
+
 const ArtistInfoTab = ({ onTabChange }) => {
-  const [followingArtists, setFollowingArtists] = useState([]);
   const { playerState } = useContext(PlayerContext);
   const {
     title,
@@ -23,6 +31,19 @@ const ArtistInfoTab = ({ onTabChange }) => {
 
 
   const [artistInfo, setArtistInfo] = useState([]);
+  const [isFollowing, setIsFollowing] = useState(false);
+  
+  const currentUser = useSelector((state) => state.auth.user);
+  const [toggleFollowArtist] = useToggleFollowArtistMutation();
+  
+  const { data: userFollowedArtists, refetch: refetchFollowed } = useGetUserFollowedArtistsQuery(undefined, {
+    skip: !currentUser,
+    refetchOnMountOrArgChange: true
+  });
+
+  const { data: topFollowedArtists, refetch: refetchTop } = useGetTopFollowedArtistsQuery(undefined, {
+    refetchOnMountOrArgChange: true
+  });
 
   const getArtistInfo = async () => {
     try {
@@ -53,19 +74,32 @@ const ArtistInfoTab = ({ onTabChange }) => {
     getArtistInfo();
   }, [artistID]);
 
-  const handleFollow = (artistName) => {
-    if (followingArtists.includes(artistName)) {
-      // Logic hủy theo dõi
-      setFollowingArtists(
-        followingArtists.filter((name) => name !== artistName)
+  useEffect(() => {
+    if (artistInfo && userFollowedArtists) {
+      const isCurrentlyFollowing = userFollowedArtists.some(
+        followedArtist => followedArtist.id === artistInfo[0]?.id
       );
-    } else {
-      // Theo logic
-      setFollowingArtists([...followingArtists, artistName]);
+      setIsFollowing(isCurrentlyFollowing);
+    }
+  }, [artistInfo, userFollowedArtists]);
+
+  const handleFollow = async (artistId) => {
+    try {
+      if (!currentUser) return;
+      
+      const response = await toggleFollowArtist(artistId).unwrap();
+      if (response.data) {
+        setIsFollowing(response.data.isFollowing);
+        
+        await Promise.all([
+          refetchFollowed(),
+          refetchTop()
+        ]);
+      }
+    } catch (error) {
+      console.error("Error toggling follow state:", error);
     }
   };
-
-  const isFollowing = (artistName) => followingArtists.includes(artistName);
 
   return (
     <div className="p-4 h-screen text-white">
@@ -95,7 +129,7 @@ const ArtistInfoTab = ({ onTabChange }) => {
 
       {artistInfo.map((artist, index) => (
         <div key={index} className="mb-8 rounded-md border-b border-gray-700 pb-8">
-          <Link to={`/artist/${artist.name}`}>
+          <Link to={`/artist/${slugify(artist.name)}`}>
           <img
             src={artist.avatar || Image}
             alt={artist.name}
@@ -115,13 +149,24 @@ const ArtistInfoTab = ({ onTabChange }) => {
               </p>
             </div>
             <button
-              onClick={() => handleFollow(artist.name)}
-              className={`flex items-center px-4 py-2 border rounded-md transition duration-300 ml-4 ${isFollowing(artist.name)
+              onClick={() => handleFollow(artist.id)}
+              className={`flex items-center px-4 py-2 border rounded-md transition duration-300 ml-4 ${
+                isFollowing
                   ? "bg-sky-500 text-white border-transparent"
                   : "border-sky-500 text-white-500 hover:bg-sky-500 hover:border-transparent hover:text-white"
-                }`}
+              }`}
             >
-              {isFollowing(artist.name) ? 'Following' : 'Follow'}
+              {isFollowing ? (
+                <>
+                  <MdCheck className="mr-2 h-5 w-5" />
+                  Following
+                </>
+              ) : (
+                <>
+                  <MdPersonAdd className="mr-2 h-5 w-5" />
+                  Follow
+                </>
+              )}
             </button>
           </div>
           {/* Artist bio */}

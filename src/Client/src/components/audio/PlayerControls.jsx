@@ -45,6 +45,7 @@ const PlayerControls = () => {
     TotalDuration,
     songId,
     is_premium,
+    artistID 
   } = playerState;
   const age = useAge();
   const navigate = useNavigate();
@@ -94,6 +95,7 @@ const PlayerControls = () => {
         TotalDuration,
         songId,
         is_premium,
+        artistID
       }));
     }
   }, [
@@ -107,6 +109,7 @@ const PlayerControls = () => {
     TotalDuration,
     songId,
     is_premium,
+    artistID,
     setPlayerState,
   ]);
 
@@ -164,20 +167,29 @@ const PlayerControls = () => {
         return;
       }
 
-      const historyForSong =
-        Array.isArray(history) &&
+      const historyForSong = Array.isArray(history) && 
         history.find((item) => item.songID === songId);
 
       if (!historyForSong && !hasAddedHistory) {
-        await addHistory(user_id, songId);
-        setHasAddedHistory(true);
-        localStorage.setItem(`history_${songId}`, "true");
-        const updatedHistory = await getHistoryById(user_id);
-        if (Array.isArray(updatedHistory)) {
-          setHistory(updatedHistory);
+        try {
+          await addHistory(user_id, songId);
+          setHasAddedHistory(true);
+          localStorage.setItem(`history_${songId}`, "true");
+          
+          const updatedHistory = await getHistoryById(user_id);
+          if (Array.isArray(updatedHistory)) {
+            setHistory(updatedHistory);
+          }
+        } catch (error) {
+          if (error.response?.status === 400) {
+            setHasAddedHistory(true);
+            localStorage.setItem(`history_${songId}`, "true");
+          }
         }
       }
-    } catch (error) { }
+    } catch (error) {
+      return;
+    }
   };
 
   const handleProgress = (state) => {
@@ -310,6 +322,7 @@ const PlayerControls = () => {
         TotalDuration: nextSong.duration,
         songId: nextSong.songId,
         is_premium: nextSong.is_premium,
+        artistID: nextSong.artistID,
       });
       setClickedIndex(nextIndex);
       setIsPlaying(true);
@@ -343,6 +356,7 @@ const PlayerControls = () => {
           TotalDuration: prevSong.duration,
           songId: prevSong.songId,
           is_premium: prevSong.is_premium,
+          artistID: prevSong.artistID,
         });
         setClickedIndex(prevIndex);
         return;

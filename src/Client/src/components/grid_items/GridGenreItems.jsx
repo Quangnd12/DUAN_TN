@@ -153,17 +153,16 @@ const GridGenreItems = () => {
                 <div>
                   <p className="font-medium text-white flex items-center">
                     {song.title}
-                    {song.is_explicit === 1 && (
-                      <span className="ml-2 text-red-500 text-xs">Explicit</span>
-                    )}
-                    {song.is_premium === 1 && (
-                      <span className="ml-2 text-yellow-500 text-xs">Premium</span>
+                 {song.is_premium === 1 && (
+                      <span className="bg-yellow-500 text-white text-[8px] font-bold px-2 py-1 rounded ml-2 shrink-0">
+                        PREMIUM
+                      </span>
                     )}
                   </p>
                   <div className="flex items-center text-sm text-gray-400">
                     <span>{song.artist}</span>
                     <span className="mx-2">•</span>
-                    <span>{formatListens(song.listens_count)} lượt nghe</span>
+                    <span>{formatListens(song.listens_count)} Views</span>
                   </div>
                 </div>
               </div>

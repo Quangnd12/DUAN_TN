@@ -8,7 +8,7 @@ import { handleWarning } from "../../../components/notification";
 import "../../../assets/css/artist/artist.css";
 import { slugify } from "Client/src/components/createSlug";
 import { formatDuration } from "Client/src/components/format";
-import LikeButton from "../../../components/button/favorite/";
+import LikeButton from "Client/src/components/button/favorite";
 
 const PopularSong = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -117,12 +117,17 @@ const PopularSong = () => {
     try {
       const songsToStore = artistData.map(song => ({
         ...song,
-        file: song.songFile,
-        title: song.songTitle,
-        image: song.songImage,
-        lyrics: song.songLyrics,
-        duration: song.duration,
-        listens_count: song.listens_count
+        audioUrl: song.file_song,
+        title: song.title,
+        artist: song.name,
+        Image: song.image,
+        lyrics: song.lyrics,
+        album: song.title,
+        playCount: song.listens_count,
+        TotalDuration: song.duration,
+        songId: song.id,
+        is_premium: song.is_premium,
+        artistID: song.artistID
       }));
       localStorage.setItem("songs", JSON.stringify(songsToStore));
     } catch (error) {
@@ -222,10 +227,9 @@ const PopularSong = () => {
           <div className="grid grid-cols-2 gap-[10px]">
             {popularSongs.map((song, index) => (
               <div
-                key={song.songID}
-                className={`relative flex items-center p-2 rounded-lg transition-colors
-                  ${hoveredIndex === index ? "bg-gray-700" : ""}
-                  ${clickedIndex === index + 1 ? "bg-gray-600" : "hover:bg-gray-700"}
+                key={song.id}
+                className={`relative flex items-center p-2 rounded-lg transition-colors 
+                  ${hoveredIndex === index || clickedIndex === index ? "bg-gray-700" : ""} 
                   ${itemHeight}`}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
@@ -238,10 +242,15 @@ const PopularSong = () => {
                 />
                 <div className="flex flex-col flex-grow ml-3">
                   <div className="flex justify-between items-center">
-                    <div style={{ width: "150px" }}>
-                      <p className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-[150px]">
+                    <div className="flex items-center w-[200px] whitespace-nowrap overflow-hidden text-ellipsis">
+                      <p className="text-sm font-semibold overflow-hidden text-ellipsis">
                         {song.title}
                       </p>
+                      {song.is_premium === 1 && (
+                        <span className="bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded ml-2 shrink-0">
+                          PREMIUM
+                        </span>
+                      )}
                     </div>
                     <div className="absolute inset-0 flex items-center justify-end">
                       <p
@@ -252,20 +261,22 @@ const PopularSong = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-1 mt-1" style={{ zIndex: 1 }}>
-                    <span className="flex items-center">
-                      <p className="text-gray-400 text-sm whitespace-nowrap overflow-hidden text-ellipsis">
-                        {song.name}
-                      </p>
-                    </span>
-                  </div>
+                  <p className="text-gray-400 text-sm mt-1 relative z-10">
+                    <Link
+                      to={`/artist/${slugify(song.name)}`}
+                      className="text-gray-400 text-sm hover:text-blue-500 hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {song.name}
+                    </Link>
+                  </p>
 
                   <SongItem
-                   key={index}
-                   song={{
-                       ...song,
-                       id: song.id
-                   }}
+                    key={index}
+                    song={{
+                      ...song,
+                      id: song.id
+                    }}
                     index={index}
                     hoveredIndex={hoveredIndex}
                     clickedIndex={clickedIndex}
@@ -282,9 +293,11 @@ const PopularSong = () => {
                     type="song"
                   />
                 </div>
-                <div className="absolute right-[80px]">
-                  <LikeButton songId={song.id} />
-                </div>
+                {hoveredIndex === index && (
+                  <div className="mr-[50px]" onClick={(e) => e.stopPropagation()}>
+                    <LikeButton songId={song.id} />
+                  </div>
+                )}
               </div>
             ))}
           </div>
