@@ -17,7 +17,7 @@ const PlaylistList = () => {
         <div className="p-4 bg-zinc-900 p-4 rounded-md  mt-4 backdrop-filter">
           <ListSongOfPlaylist playlistAdd={playlistAdd} />
         </div>
-        <RelatedSong onAddSong={handleAddSong} />
+        {/* <RelatedSong onAddSong={handleAddSong} /> */}
       </div>
     </div>
   );

@@ -128,13 +128,6 @@ if (loading) {
           globalPlayingState={globalPlayingState}
           setGlobalPlayingState={setGlobalPlayingState}
         />
-        <RowItems
-          title={"Popular Radio"}
-          data={data.radio}
-          rowId="popular-radio"
-          globalPlayingState={globalPlayingState}
-          setGlobalPlayingState={setGlobalPlayingState}
-        />
         <GridGenreItems />
         <Footer />
       </Box>

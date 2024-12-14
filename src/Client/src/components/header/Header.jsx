@@ -17,7 +17,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { styled } from "@mui/joy";
 import Button from "@mui/joy/Button";
-import { getPaymentByUser,CheckPayment } from 'services/payment';
+import { getPaymentByUser, CheckPayment } from 'services/payment';
 import { GiCrown } from 'react-icons/gi';
 
 const VisuallyHiddenInput = styled("input")`
@@ -127,33 +127,33 @@ const Header = () => {
 
   const getPayment = async () => {
     try {
-        if (user) {
-            const data = await getPaymentByUser(); 
-            setPayments(data || []); 
-        }
+      if (user) {
+        const data = await getPaymentByUser();
+        setPayments(data || []);
+      }
     } catch (error) {
-        console.error("Error fetching payment data", error);
-        setPayments([]);
+      console.error("Error fetching payment data", error);
+      setPayments([]);
     }
-};
+  };
 
-useEffect(() => {
+  useEffect(() => {
     if (user) {
-        getPayment();
+      getPayment();
     }
-}, [user]); 
+  }, [user]);
 
   const checkUserPremium = async () => {
     if (user) {
-    await CheckPayment();
+      await CheckPayment();
     }
-}
-
-useEffect(() => {
-  if (user) {
-    checkUserPremium();
   }
-}, [])
+
+  useEffect(() => {
+    if (user) {
+      checkUserPremium();
+    }
+  }, [])
 
   // Render user section based on authentication status
   const renderUserSection = () => {
@@ -162,8 +162,8 @@ useEffect(() => {
         <div className="relative">
           <div onClick={toggleMenu} className="cursor-pointer flex items-center">
             <p className="px-4 py-2 text-sm text-white hover:text-gray-300 flex items-center">
-            {displayUser.username}
-              {payment.status===1 && ( 
+              {displayUser.username}
+              {payment.status === 1 && (
                 <GiCrown className="ml-2 text-yellow-500" size={20} />
               )}
             </p>
@@ -188,19 +188,6 @@ useEffect(() => {
               >
                 {isLoggingOut ? "Logging out..." : "Logout"}
               </button>
-              <hr className="border-gray-700" />
-              <Button
-                component="label"
-                role={undefined}
-                tabIndex={-1}
-                variant="outlined"
-                color="neutral"
-                startDecorator={<CloudUploadIcon fontSize="small" />}
-                className="block w-full px-4 py-2 text-sm text-white hover:bg-zinc-700"
-              >
-                Upload a file
-                <VisuallyHiddenInput type="file" />
-              </Button>
             </div>
           )}
         </div>
@@ -264,18 +251,18 @@ useEffect(() => {
             {isAuthenticated && (
               <>
 
-                { !payment.user_id && (
-                <Link to="/upgrade">
-                  <button className="bg-white text-black text-[16px] font-bold px-3 py-2 rounded-[20px]  mr-6 shrink-0">
-                    Premium Upgrade
-                  </button>
+                {!payment.user_id && (
+                  <Link to="/upgrade">
+                    <button className="bg-white text-black text-[16px] font-bold px-3 py-2 rounded-[20px]  mr-6 shrink-0">
+                      Premium Upgrade
+                    </button>
                   </Link>
-               )} 
+                )}
                 <Link to="/content">
-                <NotificationBell />
-              </Link>
+                  <NotificationBell />
+                </Link>
               </>
-            
+
             )}
             {renderUserSection()}
           </div>

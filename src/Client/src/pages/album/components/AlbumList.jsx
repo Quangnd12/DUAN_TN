@@ -37,11 +37,14 @@ const ListSongOfAlbums = () => {
         const fetchAlbumDetails = async () => {
             try {
                 const response = await getAlbumById(id);
+                console.log('Album API Response:', response);
+                console.log('Album Songs:', response.songs);
                 if (response) {
                     setAlbum(response);
                 }
                 setIsLoading(false);
             } catch (err) {
+                console.error('Error fetching album:', err);
                 setError(err.message);
                 setIsLoading(false);
             }
@@ -52,36 +55,59 @@ const ListSongOfAlbums = () => {
 
     // Song click handler
     const handleSongClick = (song, index) => {
+        console.log('Song clicked - Full song object:', song);
+        console.log('Song File URL:', song.songFile || song.file_song);
+        console.log('Album context:', album);
+        
         if (song.is_explicit === 1 && age < 18) {
             handleWarning();
             setClickedIndex(null);
             return;
         }
 
-        const songIndex = Songs.findIndex((s) => s._id === song._id);
+        const playerData = {
+            audioUrl: song.songFile || song.file_song || song.file,  // Thêm song.file
+            title: song.title,
+            artist: album.artistName,
+            Image: song.image,
+            lyrics: song.lyrics,
+            album: album.title,
+            playCount: song.songListensCount || song.listens_count,
+            TotalDuration: song.songDuration || song.duration,
+            songId: song.id,
+            is_premium: song.songIsPremium || song.is_premium,
+            artistID: song.artistIds?.[0] || album.artistId
+        };
 
-        if (songIndex !== -1) {
-            setPlayerState({
-                audioUrl: song.songFile,
-                title: song.title,
-                artist: album.artistName,
-                Image: song.image,
-                lyrics: song.lyrics,
-                album: album.title,
-                playCount: song.songListensCount,
-                TotalDuration: song.songDuration,
-                songId: song.id,
-                is_premium: song.songIsPremium,
-                artistID: song.artistIds[0]
+        console.log('Setting player state with:', playerData);
+        setPlayerState(playerData);
+        
+        setClickedIndex(index);
+        setHoveredIndex(index);
+
+        try {
+            const songsToStore = album.songs.map(s => {
+                const songData = {
+                    ...s,
+                    audioUrl: s.songFile || s.file_song || s.file,
+                    title: s.title,
+                    artist: album.artistName,
+                    Image: s.image,
+                    lyrics: s.lyrics,
+                    album: album.title,
+                    playCount: s.songListensCount || s.listens_count,
+                    TotalDuration: s.songDuration || s.duration,
+                    songId: s.id,
+                    is_premium: s.songIsPremium || s.is_premium,
+                    artistID: s.artistIds?.[0] || album.artistId
+                };
+                console.log('Processed song for storage:', songData);
+                return songData;
             });
-            setClickedIndex(index);
-            setHoveredIndex(index);
-
-            try {
-                localStorage.setItem("songs", JSON.stringify(album.songs));
-            } catch (error) {
-                console.error("Error saving songs to localStorage:", error);
-            }
+            
+            localStorage.setItem("songs", JSON.stringify(songsToStore));
+        } catch (error) {
+            console.error("Error saving songs to localStorage:", error);
         }
     };
 
