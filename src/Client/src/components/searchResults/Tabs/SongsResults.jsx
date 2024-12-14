@@ -14,26 +14,32 @@ const SongsResults = ({ songs }) => {
       handleWarning();
       setClickedIndex(null);
       return;
-    }
-    
-    setPlayerState({
-      audioUrl: song.file_song,
-      title: song.title,
-      artists: song.artists?.join(', ') || song.artist || '',
-      Image: song.image,
-      album: song.albums?.length > 0 ? song.albums[0] : song.album || '',
-      playCount: song.listens_count,
-      TotalDuration: song.duration,
-      songId: song.id,
-      is_premium: song.is_premium,
-      albumTitle: song.albums?.length > 0 ? song.albums[0] : song.album || '',
-      artistName: song.artists?.join(', ') || song.artist || '',
-    });
-    setClickedIndex(index);
-    try {
-      localStorage.setItem("songs", JSON.stringify(songs));
-    } catch (error) {
-      console.error("Error saving songs to localStorage:", error);
+    } 
+    else {
+      console.log("Song data:", song);
+      
+      setPlayerState({
+        audioUrl: song.file_song,
+        title: song.title,
+        artist: song.artists?.join(', ') || '',
+        Image: song.image,
+        lyrics: song.lyrics,
+        album: song.albums?.[0] || '',
+        playCount: song.listens_count || 0,
+        TotalDuration: song.duration,
+        songId: song.id,
+        is_premium: song.is_premium || 0,
+        albumTitle: song.albums?.[0] || '',
+        artistName: song.artists?.join(', ') || '',
+        artistID: song.artistID
+      });
+      setClickedIndex(index);
+
+      try {
+        localStorage.setItem("songs", JSON.stringify(songs?.data?.songs?.items || []));
+      } catch (error) {
+        console.error("Error saving songs to localStorage:", error);
+      }
     }
   };
 
