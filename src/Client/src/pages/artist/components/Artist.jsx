@@ -228,8 +228,9 @@ const PopularSong = () => {
             {popularSongs.map((song, index) => (
               <div
                 key={song.id}
-                className={`relative flex items-center p-2 rounded-lg transition-colors 
-                  ${hoveredIndex === index || clickedIndex === index ? "bg-gray-700" : ""} 
+                className={`relative flex items-center p-2 rounded-lg transition-colors
+                  ${hoveredIndex === index ? "bg-gray-700" : ""}
+                  ${clickedIndex === index + 1 ? "bg-gray-600" : "hover:bg-gray-700"}
                   ${itemHeight}`}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
@@ -242,15 +243,10 @@ const PopularSong = () => {
                 />
                 <div className="flex flex-col flex-grow ml-3">
                   <div className="flex justify-between items-center">
-                    <div className="flex items-center w-[200px] whitespace-nowrap overflow-hidden text-ellipsis">
-                      <p className="text-sm font-semibold overflow-hidden text-ellipsis">
+                    <div style={{ width: "150px" }}>
+                      <p className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-[150px]">
                         {song.title}
                       </p>
-                      {song.is_premium === 1 && (
-                        <span className="bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded ml-2 shrink-0">
-                          PREMIUM
-                        </span>
-                      )}
                     </div>
                     <div className="absolute inset-0 flex items-center justify-end">
                       <p
@@ -261,22 +257,20 @@ const PopularSong = () => {
                       </p>
                     </div>
                   </div>
-                  <p className="text-gray-400 text-sm mt-1 relative z-10">
-                    <Link
-                      to={`/artist/${slugify(song.name)}`}
-                      className="text-gray-400 text-sm hover:text-blue-500 hover:underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {song.name}
-                    </Link>
-                  </p>
+                  <div className="flex flex-wrap gap-1 mt-1" style={{ zIndex: 1 }}>
+                    <span className="flex items-center">
+                      <p className="text-gray-400 text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                        {song.name}
+                      </p>
+                    </span>
+                  </div>
 
                   <SongItem
-                    key={index}
-                    song={{
-                      ...song,
-                      id: song.id
-                    }}
+                   key={index}
+                   song={{
+                       ...song,
+                       id: song.id
+                   }}
                     index={index}
                     hoveredIndex={hoveredIndex}
                     clickedIndex={clickedIndex}
@@ -293,11 +287,9 @@ const PopularSong = () => {
                     type="song"
                   />
                 </div>
-                {hoveredIndex === index && (
-                  <div className="mr-[50px]" onClick={(e) => e.stopPropagation()}>
-                    <LikeButton songId={song.id} />
-                  </div>
-                )}
+                <div className="absolute right-[80px]">
+                  <LikeButton songId={song.id} />
+                </div>
               </div>
             ))}
           </div>
