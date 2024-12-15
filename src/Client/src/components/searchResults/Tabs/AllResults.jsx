@@ -42,6 +42,8 @@ const AllResults = ({ results }) => {
       songId: song.id,
       is_premium: song.is_premium || 0,
       artistName: song.artists?.join(', ') || song.artist || '',
+      lyrics: song.lyrics || 'Không có lời bài hát',
+      album: song.albums?.join(', ') || 'Chưa có album'
     });
   };
 
@@ -62,6 +64,8 @@ const AllResults = ({ results }) => {
       songId: song.id,
       is_premium: song.is_premium || 0,
       artistName: song.artists?.join(', ') || song.artist || '',
+      lyrics: song.lyrics || 'Không có lời bài hát',
+      album: song.albums?.join(', ') || 'Chưa có album'
     });
     setClickedIndex(index);
   };

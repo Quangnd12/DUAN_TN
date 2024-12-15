@@ -69,7 +69,7 @@ const ListSongOfGenres = () => {
         artist: song.artist,
         Image: song.image,
         lyrics: song.lyrics,
-        album: song.albumTitle,
+        album: song.album,
         playCount: song.listens_count,
         TotalDuration: song.duration,
         songId: song.id,

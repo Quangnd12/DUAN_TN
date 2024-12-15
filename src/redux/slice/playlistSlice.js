@@ -147,21 +147,6 @@ export const playlistApi = createApi({
       invalidatesTags: (result, error, { playlistId }) => [
         { type: "Playlist", id: playlistId },
       ],
-      async onQueryStarted(
-        { playlistId, songId },
-        { dispatch, queryFulfilled }
-      ) {
-        try {
-          await queryFulfilled;
-          dispatch(
-            playlistApi.util.invalidateTags([
-              { type: "Playlist", id: playlistId },
-            ])
-          );
-        } catch {
-          // Xử lý lỗi nếu cần
-        }
-      },
     }),
 
     // Remove song from playlist

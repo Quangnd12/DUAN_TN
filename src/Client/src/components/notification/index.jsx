@@ -103,6 +103,13 @@ const handlePay = () => {
     });
 }
 
+const handleSongExistsInPlaylist = () => {
+    toast.info("Song already exists in playlist", {
+        autoClose: 2000,
+        className: 'custom-toast',
+    });
+};
+
 export { 
     handleAddPlaylist, 
     handleAddFavorite,
@@ -117,5 +124,6 @@ export {
     handleWarning,
     handleWarningUser,
     handleCopy,
-    handlePay
+    handlePay,
+    handleSongExistsInPlaylist 
 };

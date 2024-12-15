@@ -33,13 +33,11 @@ const SongsResults = ({ songs }) => {
       artist: song.artists?.join(', ') || '',
       Image: song.image,
       lyrics: song.lyrics || 'Lyrics not available',
-      album: song.albums?.[0] || '',
+      album: song.albums?.join(', ') || '',
       playCount: song.listens_count || 0,
       TotalDuration: song.duration,
       songId: song.id,
       is_premium: song.is_premium || 0,
-      albumTitle: song.albums?.[0] || '',
-      artistName: song.artists?.join(', ') || '',
     });
     setClickedIndex(index);
 

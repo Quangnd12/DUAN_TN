@@ -43,21 +43,25 @@ const AllSong = () => {
                     const artistDetails = await getArtistById(currentArtist.id);
                     setArtist(artistDetails);
 
-                    const formattedSongs = artistDetails.songs.map(song => ({
-                        id: song.id,
-                        title: song.title,
-                        file_song: song.file,
-                        image: song.image,
-                        lyrics: song.lyrics,
+                    const formattedSongs = artistDetails.songs.map(({
+                        id, title, file, image, lyrics, is_explicit,
+                        listens_count, duration, is_premium, releaseDate,
+                        albumId, albumTitle
+                    }) => ({
+                        id,
+                        title,
+                        file_song: file,
+                        image,
+                        lyrics,
                         name: artistDetails.name,
-                        is_explicit: song.is_explicit || 0,
-                        listens_count: song.listens_count || 0,
-                        duration: song.duration || 0,
-                        is_premium: song.is_premium,
+                        is_explicit: is_explicit || 0,
+                        listens_count: listens_count || 0,
+                        duration: duration || 0,
+                        is_premium: is_premium || 0,
                         artistID: artistDetails.id,
-                        releaseDate: song.releaseDate,
-                        albumID: song.albumId,
-                        albumName: song.albumTitle
+                        releaseDate,
+                        albumId,
+                        albumTitle
                     }));
 
                     setArtistSongs(formattedSongs);
@@ -77,19 +81,22 @@ const AllSong = () => {
             return;
         }
 
-        setPlayerState({
+        const playerData = {
             audioUrl: song.file_song,
             title: song.title,
             artist: song.name,
             Image: song.image,
-            lyrics: song.lyrics,
-            album: song.title,
+            lyrics: song.lyrics !== "Not Found!" ? song.lyrics : "Không có lời bài hát",
+            album: song.albumTitle || "Chưa có album",
+            albumTitle: song.albumTitle || "Chưa có album",
             playCount: song.listens_count,
             TotalDuration: song.duration,
             songId: song.id,
             is_premium: song.is_premium,
             artistID: song.artistID
-        });
+        };
+
+        setPlayerState(playerData);
         setClickedIndex(index);
 
         try {
@@ -141,14 +148,7 @@ const AllSong = () => {
                 updatedCheckboxes.add(index);
             }
 
-            if (updatedCheckboxes.size === artistSongs.length) {
-                setIsSelectAllChecked(true);
-            } else if (updatedCheckboxes.size === 0) {
-                setIsSelectAllChecked(false);
-            } else {
-                setIsSelectAllChecked(false);
-            }
-
+            setIsSelectAllChecked(updatedCheckboxes.size === artistSongs.length);
             return updatedCheckboxes;
         });
     };
@@ -308,7 +308,7 @@ const AllSong = () => {
                                             <div className="absolute top-[25px] justify-end right-[200px]">
                                                 <Link to={`/album/${song.albumID}`}>
                                                     <p className="text-gray-500 text-sm text-center whitespace-nowrap overflow-hidden text-ellipsis w-[370px] hover:text-blue-500 hover:underline no-underline">
-                                                        {song.albumName}
+                                                        {song.albumTitle}
                                                     </p>
                                                 </Link>
                                             </div>

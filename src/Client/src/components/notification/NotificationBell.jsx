@@ -6,8 +6,8 @@ import Tooltip from "@mui/material/Tooltip";
 
 const NotificationBell = () => {
   const { data: followedArtists } = useGetUserFollowedArtistsQuery();
+  const [showNotification, setShowNotification] = useState(false);
   const [notificationsViewed, setNotificationsViewed] = useState(() => {
-    // Lấy trạng thái từ localStorage khi khởi tạo
     const savedState = localStorage.getItem('notificationsViewed');
     return savedState ? JSON.parse(savedState) : {};
   });
@@ -20,7 +20,6 @@ const NotificationBell = () => {
       const diffTime = Math.abs(currentDate - songDate);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
-      // Kiểm tra xem bài hát đã được xem chưa
       const songKey = `song-${song.id}`;
       const isViewed = notificationsViewed[songKey];
       
@@ -31,8 +30,24 @@ const NotificationBell = () => {
 
   const hasNewSongs = newSongs > 0;
 
+  // Thêm useEffect để xử lý độ trễ hiển thị thông báo
+  useEffect(() => {
+    if (hasNewSongs) {
+      // Ban đầu ẩn thông báo
+      setShowNotification(false);
+      
+      // Sau 5 giây mới hiển thị thông báo
+      const timer = setTimeout(() => {
+        setShowNotification(true);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    } else {
+      setShowNotification(false);
+    }
+  }, [hasNewSongs]);
+
   const handleNotificationClick = () => {
-    // Lưu trạng thái đã xem cho tất cả bài hát mới
     const updatedNotificationsViewed = { ...notificationsViewed };
     
     followedArtists?.forEach(artist => {
@@ -50,23 +65,20 @@ const NotificationBell = () => {
     });
 
     setNotificationsViewed(updatedNotificationsViewed);
-    // Lưu vào localStorage
     localStorage.setItem('notificationsViewed', JSON.stringify(updatedNotificationsViewed));
+    setShowNotification(false);
   };
 
-  // Tự động cập nhật localStorage khi notificationsViewed thay đổi
   useEffect(() => {
     localStorage.setItem('notificationsViewed', JSON.stringify(notificationsViewed));
   }, [notificationsViewed]);
 
-  // Xóa các bài hát cũ khỏi notificationsViewed (tùy chọn)
   useEffect(() => {
     const cleanupOldNotifications = () => {
       const updatedNotificationsViewed = { ...notificationsViewed };
       let hasChanges = false;
 
       Object.keys(updatedNotificationsViewed).forEach(key => {
-        // Kiểm tra xem bài hát còn tồn tại trong danh sách không
         const songExists = followedArtists?.some(artist =>
           artist.songs?.some(song => `song-${song.id}` === key)
         );
@@ -92,7 +104,7 @@ const NotificationBell = () => {
     <Tooltip title={hasNewSongs ? `${newSongs} new songs from your followed artists` : "No new notifications"}>
       <div className="relative px-2 py-2 hover:bg-gray-600 rounded-md cursor-pointer" onClick={handleNotificationClick}>
         <NotificationsIcon fontSize="large" className="text-white" />
-        {hasNewSongs && (
+        {showNotification && hasNewSongs && (
           <div className="absolute top-0 right-1">
             <CircleIcon fontSize="small" className="text-red-500" />
           </div>

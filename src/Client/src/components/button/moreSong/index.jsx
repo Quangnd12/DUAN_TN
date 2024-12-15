@@ -10,7 +10,7 @@ import StarIcon from '@mui/icons-material/Star';
 import FeaturedPlayListIcon from '@mui/icons-material/FeaturedPlayList';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ShareOptions from '../share';
-import { handleAddWaitlist } from "../../notification";
+import { handleAddWaitlist, handleAddPlaylist, handleSongExistsInPlaylist } from "../../notification";
 import AddPlaylistOption from '../../dropdown/dropdownAddPlaylist';
 import { useAddSongToPlaylistMutation } from '../../../../../redux/slice/playlistSlice';
 import { useNavigate } from 'react-router-dom';
@@ -60,7 +60,7 @@ const SongMoreButton = ({ type, songId, onOptionSelect }) => {
         };
     }, []);
 
-    const handleOptionClick = (action, playlistId) => {
+    const handleOptionClick = async (action, playlistId) => {
         console.log("Action:", action);
         console.log("Song ID:", songId);
         console.log("Playlist ID:", playlistId);
@@ -83,7 +83,12 @@ const SongMoreButton = ({ type, songId, onOptionSelect }) => {
                 setIsOpen(!isOpen);
                 break;
             case 'add_to_playlist_confirm':
-                addSongToPlaylist({ playlistId, songId });
+                try {
+                    const response = await addSongToPlaylist({ playlistId, songId }).unwrap();
+                    handleAddPlaylist();
+                } catch (error) {
+                    handleSongExistsInPlaylist();
+                }
                 setIsOpen(false);
                 break;
             default:
