@@ -3,8 +3,11 @@ import { useGetUserFollowedArtistsQuery } from "../../../../redux/slice/followSl
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import slugify from "slugify";
+import { translations } from "../../utils/translations/translations";
+import { useTheme } from "../../utils/ThemeContext";
 
 const InfoClientFollowingCard = () => {
+  const { language } = useTheme();
   const { user } = useSelector((state) => state.auth);
   
   const { data, error, isLoading, refetch } = useGetUserFollowedArtistsQuery(
@@ -29,18 +32,19 @@ const InfoClientFollowingCard = () => {
   
   if (error) return (
     <div className="text-center text-red-500 py-4">
-      Error fetching followed artists
+      {translations[language].notifications.title}
     </div>
   );
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold text-white mb-6">Following</h1>
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-5">
+    <div className="p-6 max-h-[600px] overflow-y-auto">
+      <h1 className="text-3xl font-bold text-white mb-6">{translations[language].whatsNew}</h1>
+      <div className="flex flex-wrap gap-6 justify-start">
         {data && data.map((artist) => (
           <div
             key={artist.id}
             className="group relative flex flex-col items-center"
+            style={{ minWidth: '150px', maxWidth: '150px' }}
           >
             <Link 
               to={`/artist/${slugify(artist.name)}`}
@@ -59,13 +63,13 @@ const InfoClientFollowingCard = () => {
             
             <Link 
               to={`/artist/${slugify(artist.name)}`}
-              className="text-center"
+              className="text-center w-full"
             >
-              <h3 className="text-white font-medium text-base mb-1 
-                hover:text-blue-500 transition-colors">
+              <h3 className="text-white font-medium text-base mb-1 truncate
+                hover:text-blue-500 transition-colors px-2">
                 {artist.name}
               </h3>
-              <p className="text-gray-400 text-sm">Artist</p>
+              <p className="text-gray-400 text-sm">{translations[language].artist}</p>
             </Link>
           </div>
         ))}

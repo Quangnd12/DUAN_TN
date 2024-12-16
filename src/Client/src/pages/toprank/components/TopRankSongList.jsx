@@ -21,8 +21,11 @@ import { useParams } from "react-router-dom";
 import { formatDuration } from "Admin/src/components/formatDate";
 import { PlayerContext } from "Client/src/components/context/MusicPlayer";
 import useAge from "Client/src/components/calculateAge";
+import { translations } from "../../../utils/translations/translations";
+import { useTheme } from "../../../utils/ThemeContext";
 
 const TopRankSongList = () => {
+  const { language } = useTheme();
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [dropdownIndex, setDropdownIndex] = useState(null);
   const [showShareOptions, setShowShareOptions] = useState(false);
@@ -214,7 +217,7 @@ const TopRankSongList = () => {
                     </span>
                     <span className="flex items-center">
                       <AiOutlineHeart className="w-4 h-4 mr-1 text-pink-500" />
-                      {formatListenCount(topSongs[0].listens_count)} lượt nghe
+                      {formatListenCount(topSongs[0].listens_count)} {translations[language].listens}
                     </span>
                   </div>
                   <p className="text-gray-400 text-sm relative z-10">
@@ -241,12 +244,6 @@ const TopRankSongList = () => {
                   <LikeButton
                     likedSongs={likedSongs[0]}
                     handleLikeToggle={() => handleLikeToggle(0)}
-                  />
-                </div>
-                <div className="ml-6">
-                  <MoreButton
-                    type="albumPlaylist"
-                    onOptionSelect={handleOptionSelect}
                   />
                 </div>
               </div>
@@ -342,7 +339,7 @@ const TopRankSongList = () => {
                           </span>
                         )}
                         <span className="ml-2 text-xs text-gray-400">
-                          {formatListenCount(song.listens_count)} lượt nghe
+                          {formatListenCount(song.listens_count)} {translations[language].listens}
                         </span>
                       </div>
                       <div className="absolute inset-0 flex items-center justify-center">

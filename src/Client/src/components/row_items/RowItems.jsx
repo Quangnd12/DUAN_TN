@@ -2,6 +2,8 @@ import React, {useEffect} from "react";
 import { Link } from "react-router-dom";
 import CircleCard from "../cards/CircleCard";
 import RoundCard from "../cards/RoundCard";
+import { translations } from "../../utils/translations/translations";
+import { useTheme } from "../../utils/ThemeContext";
 
 
 import PlayPause from "../button/playPause";
@@ -10,6 +12,7 @@ import PlayPause from "../button/playPause";
 import {slugify,createAlbumSlug} from "../createSlug";
 
 const RowItems = ({ title, data, rowId, globalPlayingState, setGlobalPlayingState }) => {
+  const { language } = useTheme();
   const sky = getComputedStyle(document.documentElement).getPropertyValue("--sky").trim();
 
   useEffect(() => {
@@ -68,7 +71,7 @@ const RowItems = ({ title, data, rowId, globalPlayingState, setGlobalPlayingStat
           to={getShowAllLink()}
           className="rowItemSubTitle text-sky-500 font-bold cursor-pointer hover:text-white"
         >
-          Show all
+          {translations[language].showAll}
         </Link>
       </div>
       <div className="flex justify-between">

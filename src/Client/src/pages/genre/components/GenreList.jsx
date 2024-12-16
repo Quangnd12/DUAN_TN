@@ -55,6 +55,44 @@ const ListSongOfGenres = () => {
     }
   }, [debounced]);
 
+  const playFirstSong = () => {
+    if (Songs.length > 0) {
+      const firstSong = Songs[0];
+      setPlayerState({
+        audioUrl: firstSong.file_song,
+        title: firstSong.title,
+        artist: firstSong.artist,
+        Image: firstSong.image,
+        lyrics: firstSong.lyrics,
+        album: firstSong.album,
+        playCount: firstSong.listens_count,
+        TotalDuration: firstSong.duration,
+        songId: firstSong.id,
+        is_premium: firstSong.is_premium,
+        artistID: firstSong.artistID,
+      });
+    }
+  };
+
+  const playRandomSong = () => {
+    if (Songs.length > 0) {
+      const randomIndex = Math.floor(Math.random() * Songs.length);
+      const randomSong = Songs[randomIndex];
+      setPlayerState({
+        audioUrl: randomSong.file_song,
+        title: randomSong.title,
+        artist: randomSong.artist,
+        Image: randomSong.image,
+        lyrics: randomSong.lyrics,
+        album: randomSong.album,
+        playCount: randomSong.listens_count,
+        TotalDuration: randomSong.duration,
+        songId: randomSong.id,
+        is_premium: randomSong.is_premium,
+        artistID: randomSong.artistID,
+      });
+    }
+  };
 
   const handleRowClick = (song, index) => {
     if (song.is_explicit === 1 && age < 18) {
@@ -144,9 +182,10 @@ const ListSongOfGenres = () => {
       <div className="flex flex-col">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
-            <button className="bg-icon text-white p-2 rounded-full hover:bg-blue-700 transition ml-3">
+            <button className="bg-icon text-white p-2 rounded-full hover:bg-blue-700 transition ml-3" onClick={playFirstSong}>
               <MdPlayArrow size={24} />
             </button>
+          
             <div className="ml-6">
               {/* <LikeButton
                   likedSongs={likedSongs[0]}
@@ -154,16 +193,10 @@ const ListSongOfGenres = () => {
 
               /> */}
             </div>
-            <div className="ml-6">
-              <MoreButton
-                type="albumPlaylist"
-                onOptionSelect={handleOptionSelect}
-              />
-            </div>
           </div>
-          <button className="flex items-center bg-icon text-white p-2 rounded-full hover:bg-blue-700 transition">
-            <MdShuffle size={24} />
-          </button>
+          <button className="flex items-center bg-icon text-white p-2 rounded-full hover:bg-blue-700 transition" onClick={playRandomSong}>
+              <MdShuffle size={24} />
+            </button>
         </div>
         <div className="flex">
           {isAnyCheckboxSelected() && (

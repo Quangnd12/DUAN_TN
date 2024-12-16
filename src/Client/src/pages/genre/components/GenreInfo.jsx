@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { getSongs } from "services/songs";
+import { translations } from "../../../utils/translations/translations";
+import { useTheme } from "../../../utils/ThemeContext";
 
 
 const GenreInfo = ({ id }) => {
-
+  const { language } = useTheme();
   const [Songs, setSongs] = useState([]);
 
   const SongData = async (page = 0, limit = 0, search = '', genre = [], minDuration = 0, maxDuration = 0, minListensCount = 0, maxListensCount = 0) => {
@@ -29,18 +31,18 @@ const GenreInfo = ({ id }) => {
 
           <div className="max-w-7xl mx-auto w-full relative z-10 animate-fadeIn">
             <span className="text-gray-300 text-lg mb-4 block hover:text-white transition-colors duration-300">
-              THỂ LOẠI
+              {translations[language].genres}
             </span>
             <h1 className="text-8xl font-bold text-white mb-6 tracking-tight hover:scale-[1.01] transform transition-transform duration-300">
               {song.genre}
             </h1>
             <div className="flex items-center gap-4 text-gray-300 hover:text-white transition-colors duration-300">
               <p className="text-lg hover:text-white transition-colors">
-                {Songs.length} bài hát
+                {Songs.length} {translations[language].songs}
               </p>
               <div className="w-1px h-4 bg-gray-600"></div>
               <p className="text-lg hover:text-white transition-colors">
-                Tổng thời lượng: {Math.floor(Songs.reduce((acc, song) => acc + song.duration, 0) / 60)} phút
+                {translations[language].totalDuration}: {Math.floor(Songs.reduce((acc, song) => acc + song.duration, 0) / 60)} {translations[language].minutes}
               </p>
             </div>
           </div>

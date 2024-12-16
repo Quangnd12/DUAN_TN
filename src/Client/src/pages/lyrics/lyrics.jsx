@@ -155,11 +155,6 @@ const Lyrics = ({ onClose, lyrics, title, artist, album, image, playCount, curre
                 </div>
             </div>
 
-            <div className="flex justify-between items-center pl-52">
-                <div className="flex space-x-4 items-center">
-                    <MoreButton type="lyrics" onOptionSelect={() => { }} />
-                </div>
-            </div>
 
             <div className="flex flex-col pl-52 mb-4">
                 <div className="flex justify-between items-center">

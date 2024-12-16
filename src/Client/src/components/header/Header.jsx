@@ -10,29 +10,16 @@ import { searchAll } from '../../../../services/search';
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import Tooltip from "@mui/material/Tooltip";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import CircleIcon from "@mui/icons-material/Circle";
 import Avatar from "@mui/material/Avatar";
 import CircularProgress from "@mui/material/CircularProgress";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { styled } from "@mui/joy";
-import Button from "@mui/joy/Button";
 import { getPaymentByUser, CheckPayment } from 'services/payment';
 import { GiCrown } from 'react-icons/gi';
+import { translations } from "../../utils/translations/translations";
+import { useTheme } from "../../utils/ThemeContext";
 
-const VisuallyHiddenInput = styled("input")`
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  height: 1px;
-  overflow: hidden;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  white-space: nowrap;
-  width: 1px;
-`;
 
 const Header = () => {
+  const { language } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -177,16 +164,16 @@ const Header = () => {
             <div className="absolute right-0 mt-2 w-48 bg-zinc-800 rounded-md shadow-lg py-1 z-50 border border-gray-700">
               <button
                 onClick={handleProfileClick}
-                className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-zinc-700"
+                className="block w-full text-left px-4 py-2 text-sm rounded-sm text-white hover:bg-zinc-700"
               >
-                Profile
+                {translations[language].info}
               </button>
               <hr className="border-gray-700" />
               <button
                 onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-zinc-700"
+                className="block w-full text-left px-4 py-2 text-sm rounded-sm text-white hover:bg-zinc-700"
               >
-                {isLoggingOut ? "Logging out..." : "Logout"}
+                {isLoggingOut ? translations[language].logout + "..." : translations[language].logout}
               </button>
             </div>
           )}
@@ -198,12 +185,12 @@ const Header = () => {
       <>
         <Link to="/register">
           <div className="px-4 py-2 rounded-md text-white hover:bg-zinc-800 transition-colors">
-            Sign up
+            {translations[language].register}
           </div>
         </Link>
         <Link to="/login">
           <div className="px-4 py-2 rounded-md font-bold bg-white text-black hover:bg-gray-200 transition-colors">
-            Sign in
+            {translations[language].login}
           </div>
         </Link>
       </>
@@ -215,7 +202,7 @@ const Header = () => {
       <div className="w-full bg-zinc-900 mb-4 rounded-md">
         <div className="p-4 flex justify-between items-center">
           <div className="flex gap-2">
-            <Tooltip title={canGoBack ? "Back" : "Can't go back"}>
+            <Tooltip title={canGoBack ? translations[language].back : translations[language].cantGoBack}>
               <span>
                 <div
                   className={`rounded-full p-2 ${canGoBack
@@ -228,7 +215,7 @@ const Header = () => {
                 </div>
               </span>
             </Tooltip>
-            <Tooltip title={canGoForward ? "Forward" : "Can't go on"}>
+            <Tooltip title={canGoForward ? translations[language].forward : translations[language].cantGoForward}>
               <span>
                 <div
                   className={`rounded-full p-2 ${canGoForward
@@ -254,7 +241,7 @@ const Header = () => {
                 {!payment.user_id && (
                   <Link to="/upgrade">
                     <button className="bg-white text-black text-[16px] font-bold px-3 py-2 rounded-[20px]  mr-6 shrink-0">
-                      Premium Upgrade
+                      {translations[language].premiumUpgrade}
                     </button>
                   </Link>
                 )}

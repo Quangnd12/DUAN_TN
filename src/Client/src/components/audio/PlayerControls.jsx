@@ -206,7 +206,8 @@ const PlayerControls = () => {
       }));
     }
 
-    if (!user && currentTime > 30) {
+    if ((!user && currentTime > 30) ||
+      (user && is_premium === 1 && !payment.user_id && currentTime > 30)) {
       setIsPlaying(false);
       return;
     }
@@ -391,7 +392,7 @@ const PlayerControls = () => {
   }, [Songs]);
 
   return (
-    <div className="container-controls">
+    <div className="container-controls m-2">
       <div className="controls">
         <CurrentTrack
           title={title}
@@ -399,6 +400,7 @@ const PlayerControls = () => {
           image={Image}
           lyrics={lyrics}
           user_id={payment.user_id}
+          is_premium={is_premium}
         />
         <div className="control-buttons">
           <MdRepeat

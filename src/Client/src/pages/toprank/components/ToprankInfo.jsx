@@ -2,9 +2,12 @@ import React, { useState, useEffect } from "react";
 import "../../../assets/css/artist/artist.css";
 import { useParams } from "react-router-dom";
 import { getGenres } from '../../../../../services/genres';
+import { translations } from "../../../utils/translations/translations";
+import { useTheme } from "../../../utils/ThemeContext";
 
 const TopRankInfo = () => {
     const { id } = useParams();
+    const { language } = useTheme();
     const [genreData, setGenreData] = useState(null);
 
     useEffect(() => {
@@ -22,7 +25,7 @@ const TopRankInfo = () => {
     }, [id]);
 
     if (!genreData) {
-        return <div className="text-gray-600">Đang tải...</div>;
+        return <div className="text-gray-600">{translations[language].loading}</div>;
     }
 
     return (
@@ -58,7 +61,7 @@ const TopRankInfo = () => {
                     {`${genreData.name.toUpperCase()} TRACKS`}
                 </h2>
                 <p className="text-lg text-gray-400 mb-6 max-w-3xl mx-auto">
-                    {genreData.description || `Những bài hát ${genreData.name} hay nhất hiện nay`}
+                    {genreData.description || `${translations[language].Songs} ${genreData.name} ${translations[language].bestToday}`}
                 </p>
                 <div className="flex justify-center space-x-4">
                     <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-yellow-500 rounded-full animate-pulse"></div>

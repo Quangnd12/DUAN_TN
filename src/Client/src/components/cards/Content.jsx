@@ -28,7 +28,6 @@ const ContentCard = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [dropdownIndex, setDropdownIndex] = useState(null);
   const [selectedCheckboxes, setSelectedCheckboxes] = useState(new Set());
-  const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
   const [likedSongs, setLikedSongs] = useState({});
 
@@ -187,7 +186,7 @@ const ContentCard = () => {
 
                       <div className="absolute inset-0 flex items-center justify-end">
                         <div
-                          className={`absolute right-[250px] transition-opacity duration-300 ${
+                          className={`absolute right-[150px] transition-opacity duration-300 ${
                             hoveredIndex === artistIndex ? "opacity-100" : "opacity-0"
                           }`}
                         >

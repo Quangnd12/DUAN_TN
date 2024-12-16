@@ -109,16 +109,6 @@ const CheckoutForm = () => {
             <LoadingSpinner isLoading={loading} />
             <div className="payment-methods flex flex-col space-y-4 mb-6">
                 <p>Please choose payment method</p>
-                <label className=" items-center space-x-4">
-                    <input
-                        type="radio"
-                        checked={paymentMethod === 'paypal'}
-                        onChange={() => setPaymentMethod(paymentMethod === 'paypal' ? null : 'paypal')}
-                        className="w-3 h-3"
-                    />
-                    <span className="text-black text-lg">PayPal</span>
-                    <img src='/images/paypal.png' className='w-[100px] mt-2' />
-                </label>
                 <label className="items-center space-x-4">
                     <input
                         type="radio"

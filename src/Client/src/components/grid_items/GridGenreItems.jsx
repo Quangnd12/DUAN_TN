@@ -8,8 +8,11 @@ import useAge from "Client/src/components/calculateAge";
 import { handleWarning, handleWarningUser } from "Client/src/components/notification";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { translations } from "../../utils/translations/translations";
+import { useTheme } from "../../utils/ThemeContext";
 
 const GridGenreItems = () => {
+  const { language } = useTheme();
   const [genres, setGenres] = useState([]);
   const [topSongs, setTopSongs] = useState([]);
   const { setPlayerState, Songs, setClickedIndex } = useContext(PlayerContext);
@@ -114,9 +117,9 @@ const GridGenreItems = () => {
     <div className="grid grid-cols-2 gap-4 mt-4">
       <div className="bg-zinc-900 p-4 rounded-md">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl text-left font-bold text-white">Genres</h2>
+          <h2 className="text-xl text-left font-bold text-white">{translations[language].genres}</h2>
           <Link to="/genre" className="text-sm text-gray-400 hover:text-white">
-            See all
+            {translations[language].showAll}
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 bg-zinc-900">
@@ -127,9 +130,9 @@ const GridGenreItems = () => {
       </div>
       <div className="bg-zinc-900 p-4 rounded-md">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl text-left font-bold text-white">Top Charts</h2>
+          <h2 className="text-xl text-left font-bold text-white">{translations[language].topCharts}</h2>
           <Link to="/toprank" className="text-sm text-gray-400 hover:text-white">
-            See all
+            {translations[language].showAll}
           </Link>
         </div>
         <div className="space-y-4">
@@ -162,7 +165,7 @@ const GridGenreItems = () => {
                   <div className="flex items-center text-sm text-gray-400">
                     <span>{song.artist}</span>
                     <span className="mx-2">•</span>
-                    <span>{formatListens(song.listens_count)} Views</span>
+                    <span>{formatListens(song.listens_count)} {translations[language].listens}</span>
                   </div>
                 </div>
               </div>

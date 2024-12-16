@@ -3,6 +3,8 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import CircleIcon from "@mui/icons-material/Circle";
 import { useGetUserFollowedArtistsQuery } from "../../../../redux/slice/followSlice";
 import Tooltip from "@mui/material/Tooltip";
+import { translations } from "../../utils/translations/translations"; // Import translations
+import { useTheme } from "../../utils/ThemeContext"; // Import useTheme
 
 const NotificationBell = () => {
   const { data: followedArtists } = useGetUserFollowedArtistsQuery();
@@ -11,6 +13,7 @@ const NotificationBell = () => {
     const savedState = localStorage.getItem('notificationsViewed');
     return savedState ? JSON.parse(savedState) : {};
   });
+  const { language } = useTheme(); // Lấy ngôn ngữ từ context
 
   // Đếm số bài hát mới
   const newSongs = followedArtists?.reduce((acc, artist) => {
@@ -101,7 +104,7 @@ const NotificationBell = () => {
   }, [followedArtists]);
 
   return (
-    <Tooltip title={hasNewSongs ? `${newSongs} new songs from your followed artists` : "No new notifications"}>
+    <Tooltip title={hasNewSongs ? `${newSongs} ${translations[language].notifications.justNow} từ nghệ sĩ bạn theo dõi` : translations[language].notifications.noNotifications}>
       <div className="relative px-2 py-2 hover:bg-gray-600 rounded-md cursor-pointer" onClick={handleNotificationClick}>
         <NotificationsIcon fontSize="large" className="text-white" />
         {showNotification && hasNewSongs && (

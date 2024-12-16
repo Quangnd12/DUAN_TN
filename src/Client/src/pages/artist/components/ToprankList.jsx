@@ -2,8 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getGenres } from '../../../../../services/genres';
 import { getSongs } from '../../../../../services/songs';
+import { translations } from "../../../utils/translations/translations";
+import { useTheme } from "../../../utils/ThemeContext";
 
 const AllTopranks = () => {
+    const { language } = useTheme();
     const [genres, setGenres] = useState([]);
 
     useEffect(() => {
@@ -51,7 +54,7 @@ const AllTopranks = () => {
                     <div className="relative z-10 text-white p-4 mb-8">
                         <div className="absolute inset-0 bg-purple-600 blur-2xl opacity-30 animate-pulse"></div>
                         <h2 className="relative text-2xl font-semibold mb-4 tracking-tight z-20">
-                            Top Thể Loại
+                            {translations[language].topGenre}
                         </h2>
                     </div>
 
@@ -83,7 +86,7 @@ const AllTopranks = () => {
                     </div>
                 </div>
             ) : (
-                <p className="text-center text-gray-400">Không có dữ liệu để hiển thị.</p>
+                <p className="text-center text-gray-400">{translations[language].noData}</p>
             )}
         </div>
     );

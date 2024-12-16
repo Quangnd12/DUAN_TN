@@ -3,9 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useGetAllEventsQuery } from "../../../../redux/slice/eventSlice";
 import { Loader2, AlertCircle, Sparkles, TrendingUp } from "lucide-react";
 import EventCard from '../../components/cards/EventCard';
+import { translations } from "../../utils/translations/translations";
+import { useTheme } from "../../utils/ThemeContext";
 
 const Event = () => {
   const navigate = useNavigate();
+  const { language } = useTheme();
   const { data, error, isLoading } = useGetAllEventsQuery({
     page: 1,
     limit: 12,
@@ -43,7 +46,7 @@ const Event = () => {
         <div className="flex items-center justify-between mb-12">
           <h1 className="text-white text-2xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600 flex items-center">
             <Sparkles className="w-10 h-10 mr-4 text-yellow-400" />
-            Upcoming Events
+            {translations[language].upcoming}
             <TrendingUp className="w-8 h-8 ml-4 text-green-400" />
           </h1>
         </div>

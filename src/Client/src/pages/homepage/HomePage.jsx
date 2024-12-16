@@ -8,9 +8,12 @@ import Footer from "../../components/footer/Footer";
 import { getAllArtists } from "../../../../services/artist";
 import { getAlbums } from "../../../../services/album"; // Import hàm getAlbums
 import { useDispatch, useSelector } from "react-redux";
+import { translations } from "../../utils/translations/translations";
+import { useTheme } from "../../utils/ThemeContext";
 
 
 const HomePage = () => {
+  const { language } = useTheme();
   const [artists, setArtists] = useState([]);
   const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -83,18 +86,6 @@ useEffect(() => {
   fetchData();
 }, [isMounted]);
 
-// Giữ nguyên dữ liệu radio
-const data = {
-  radio: [
-    {
-      id: 1,
-      name: "GolTV On The Radioden",
-      image: "https://seeded-session-images.scdn.co/v2/img/122/secondary/artist/3HJIB8sYPyxrFGuwvKXSLR/en",
-      title: "podcast",
-    },
-    // ... các radio khác giữ nguyên
-  ]
-};
 
 if (loading) {
   return (
@@ -115,14 +106,14 @@ if (loading) {
         </Helmet>
         <GridItems />
         <RowItems
-          title={"Popular artist"}
+          title={translations[language].popularArtist}
           data={artists}
           rowId="popular-artist"
           globalPlayingState={globalPlayingState}
           setGlobalPlayingState={setGlobalPlayingState}
         />
         <RowItems
-          title={"Popular albums"}
+          title={translations[language].popularAlbums}
           data={albums}
           rowId="popular-albums"
           globalPlayingState={globalPlayingState}

@@ -1,15 +1,19 @@
 import React from 'react';
 import ContentCard from '../../components/cards/Content';
 import tb from '../../../public/assets/img/Tb.png';
+import { translations } from '../../utils/translations/translations';
+import { useTheme } from '../../utils/ThemeContext';
 
 const Content = () => {
+  const { language } = useTheme();
+
   return (
     <div className="bg-black text-white p-8">
       <div className="flex flex-col items-start justify-between">
-        <h1 className="text-7xl font-bold mb-2 ml-32">What's new today?</h1>
+        <h1 className="text-7xl font-bold mb-2 ml-32">{translations[language].whatsNew}</h1>
         <p className="text-gray-400 mb-4 ml-36">
-          Let's enjoy wonderful moments of relaxation <br />
-          together with music.
+          {translations[language].enjoyMoments} <br />
+          {translations[language].togetherWithMusic}
         </p>
         <img 
           src={tb} 
@@ -18,7 +22,7 @@ const Content = () => {
         />
         
         <div className="w-full">
-          <span className="text-gray-400 font-semibold mb-1 inline-block">New songs</span>
+          <span className="text-gray-400 font-semibold mb-1 inline-block">{translations[language].newSongs}</span>
           <hr className="w-full border-t border-gray-600" />
         </div>
       </div>
