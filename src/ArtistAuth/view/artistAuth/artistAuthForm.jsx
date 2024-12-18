@@ -162,7 +162,7 @@ const ArtistAuthForm = () => {
             }}
           >
             <Tab label="Login" className="text-lg" />
-            <Tab label="Register" className="text-lg" />
+            {/* <Tab label="Register" className="text-lg" /> */}
           </Tabs>
 
           {errorMessage && (

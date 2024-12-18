@@ -3,6 +3,7 @@ import { FaStar, FaStarHalfAlt, FaRegStar, FaMusic } from 'react-icons/fa';
 import '../../../src/assets/css/report/report.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCreateOrUpdateRatingMutation, useGetUserRatingQuery } from '../../../../redux/slice/ratingSlice';
+import { slugify } from "Client/src/components/createSlug";
 
 const Report = () => {
   const location = useLocation();
@@ -92,7 +93,7 @@ const Report = () => {
       });
       setShowThankYouModal(true);
       setTimeout(() => {
-        navigate('/');
+        navigate(`/artist/${slugify(currentSong.artist)}`);
       }, 2000);
     } catch (error) {
       console.error("Error submitting rating:", error);

@@ -146,9 +146,6 @@ const ArtistInfo = () => {
                   </>
                 )}
               </button>
-              <div className="relative top-4 ml-2">
-                <MoreButton type="artist" onOptionSelect={handleOptionSelect} />
-              </div>
             </div>
           </div>
         </div>

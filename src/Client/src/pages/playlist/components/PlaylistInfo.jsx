@@ -160,7 +160,6 @@ const PlayListInfo = () => {
                             </h6>
                         </div>
                         <div className="flex items-center">
-                            <p className="text-left text-lg pr-4 mt-2">{"nhituyet"}</p>
                             <div className="flex items-center">
                                 <p style={{ fontSize: '40px', color: 'white', marginBottom: '20px', marginRight: '5px' }}>.</p>
                                 <p className="text-left text-lg mt-2 text-gray-400">

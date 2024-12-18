@@ -471,6 +471,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
           icon={<i className="fas fa-users"></i>}
+          value={isLoadingUsers ? "..." : (usersData?.users?.filter(user => user.role === 'user').length || 0)} 
           label={t.stats.listeners}
           color="bg-purple-100"
           topUsers={getTopUsers()}
@@ -478,6 +479,7 @@ export default function Dashboard() {
         />
         <StatCard
           icon={<i className="fas fa-calendar-alt"></i>}
+          value={isLoadingEvents ? "..." : eventsData?.total || 0}
           label={t.stats.upcomingEvent}
           color="bg-blue-100"
           upcomingEvents={getUpcomingEvents()}
@@ -485,6 +487,7 @@ export default function Dashboard() {
         />
         <StatCard
           icon={<i className="fas fa-microphone"></i>}
+          value={isLoadingSongStats ? "..." : Object.keys(songStats?.artists || {}).length}
           label={t.stats.artists}
           color="bg-red-100"
           topArtists={isLoadingSongStats ? [] : getTopArtists()}

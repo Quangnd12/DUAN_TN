@@ -41,12 +41,12 @@ const RowItems = ({ title, data, rowId, globalPlayingState, setGlobalPlayingStat
           <RoundCard image={item.image} name={item.name} title={item.title} />
         )}
       </Link>
-      <PlayPause
+      {/* <PlayPause
         rowId={rowId}
         index={index}
         globalPlayingState={globalPlayingState}
         setGlobalPlayingState={setGlobalPlayingState}
-      />
+      /> */}
     </div>
   );
 
