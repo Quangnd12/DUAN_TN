@@ -237,8 +237,7 @@ const Header = () => {
 
             {isAuthenticated && (
               <>
-
-                {!payment.user_id && (
+                {(!payment.user_id || (payment.user_id && payment.status === 0)) && (
                   <Link to="/upgrade">
                     <button className="bg-white text-black text-[16px] font-bold px-3 py-2 rounded-[20px]  mr-6 shrink-0">
                       {translations[language].premiumUpgrade}
@@ -249,7 +248,6 @@ const Header = () => {
                   <NotificationBell />
                 </Link>
               </>
-
             )}
             {renderUserSection()}
           </div>

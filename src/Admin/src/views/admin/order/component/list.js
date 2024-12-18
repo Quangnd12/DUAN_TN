@@ -118,7 +118,10 @@ const OrderList = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {Orders.map((order, index) => (
+                                {Orders.filter(order => {
+                                    const status = order.status;
+                                    return status === 1
+                                }).map((order, index) => (
                                     <React.Fragment key={order.payment_id}>
                                         <TableRow sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}>
                                             <TableCell>
@@ -153,7 +156,7 @@ const OrderList = () => {
                                                             <div className="flex mr-2">
                                                                 Additional Information
                                                                 <button className="bg-green-500 text-white p-2 rounded-md transition hover:bg-green-600 ml-3 w-[100px] h-[40px] text-[16px]"
-                                                                onClick={()=>{exportToPDF(order.username,order.amount / 100,formatDate(order.subscription_date),formatDate(order.expiry_date))}}
+                                                                    onClick={() => { exportToPDF(order.username, order.amount / 100, formatDate(order.subscription_date), formatDate(order.expiry_date)) }}
                                                                 >
                                                                     Export PDF
                                                                 </button >
