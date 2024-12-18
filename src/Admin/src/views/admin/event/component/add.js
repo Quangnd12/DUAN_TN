@@ -256,8 +256,7 @@ const EventAdd = () => {
                   InputLabelProps={{ shrink: true }}
                   inputProps={{
                     min: watch("startTime") || getCurrentDateTimeLocalFormat(),
-                    // Nếu chưa chọn start time thì mặc định từ thời điểm hiện tại
-                    step: 60, // Giới hạn chọn theo từng phút
+                    step: 60,
                   }}
                   error={!!errors.endTime}
                   helperText={errors.endTime?.message}

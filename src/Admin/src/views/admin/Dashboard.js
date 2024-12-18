@@ -20,6 +20,9 @@ import { useGetUsersQuery } from "../../../../redux/slice/apiSlice";
 import { useGetAllEventsQuery } from "../../../../redux/slice/eventSlice";
 import { getSongs, getSongStats } from "../../../../services/songs";
 
+// Thêm import translations từ ChartSwitcher
+import { translations as chartTranslations } from "../../components/ChartSwitcher/ChartSwitcher";
+
 const translations = {
   vi: {
     dashboard: "Bảng Điều Khiển",
@@ -35,12 +38,13 @@ const translations = {
       topFans: "Người Hâm Mộ Hàng Đầu",
     },
     charts: {
-      popularGenres: "Thể loại được yêu thích",
+      popularGenres: "Tổng lượt nghe hàng tháng",
       topArtists: "Nghệ sĩ có album",
       songCount: "Số bài hát",
       listenCount: "Lượt nghe",
       albumCount: "Số album"
-    }
+    },
+    distribution: "Phân phối thể loại"
   },
   en: {
     dashboard: "Dashboard",
@@ -56,12 +60,13 @@ const translations = {
       topFans: "Top Fans",
     },
     charts: {
-      popularGenres: "Popular Genres",
+      popularGenres: "Total monthly listens",
       topArtists: "Artists with Albums",
       songCount: "Songs",
       listenCount: "Listens",
       albumCount: "Albums"
-    }
+    },
+    distribution: "Genre Distribution"
   }
 };
 
@@ -265,9 +270,18 @@ export default function Dashboard() {
             genre,
             count: 0,
             listens: 0,
+            monthlyListens: {}, // Thêm trường để lưu lượt nghe theo tháng
           };
           currentCount.count++;
           currentCount.listens += song.listens_count || 0;
+
+          // Tính lượt nghe theo tháng
+          const date = new Date(song.releaseDate);
+          const monthName = date.toLocaleString('en', { month: 'long' }); // Luôn lấy tên tháng tiếng Anh
+          const year = date.getFullYear();
+          const monthKey = `${monthName} ${year}`;
+          currentCount.monthlyListens[monthKey] = (currentCount.monthlyListens[monthKey] || 0) + (song.listens_count || 0);
+
           genresMap.set(genre, currentCount);
         });
 
@@ -311,6 +325,54 @@ export default function Dashboard() {
     fetchSongStats();
   }, []);
 
+  const monthOrder = {
+    "January": 1,
+    "February": 2,
+    "March": 3,
+    "April": 4,
+    "May": 5,
+    "June": 6,
+    "July": 7,
+    "August": 8,
+    "September": 9,
+    "October": 10,
+    "November": 11,
+    "December": 12,
+  };
+
+  const getMonthlyListenData = () => {
+    const totalMonthlyData = {};
+    genreStats.forEach((genre) => {
+      Object.entries(genre.monthlyListens).forEach(([month, count]) => {
+        totalMonthlyData[month] = (totalMonthlyData[month] || 0) + count;
+      });
+    });
+
+    return Object.entries(totalMonthlyData)
+      .map(([month, listens]) => {
+        const [monthName, year] = month.split(" ");
+        const monthNumber = monthOrder[monthName]; // Lấy số tháng
+
+        // Sử dụng chartTranslations để lấy tên tháng đã dịch
+        const translatedMonth = chartTranslations[language]?.popularGenres?.months?.[monthName];
+
+        // Format lại theo ngôn ngữ
+        const formattedMonth = language === 'vi' 
+          ? `${translatedMonth} năm ${year}`
+          : `${monthName} ${year}`;
+
+        return {
+          month: formattedMonth,
+          listens,
+          monthNumber, // Thêm số tháng vào dữ liệu
+        };
+      })
+      .sort((a, b) => a.monthNumber - b.monthNumber) // Sắp xếp theo số tháng
+      .map(({ month, listens }) => ({ month, listens })); // Trả về dữ liệu đã sắp xếp
+  };
+
+  const monthlyListenData = getMonthlyListenData();
+
   return (
     <div className="p-6">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6">
@@ -337,10 +399,10 @@ export default function Dashboard() {
           label={t.stats.listeners}
           color="bg-purple-100"
           topUsers={getTopUsers()}
+          language={language}
         />
         <StatCard
           icon={<i className="fas fa-calendar-alt"></i>}
-          value={isLoadingEvents ? "..." : eventsData?.total || 0}
           label={t.stats.upcomingEvent}
           color="bg-blue-100"
           upcomingEvents={getUpcomingEvents()}
@@ -348,13 +410,12 @@ export default function Dashboard() {
         />
         <StatCard
           icon={<i className="fas fa-microphone"></i>}
-          value={isLoadingSongStats ? "..." : Object.keys(songStats?.artists || {}).length}
           label={t.stats.artists}
           color="bg-red-100"
           topArtists={isLoadingSongStats ? [] : getTopArtists()}
         />
         <PieChartCard
-          title="Genre Distribution"
+          title={t.distribution}
           data={isLoadingSongStats ? [] : formatGenreData()}
           colors={COLORS}
           loading={isLoadingSongStats}
@@ -374,13 +435,12 @@ export default function Dashboard() {
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             {chartType === "popularGenres" && (
-              <BarChart data={genreStats}>
+              <BarChart data={monthlyListenData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="genre" />
+                <XAxis dataKey="month" />
                 <YAxis />
-                <Tooltip />
-                <Bar name={t.charts.songCount} dataKey="count" fill="#8884d8" />
-                <Bar name={t.charts.listenCount} dataKey="listens" fill="#82ca9d" />
+                <Tooltip formatter={(value) => [`Tổng Lượt Nghe: ${value}`, ""]} />
+                <Bar name="Tổng Lượt Nghe" dataKey="listens" fill="#8884d8" />
               </BarChart>
             )}
             {chartType === "topArtists" && (

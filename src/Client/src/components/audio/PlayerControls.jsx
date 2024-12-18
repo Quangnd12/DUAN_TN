@@ -392,7 +392,7 @@ const PlayerControls = () => {
   }, [Songs]);
 
   return (
-    <div className="container-controls m-2">
+    <div className="container-controls mx-2">
       <div className="controls">
         <CurrentTrack
           title={title}

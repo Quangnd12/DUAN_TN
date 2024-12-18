@@ -95,13 +95,8 @@ const SideBar = () => {
       />
 
       <div className="mt-auto">
-        {isOpen && (
-          <div className="text-white font-bold p-3 mb-4">
-            {translations[language].sidebarDescription}
-          </div>
-        )}
         <div
-          className={`flex items-center gap-3 rounded-full w-max p-2 mb-5 font-bold transition-all cursor-pointer ${isClicked ? "bg-white text-black" : "bg-black text-white"
+          className={`flex items-center gap-3 rounded-full w-max p-2 mb-9 font-bold transition-all cursor-pointer ${isClicked ? "bg-white text-black" : "bg-black text-white"
             } hover:scale-105 ${isOpen ? "" : "justify-center"}`}
           onClick={() => {
             toggleLanguage();

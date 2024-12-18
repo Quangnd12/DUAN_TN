@@ -72,7 +72,7 @@ const ArtistDashboard = () => {
       icon: <HeadphonesIcon sx={{ fontSize: 40 }} className="text-green-400" />,
       title: 'Monthly Listeners',
       value: monthlyListeners,
-      change: '+1 this week',
+      change: '+1 this month',
       progress: 78,
     },
     {

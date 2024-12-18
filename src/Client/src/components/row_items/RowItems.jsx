@@ -59,7 +59,7 @@ const RowItems = ({ title, data, rowId, globalPlayingState, setGlobalPlayingStat
     } else if (title.toLowerCase().includes("album")) {
       return "/show-all/album";
     } else {
-      return "/show-all/radio";
+      return "/show-all/artist";
     }
   };
 

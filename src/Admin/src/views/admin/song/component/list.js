@@ -384,9 +384,18 @@ const SongList = () => {
                               onError={(e) => e.target.src = '/images/music.png'}
                             />
                           </span>
-                          <span className="ml-2 whitespace-nowrap overflow-hidden text-ellipsis w-[250px]">
-                            {song.title}
-                          </span>
+                          <div className="flex items-center">
+                            <div className="flex items-center ml-2">
+                              <span className="whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">
+                                {song.title}
+                              </span>
+                              {song.is_premium === 1 && (
+                                <span className="bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded ml-1 shrink-0">
+                                  PREMIUM
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell sx={{ maxWidth: '145px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

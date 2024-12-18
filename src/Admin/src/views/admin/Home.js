@@ -164,7 +164,7 @@ const Home = () => {
               <img
                 src={songs.length > 0 ? songs[0].image : "default-image-url"}
                 alt={artistOfWeek || "Artist"}
-                className="w-32 h-32 object-cover rounded-lg mb-4 sm:mb-0 sm:mr-6"
+                className="w-28 h-28 object-cover rounded-lg mb-4 sm:mb-0 sm:mr-6"
               />
               <div>
                 <h3 className="text-xl font-bold">

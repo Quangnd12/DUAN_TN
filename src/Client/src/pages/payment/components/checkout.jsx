@@ -12,11 +12,11 @@ const CheckoutForm = () => {
     const stripe = useStripe();
     const elements = useElements();
     const navigate = useNavigate();
-    const [paymentMethod, setPaymentMethod] = useState(null);
+    const [paymentMethod, setPaymentMethod] = useState('visa');
     const [paymentSuccess, setPaymentSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
     const [payment, setPayments] = useState([]);
-    const amount = 5;
+    const amount = 1;
     const { user } = useSelector((state) => state.auth);
 
     const getPayment = async () => {
@@ -110,46 +110,27 @@ const CheckoutForm = () => {
             <div className="payment-methods flex flex-col space-y-4 mb-6">
                 <p>Please choose payment method</p>
                 <label className="items-center space-x-4">
-                    <input
-                        type="radio"
-                        checked={paymentMethod === 'visa'}
-                        onChange={() => setPaymentMethod(paymentMethod === 'visa' ? null : 'visa')}
-                        className="w-3 h-3"
-                    />
                     <span className="text-black text-lg">Credit or debit card</span>
                     <div className='flex mt-2'>
-                        <img src='/images/visa.webp' className='w-[55px]  border-2 border-gray-300 p-2 mr-2' />
-                        <img src='/images/masterCard.png' className='w-[45px]  border-2 border-gray-300 p-2 mr-2' />
+                        <img src='/images/visa.webp' className='w-[55px] border-2 border-gray-300 p-2 mr-2' />
+                        <img src='/images/masterCard.png' className='w-[45px] border-2 border-gray-300 p-2 mr-2' />
                         <img src='/images/american.png' className='w-[35px] mr-2' />
                         <img src='/images/jcb.png' className='w-[40px]' />
                     </div>
-
                 </label>
             </div>
-            {paymentMethod === 'visa' && (
-                <form onSubmit={handleSubmit} className="mt-6">
-                    <div className="stripe-card-element mb-6">
-                        <CardElement className="p-4 border rounded-md bg-white" />
-                    </div>
-                    <button
-                        type="submit"
-                        disabled={!stripe}
-                        className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-green-700 transition"
-                    >
-                        Pay immediately
-                    </button>
-                </form>
-            )}
-            {paymentMethod === 'paypal' && (
-                <div className="paypal-info mt-6 text-center">
-                    <p className="text-sm text-gray-200">Redirect to paypal for payment</p>
-                    <button
-                        className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition"
-                    >
-                        Payment via Paypal
-                    </button>
+            <form onSubmit={handleSubmit} className="mt-6">
+                <div className="stripe-card-element mb-6">
+                    <CardElement className="p-4 border rounded-md bg-white" />
                 </div>
-            )}
+                <button
+                    type="submit"
+                    disabled={!stripe}
+                    className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-green-700 transition"
+                >
+                    Pay immediately
+                </button>
+            </form>
         </div>
     );
 };

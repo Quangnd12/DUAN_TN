@@ -1,12 +1,26 @@
 import React from "react";
 import { useTheme } from "../../views/admin/ThemeContext";
 
-// Thêm translations cho ChartSwitcher
-const translations = {
+// Export translations
+export const translations = {
   vi: {
     popularGenres: {
-      title: "Thể loại yêu thích",
-      icon: "fas fa-music"
+      title: "Lượt nghe theo tháng",
+      icon: "fas fa-music",
+      months: {
+        "January": "Tháng 1",
+        "February": "Tháng 2", 
+        "March": "Tháng 3",
+        "April": "Tháng 4",
+        "May": "Tháng 5",
+        "June": "Tháng 6",
+        "July": "Tháng 7",
+        "August": "Tháng 8",
+        "September": "Tháng 9", 
+        "October": "Tháng 10",
+        "November": "Tháng 11",
+        "December": "Tháng 12"
+      }
     },
     topArtists: {
       title: "Nghệ sĩ có album",
@@ -15,8 +29,22 @@ const translations = {
   },
   en: {
     popularGenres: {
-      title: "Popular Genres",
-      icon: "fas fa-music"
+      title: "Number of listeners by month",
+      icon: "fas fa-music",
+      months: {
+        "January": "January",
+        "February": "February",
+        "March": "March", 
+        "April": "April",
+        "May": "May",
+        "June": "June",
+        "July": "July",
+        "August": "August",
+        "September": "September",
+        "October": "October",
+        "November": "November",
+        "December": "December"
+      }
     },
     topArtists: {
       title: "Artists with Albums",

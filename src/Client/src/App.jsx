@@ -189,7 +189,9 @@ function Client() {
 
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <div style={{ marginTop: '20px' }}>
             {savedSongs.length > 0 && <PlayerControls />}
+            </div>
           </PlayerProvider>
         </MainLayout>
         <PictureInPicturePlayer />

@@ -46,7 +46,7 @@ export const translations = {
       changesCancelled: "Đã hủy thay đổi",
       logoutFailed: "Đăng xuất thất bại",
       favoritesContent: "Nội dung yêu thích",
-      historyContent: "Lịch sử"
+      historyContent: "Lịch sử",
     },
     playlistDetail: {
       pageTitle: "Chi tiết danh sách phát",
@@ -60,15 +60,17 @@ export const translations = {
         album: "Album",
         dateAdded: "Ngày thêm",
         duration: "Thời lượng",
-        actions: "Thao tác"
+        actions: "Thao tác",
       },
-      confirmRemove: "Bạn có chắc chắn muốn xóa bài hát này khỏi danh sách phát?",
+      confirmRemove:
+        "Bạn có chắc chắn muốn xóa bài hát này khỏi danh sách phát?",
       removeError: "Lỗi khi xóa bài hát khỏi danh sách phát",
-      loadingError: "Lỗi khi tải chi tiết danh sách phát"
+      loadingError: "Lỗi khi tải chi tiết danh sách phát",
     },
     addSongtoPlaylist: {
       addToSong: "Thêm bài hát vào danh sách phát",
-      noMore: "Không còn bài hát nào để thêm"
+      noMore: "Không còn bài hát nào để thêm",
+      search: "Tìm kiếm bài hát",
     }
   },
   en: {
@@ -118,7 +120,7 @@ export const translations = {
       changesCancelled: "Changes cancelled",
       logoutFailed: "Logout failed",
       favoritesContent: "Favorites Content",
-      historyContent: "History Content"
+      historyContent: "History Content",
     },
     playlistDetail: {
       pageTitle: "Playlist Details",
@@ -132,15 +134,17 @@ export const translations = {
         album: "Album",
         dateAdded: "Date Added",
         duration: "Duration",
-        actions: "Actions"
+        actions: "Actions",
       },
-      confirmRemove: "Are you sure you want to remove this song from the playlist?",
+      confirmRemove:
+        "Are you sure you want to remove this song from the playlist?",
       removeError: "Failed to remove song from playlist",
-      loadingError: "Error loading playlist details"
+      loadingError: "Error loading playlist details",
     },
     addSongtoPlaylist: {
       addToSong: "Add Songs to Playlist",
-      noMore: " No more songs available to add"
-    }
+      noMore: " No more songs available to add",
+      search: "Search for songs",
+    },
   },
 };

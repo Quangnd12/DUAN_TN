@@ -6,13 +6,21 @@ const eventTranslations = {
     upcoming: "Sắp diễn ra",
     ongoing: "Đang diễn ra",
     date: "Ngày",
-    time: "Giờ"
+    time: "Giờ",
+    roles: {
+      user: "Người dùng",
+      admin: "Admin"
+    }
   },
   en: {
     upcoming: "Upcoming",
     ongoing: "Ongoing",
     date: "Date",
-    time: "Time"
+    time: "Time",
+    roles: {
+      user: "User",
+      admin: "Admin"
+    }
   }
 };
 
@@ -96,7 +104,7 @@ function StatCard({
                   </span>
                 </div>
                 <span className="text-gray-600 text-sm">
-                  {user.role === 'user' ? 'Người dùng' : 'Admin'}
+                  {user.role === 'user' ? t.roles.user : t.roles.admin}
                 </span>
               </div>
             ))}
