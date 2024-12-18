@@ -180,7 +180,7 @@ function Client() {
               <Route path='/report' element={<Report />} />
               <Route path='/event' element={<PrivateRoute><Event /></PrivateRoute>} />
               <Route path='/event/:id' element={<PrivateRoute><EventDetail /></PrivateRoute>} />
-              {isAuthenticated && (!payment.user_id || (payment.user_id && payment.status === 0)) && (
+              {isAuthenticated && (!payment.user_id || (payment.user_id && payment.status === 0) || (payment.status === 1 && payment.is_notified === 1)) && (
                 <Route path='/payment' element={<PaymentPage />} />
               )}
               {(!payment.user_id || 

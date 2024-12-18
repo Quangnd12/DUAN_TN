@@ -67,9 +67,9 @@ const CheckoutForm = () => {
                     if (paymentIntent.status === 'succeeded') {
                         if (payment.is_notified === 1) {
                             await RenewPayment();
+                        }else {
+                            await addPayment({ amount });
                         }
-
-                        await addPayment({ amount });
                         getPayment();
                         setPaymentSuccess(true);
                     } else {
