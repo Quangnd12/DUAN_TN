@@ -19,6 +19,9 @@ import ChartSwitcher from "../../components/ChartSwitcher/ChartSwitcher";
 import { useGetUsersQuery } from "../../../../redux/slice/apiSlice";
 import { useGetAllEventsQuery } from "../../../../redux/slice/eventSlice";
 import { getSongs, getSongStats } from "../../../../services/songs";
+import { getTotalAmountByMonth } from "services/statistica";
+import { getTotalAmountByYear } from "services/statistica";
+import Statistica from "Admin/src/components/ChartSwitcher/statistica";
 
 // Thêm import translations từ ChartSwitcher
 import { translations as chartTranslations } from "../../components/ChartSwitcher/ChartSwitcher";
@@ -42,9 +45,13 @@ const translations = {
       topArtists: "Nghệ sĩ có album",
       songCount: "Số bài hát",
       listenCount: "Lượt nghe",
-      albumCount: "Số album"
+      albumCount: "Số album",
+      monthlyRevenue: "Doanh Thu Theo Tháng của năm 2024",
+      yearlyRevenue: "Doanh Thu Theo Năm",
+      amount: "Số tiền (VNĐ)",
+      period: "Thời gian"
     },
-    distribution: "Phân phối thể loại"
+     distribution: "Phân phối thể loại"
   },
   en: {
     dashboard: "Dashboard",
@@ -64,9 +71,13 @@ const translations = {
       topArtists: "Artists with Albums",
       songCount: "Songs",
       listenCount: "Listens",
-      albumCount: "Albums"
+      albumCount: "Albums",
+      monthlyRevenue: "Monthly Revenue of 2024",
+      yearlyRevenue: "Yearly Revenue", 
+      amount: "Amount (VND)",
+      period: "Period"
     },
-    distribution: "Genre Distribution"
+     distribution: "Genre Distribution"
   }
 };
 
@@ -79,16 +90,76 @@ export default function Dashboard() {
   const [songStats, setSongStats] = useState(null);
   const [isLoadingSongStats, setIsLoadingSongStats] = useState(true);
 
+
   // Query để lấy users và lọc top 5 users có role 'user'
-  const { data: usersData, isLoading: isLoadingUsers } = useGetUsersQuery({ 
+  const { data: usersData, isLoading: isLoadingUsers } = useGetUsersQuery({
     page: 1,
     limit: 10
   });
 
+  const [monthlyRevenue, setMonthlyRevenue] = useState([]);
+  const [yearlyRevenue, setYearlyRevenue] = useState([]);
+
+  const [statisticType, setStatisticType] = useState("monthlyRevenue");
+
+  const TotalPayment = async () => {
+    try {
+      const monthlyData = await getTotalAmountByMonth();
+      const yearlyData = await getTotalAmountByYear();
+      
+      const USD_TO_VND = 25400;
+      
+      const convertToVND = (cents) => {
+        const dollars = Number(cents) / 100;
+        return Math.round(dollars * USD_TO_VND);
+      };
+
+      const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('vi-VN', { 
+          style: 'currency', 
+          currency: 'VND',
+          maximumFractionDigits: 0
+        }).format(amount);
+      };
+      
+      // Xử lý dữ liệu tháng
+      const monthlyArray = Array.isArray(monthlyData) ? monthlyData : [];
+      const formattedMonthly = monthlyArray.map(item => ({
+        period: `Tháng ${item.month}`,
+        amount: convertToVND(item.total_amount),
+        tooltipAmount: formatCurrency(convertToVND(item.total_amount))
+      }));
+      
+      // Xử lý dữ liệu năm - với response mới
+      const currentYear = new Date().getFullYear();
+      const yearlyAmount = yearlyData?.totalAmount || "0";
+      const formattedYearly = [{
+        period: `Năm ${currentYear}`,
+        amount: convertToVND(yearlyAmount),
+        tooltipAmount: formatCurrency(convertToVND(yearlyAmount))
+      }];
+
+      const sortedMonthly = formattedMonthly.sort((a, b) => {
+        return Number(a.period.split(' ')[1]) - Number(b.period.split(' ')[1]);
+      });
+
+      setMonthlyRevenue(sortedMonthly);
+      setYearlyRevenue(formattedYearly);
+    } catch (error) {
+      console.error("Error fetching revenue data:", error);
+      setMonthlyRevenue([]);
+      setYearlyRevenue([]);
+    }
+  };
+
+  useEffect(() => {
+    TotalPayment();
+  }, [])
+
   // Xử lý dữ liệu users
   const getTopUsers = () => {
     if (!usersData?.users) return [];
-    
+
     return usersData.users
       .filter(user => user.role === 'user')
       .map(user => ({
@@ -108,7 +179,7 @@ export default function Dashboard() {
   // Xử lý dữ liệu events
   const getUpcomingEvents = () => {
     if (!eventsData?.events) return [];
-    
+
     return eventsData.events
       .map(event => ({
         name: event.name,
@@ -121,7 +192,7 @@ export default function Dashboard() {
   // Xử lý dữ liệu artists từ songs (giữ nguyên code cũ)
   const getTopArtists = () => {
     if (!songStats?.artists) return [];
-    
+
     return Object.entries(songStats.artists)
       .map(([name, data]) => ({
         name,
@@ -146,6 +217,10 @@ export default function Dashboard() {
 
   const handleChartTypeChange = (type) => {
     setChartType(type);
+  };
+
+  const handleStatisticTypeChange = (type) => {
+    setStatisticType(type);
   };
 
   const downloadCSV = (downloadAll = false) => {
@@ -194,7 +269,7 @@ export default function Dashboard() {
       const headers = Object.keys(data[0]);
       const csvData = [
         headers.join(','), // header row
-        ...data.map(row => 
+        ...data.map(row =>
           headers.map(header => {
             const value = row[header];
             // Xử lý các giá trị đặc biệt (nếu có dấu phẩy hoặc xuống dòng)
@@ -211,10 +286,10 @@ export default function Dashboard() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       const timestamp = new Date().toISOString().split('T')[0];
-      
+
       link.href = url;
-      link.setAttribute('download', downloadAll 
-        ? `music-stats-all-${timestamp}.csv` 
+      link.setAttribute('download', downloadAll
+        ? `music-stats-all-${timestamp}.csv`
         : `music-stats-${chartType}-${timestamp}.csv
 `      );
       document.body.appendChild(link);
@@ -432,6 +507,7 @@ export default function Dashboard() {
             handleChartTypeChange={handleChartTypeChange}
           />
         </div>
+        
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             {chartType === "popularGenres" && (
@@ -453,6 +529,47 @@ export default function Dashboard() {
                 <Bar name={t.charts.songCount} dataKey="songs" fill="#82ca9d" />
               </BarChart>
             )}
+          </ResponsiveContainer>
+        </div>
+        <div className="flex flex-col md:flex-row justify-between items-center mb-4 space-y-2 md:space-y-0">
+          <h2 className="text-lg font-semibold">
+            {statisticType === "monthlyRevenue" ? t.charts.monthlyRevenue : t.charts.yearlyRevenue}
+          </h2>
+          <Statistica
+            chartType={statisticType}
+            handleChartTypeChange={handleStatisticTypeChange}
+          />
+        </div>
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart 
+              data={statisticType === "monthlyRevenue" ? monthlyRevenue : yearlyRevenue}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="period" />
+              <YAxis 
+                tickFormatter={(value) => new Intl.NumberFormat('vi-VN', {
+                  notation: "compact",
+                  compactDisplay: "short",
+                  maximumFractionDigits: 1,
+                  minimumFractionDigits: 1
+                }).format(value)
+                  .replace("Tr", "M")
+                  .replace("T", "B")
+                }
+              />
+              <Tooltip 
+                formatter={(value) => [
+                  new Intl.NumberFormat('vi-VN', { 
+                    style: 'currency', 
+                    currency: 'VND',
+                    maximumFractionDigits: 0
+                  }).format(value),
+                  t.charts.amount
+                ]}
+              />
+              <Bar name={t.charts.amount} dataKey="amount" fill="#8884d8" />
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
