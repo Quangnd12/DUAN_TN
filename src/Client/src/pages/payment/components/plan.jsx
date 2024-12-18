@@ -16,7 +16,7 @@ const PricingPlans = () => {
           PREMIUM
         </span>
       </div>
-      <p className="mt-8 text-[28px] font-bold text-white">5$/Month</p>
+      <p className="mt-8 text-[28px] font-bold text-white">1$/Month</p>
       <ul className="mt-8 text-left text-gray-700">
         <li className="flex items-center text-white mb-2">
           <MdCheck className="mr-2" size={20} />Premium music store

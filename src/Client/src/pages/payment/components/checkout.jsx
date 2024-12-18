@@ -16,7 +16,7 @@ const CheckoutForm = () => {
     const [paymentSuccess, setPaymentSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
     const [payment, setPayments] = useState([]);
-    const amount = 5;
+    const amount = 1;
     const { user } = useSelector((state) => state.auth);
 
     const getPayment = async () => {
