@@ -158,10 +158,7 @@ const Lyrics = ({ onClose, lyrics, title, artist, album, image, playCount, curre
 
             <div className="flex flex-col pl-52 mb-4">
                 <div className="flex justify-between items-center">
-                    <div className="text-lg font-bold mt-10">Plays</div>
-                </div>
-                <div className="flex justify-between items-center">
-                    <div className="text-lg font-bold">{playCount}</div>
+                    <div className="text-lg font-bold mt-10">Plays: {playCount}</div>
                 </div>
             </div>
         </div>

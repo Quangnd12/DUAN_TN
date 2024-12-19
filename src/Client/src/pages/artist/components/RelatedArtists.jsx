@@ -54,7 +54,7 @@ const RelatedArtist = () => {
     return (
         <div className="p-4">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl text-white font-bold mb-4">Nghệ sĩ bạn có thể thích</h2>
+                <h2 className="text-2xl text-white font-bold mb-4">Artists you may like</h2>
             </div>
 
             <div className="grid grid-cols-6 gap-4 justify-items-center">

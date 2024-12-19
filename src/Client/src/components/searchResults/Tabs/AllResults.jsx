@@ -136,22 +136,6 @@ const AllResults = ({ results }) => {
                 <p className="text-white font-bold">
                   <span className="text-gray-400">Bài hát</span> • {results.data.songs.items[0].artists?.join(', ') || 'Unknown Artist'}
                 </p>
-
-                {isHovered && (
-                  <>
-                    {isPlaying && playerState?.songId === results.data.songs.items[0].id ? (
-                      <FaPauseCircle
-                        onClick={handlePlayTopResult}
-                        className="w-16 h-16 absolute bottom-5 right-5 bg-sky-500 text-white rounded-full p-2 cursor-pointer hover:bg-sky-600 transition-colors"
-                      />
-                    ) : (
-                      <FaCirclePlay
-                        onClick={handlePlayTopResult}
-                        className="w-16 h-16 absolute bottom-5 right-5 bg-sky-500 text-white rounded-full p-2 cursor-pointer hover:bg-sky-600 transition-colors"
-                      />
-                    )}
-                  </>
-                )}
               </div>
             )}
           </div>

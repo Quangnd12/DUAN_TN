@@ -50,25 +50,6 @@ const RecentSearchCard = ({ item, index, handleRemove }) => {
             className="w-44 h-44 mb-2 rounded-full object-cover"
           />
         </div>
-
-        <div className="absolute top-2/3 right-0 cursor-pointer transition-all rounded-md p-2">
-          {(isHovered || isPlaying) &&
-            (isPlaying ? (
-              <PauseCircleIcon
-                className="transform: translate-x-1/2 -translate-y-1/2 z-10"
-                fontSize="large"
-                sx={{ color: sky }}
-                onClick={handleIconClick}
-              />
-            ) : (
-              <PlayCircleIcon
-                className="transform: translate-x-1/2 -translate-y-1/2 z-10"
-                fontSize="large"
-                sx={{ color: sky }}
-                onClick={handleIconClick}
-              />
-            ))}
-        </div>
       </div>
       <div className="text-white cursor-pointer" onClick={handleArtistClick}>
         {item.name}

@@ -7,7 +7,6 @@ import notificationReducer from './slice/notificationSlice';
 import { playlistApi } from "./slice/playlistSlice";
 import { followApi } from './slice/followSlice'; // Đảm bảo đúng đường dẫn
 import { favoriteApi } from './slice/favoriets'; // Import favoriteApi
-import playerReducer from "./slice/playerSlice";
 import { eventApi } from "./slice/eventSlice";
 import artistAuthReducer from "./slice/artistAuthSlice";
 import artistSongReducer from './slice/artistSongSlice';
@@ -29,7 +28,6 @@ const store = configureStore({
     artistSong: artistSongReducer,
     artistAlbum: artistAlbumReducer,
     notifications: notificationReducer,
-    player: playerReducer,
     [playlistApi.reducerPath]: playlistApi.reducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
     [eventApi.reducerPath]: eventApi.reducer,

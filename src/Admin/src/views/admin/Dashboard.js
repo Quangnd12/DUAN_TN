@@ -227,78 +227,78 @@ export default function Dashboard() {
     let data = [];
 
     if (downloadAll) {
-      // Gộp tất cả dữ liệu thống kê
-      data = [
-        ...genreStats.map((row) => ({
-          category: "Thể loại",
-          name: row.genre,
-          songCount: row.count,
-          listensCount: row.listens
-        })),
-        ...artistAlbumStats.map((row) => ({
-          category: "Nghệ sĩ",
-          name: row.artist,
-          albumCount: row.albums,
-          songCount: row.songs
-        }))
-      ];
+        // Gộp tất cả dữ liệu thống kê
+        data = [
+            ...genreStats.map((row) => ({
+                category: "Thể loại",
+                name: row.genre,
+                songCount: row.count,
+                listensCount: row.listens
+            })),
+            ...artistAlbumStats.map((row) => ({
+                category: "Nghệ sĩ",
+                name: row.artist,
+                albumCount: row.albums,
+                songCount: row.songs
+            }))
+        ];
     } else {
-      // Chỉ tải dữ liệu của biểu đồ hiện tại
-      if (chartType === "popularGenres") {
-        data = genreStats.map((row) => ({
-          genre: row.genre,
-          songCount: row.count,
-          listensCount: row.listens
-        }));
-      } else if (chartType === "topArtists") {
-        data = artistAlbumStats.map((row) => ({
-          artist: row.artist,
-          albumCount: row.albums,
-          songCount: row.songs
-        }));
-      }
+        // Chỉ tải dữ liệu của biểu đồ hiện tại
+        if (chartType === "popularGenres") {
+            data = genreStats.map((row) => ({
+                genre: row.genre,
+                songCount: row.count,
+                listensCount: row.listens
+            }));
+        } else if (chartType === "topArtists") {
+            data = artistAlbumStats.map((row) => ({
+                artist: row.artist,
+                albumCount: row.albums,
+                songCount: row.songs
+            }));
+        }
     }
 
     if (data.length === 0) {
-      alert('Không có dữ liệu để tải xuống!');
-      return;
+        alert('Không có dữ liệu để tải xuống!');
+        return;
     }
 
     try {
-      // Chuyển đổi dữ liệu thành CSV
-      const headers = Object.keys(data[0]);
-      const csvData = [
-        headers.join(','), // header row
-        ...data.map(row =>
-          headers.map(header => {
-            const value = row[header];
-            // Xử lý các giá trị đặc biệt (nếu có dấu phẩy hoặc xuống dòng)
-            if (typeof value === 'string' && (value.includes(',') || value.includes('\n'))) {
-              return `"${value}"`;
-            }
-            return value;
-          }).join(',')
-        )
-      ].join('\n');
+        // Chuyển đổi dữ liệu thành CSV
+        const headers = Object.keys(data[0]);
+        const csvData = [
+            headers.join(','), // header row
+            ...data.map(row =>
+                headers.map(header => {
+                    const value = row[header];
+                    // Xử lý các giá trị đặc biệt (nếu có dấu phẩy hoặc xuống dòng)
+                    if (typeof value === 'string' && (value.includes(',') || value.includes('\n'))) {
+                        return `"${value}"`;
+                    }
+                    return value;
+                }).join(',')
+            )
+        ].join('\n');
 
-      // Tạo và tải file
-      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      const timestamp = new Date().toISOString().split('T')[0];
+        // Tạo và tải file
+        const blob = new Blob([`\uFEFF${csvData}`], { type: 'text/csv;charset=utf-8;' }); // Thêm BOM cho tiếng Việt
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().split('T')[0];
 
-      link.href = url;
-      link.setAttribute('download', downloadAll
-        ? `music-stats-all-${timestamp}.csv`
-        : `music-stats-${chartType}-${timestamp}.csv
-`      );
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+        link.href = url;
+        link.setAttribute('download', downloadAll
+            ? `music-stats-all-${timestamp}.csv`
+            : `music-stats-${chartType}-${timestamp}.csv`
+        );
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading CSV:', error);
-      alert('Có lỗi xảy ra khi tải xuống file!');
+        console.error('Error downloading CSV:', error);
+        alert('Có lỗi xảy ra khi tải xuống file!');
     }
   };
 
